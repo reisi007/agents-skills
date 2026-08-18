@@ -3,6 +3,10 @@
 # Fails open: never blocks git. `codegraph sync -q` is documented "for git hooks".
 set -u
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+
+# No CodeGraph index in this project -> nothing to sync, skip silently.
+[ -d "$repo_root/.codegraph" ] || exit 0
+
 if command -v codegraph >/dev/null 2>&1; then
   if codegraph sync -q "$repo_root" >/dev/null 2>&1; then
     echo "codegraph: index synced"

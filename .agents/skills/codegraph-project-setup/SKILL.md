@@ -53,7 +53,8 @@ MCP codegraph tools work immediately and the index stays fresh:
 3. Verify: `git hook run pre-commit` → prints `codegraph: index synced`, exit 0.
 4. **Design: fails open.** Missing CLI or sync error ⇒ warning to stderr, exit 0.
    Index freshness is a convenience, not a commit gate (matches codegraph's own
-   hook design: "never block git").
+   hook design: "never block git"). Repos without a `.codegraph/` index (e.g.
+   doc/markdown-only repos) skip the sync silently via a `[ -d "$repo_root/.codegraph" ]` guard.
 5. Do **not** use codegraph's built-in post-* hook installer
    (`installGitSyncHook` for `post-commit`/`post-merge`/`post-checkout`): it
    writes into `.git/hooks/`, which git **ignores** once `core.hooksPath` is set.
