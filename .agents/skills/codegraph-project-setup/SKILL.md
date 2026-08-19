@@ -10,20 +10,31 @@ MCP codegraph tools work immediately and the index stays fresh:
 
 1. `codegraph init` → `.codegraph/` index + `.codegraph/.gitignore` (index stays out of git)
 2. `.githooks/pre-commit` + `core.hooksPath` → index refresh before every commit (fails open)
-3. `AGENTS.md` + `AGENTS.todo.md` → project conventions incl. build-agent rules
-4. Skill registration → available in every project, not just the one holding it
+3. `opencode2 mcp add codegraph -- codegraph serve --mcp` → per-project `opencode.json` (MCP, §2.6)
+4. `AGENTS.md` + `AGENTS.todo.md` → project conventions incl. build-agent rules
+5. Skill registration → available in every project, not just the one holding it
 
 ## 1. Why per-project init is required (MCP availability)
 
-- The `codegraph` MCP server (command `codegraph serve --mcp`) is configured
-  **globally** in `~/.config/opencode/opencode.jsonc` — there is **no
-  per-project MCP config**. One server instance handles whatever project is active.
+- MCP servers are configured **per project** — there is **no global MCP
+  config** (`~/.config/opencode/opencode.jsonc` has no `mcp` section). Each
+  project that wants the codegraph MCP tools declares the server in its own
+  `opencode.json`:
+  `cd <project> && opencode2 mcp add codegraph -- codegraph serve --mcp`
+  (writes `mcp.servers.codegraph` into `<project>/opencode.json`; `--global`
+  would write the global config instead).
 - The MCP tools (`codegraph_explore` …) only work when the **active project**
-  contains a `.codegraph/` index. No `.codegraph/` ⇒ the tools report
-  unavailable and agents silently fall back to grep/read.
-- ⇒ **Project readiness == `codegraph init` executed.** Do it during
-  scaffolding, not "sometime later". Verify in a fresh session that the
-  `codegraph_*` tools are listed.
+  has **both**: a `.codegraph/` index **and** the per-project `opencode.json`
+  MCP entry. Missing either ⇒ the tools report unavailable and agents silently
+  fall back to grep/read.
+- **Activation gotcha:** the running `opencode2` service caches resolved
+  per-project configs and does NOT watch project `opencode.json` files. After
+  adding/changing one, trigger a reload via `touch ~/.config/opencode/opencode.jsonc`
+  (the daemon watches the global dir) or restart the opencode session —
+  otherwise `opencode2 mcp list` still reports "No MCP servers configured".
+- ⇒ **Project readiness == `codegraph init` + per-project MCP add executed.**
+  Do it during scaffolding, not "sometime later". Verify in a fresh session
+  that the `codegraph_*` tools are listed.
 
 ## 2. Runbook
 
@@ -107,6 +118,22 @@ MCP codegraph tools work immediately and the index stays fresh:
   `.agents/skills/` — project skills under `.agents/skills/` are
   auto-discovered (no config entry needed), ID = directory name.
 
+### 2.6 Per-project MCP server (`opencode.json`)
+
+1. From the repo root:
+   `opencode2 mcp add codegraph -- codegraph serve --mcp`
+   - Writes/merges `<project>/opencode.json` with `mcp.servers.codegraph`
+     (`type: "local"` + `command`). The flat `mcp.<name>` form is also read —
+     the CLI writes the `servers` wrapper.
+2. Commit `opencode.json`:
+   `git add opencode.json && git commit -m "chore(opencode): add per-project codegraph MCP server"`
+3. **Activate:** the running `opencode2` service caches per-project configs and
+   does not watch project files — run `touch ~/.config/opencode/opencode.jsonc`
+   (daemon watches the global dir, reloads all project configs) or restart the
+   opencode session.
+4. Verify: `opencode2 mcp list` → `✓ codegraph connected`; in a fresh session
+   the `codegraph_*` tools are listed.
+
 ## 3. Verification checklist
 
 - [ ] `codegraph status` shows Files/Nodes (not empty)
@@ -115,15 +142,19 @@ MCP codegraph tools work immediately and the index stays fresh:
 - [ ] `git status` shows `.codegraph/.gitignore` as the only new file below
       `.codegraph/` (DB/logs/daemon files must NOT appear)
 - [ ] `core.hooksPath` = `.githooks` (`git config --get core.hooksPath`)
+- [ ] `git ls-files opencode.json` non-empty; `opencode2 mcp list` shows
+      `✓ codegraph connected` (after the `touch` activation from §2.6)
 - [ ] In a fresh OpenCode session the `codegraph_*` MCP tools are listed for
       this project
 - [ ] Commit 1: `.codegraph/.gitignore`; Commit 2: `.githooks/`, `AGENTS.md`,
-      `AGENTS.todo.md`
+      `AGENTS.todo.md`; Commit 3: `opencode.json`
 
 ## 4. Maintenance
 
 - CodeGraph CLI: `codegraph status | index | sync | explore | upgrade`.
   Upgrade restores the MCP registration (`codegraph upgrade` re-runs the
   installer refresh automatically).
-- The MCP server config lives in the global opencode config — only touch it if
-  the server command or disabled flag changes.
+- The per-project MCP config lives in the project's `opencode.json` (added via
+  `opencode2 mcp add`, see §2.6) — touch it only if the server command or a
+  flag changes; after any change, activate via
+  `touch ~/.config/opencode/opencode.jsonc` or a session restart.

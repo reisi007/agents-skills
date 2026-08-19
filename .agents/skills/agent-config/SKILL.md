@@ -45,28 +45,41 @@ Own skills live in **one** git repo, not per project:
 
 ## 3. MCP servers
 
+**Per-project, never global.** The global `~/.config/opencode/opencode.jsonc`
+has **no** `mcp` section. MCP servers are declared per project, so every
+project carries its own `opencode.json`:
+
 ```jsonc
-// ~/.config/opencode/opencode.jsonc
-"mcp": {
-  "servers": {
-    "codegraph": {
-      "type": "local",
-      "command": ["codegraph", "serve", "--mcp"],
-      "disabled": false
+// ~/dev/<project>/opencode.json
+{
+  "mcp": {
+    "servers": {
+      "codegraph": {
+        "type": "local",
+        "command": ["codegraph", "serve", "--mcp"]
+      }
     }
   }
 }
 ```
 
-- `codegraph` is the only globally configured MCP server. It serves **any**
-  active project — there is no per-project MCP config.
-- **Key rule (MCP availability):** the `codegraph_*` tools (e.g.
+- Canonical way to add it: `cd ~/dev/<project> && opencode2 mcp add codegraph -- codegraph serve --mcp`
+  (writes/merges `opencode.json` in the project; `--global` would write the
+  global config instead). The CLI writes the `mcp.servers.<name>` wrapper; the
+  flat `mcp.<name>` form is also read — both are valid.
+- **Key rules (MCP availability):** the `codegraph_*` tools (e.g.
   `codegraph_explore`) only work while the active project has a `.codegraph/`
-  index. Fresh project without index ⇒ tools unavailable. Fix by running
-  `codegraph init` — see the `codegraph-project-setup` skill.
-- Adding another MCP server: edit the `mcp.servers` object in the global
-  config (or `opencode2 mcp add --global …`). Local servers use `type:
-  "local"` + `command` array.
+  index **and** a per-project `opencode.json` MCP entry. Missing either ⇒
+  tools unavailable. Fix by running `codegraph init` + the MCP add — see the
+  `codegraph-project-setup` skill.
+- **Activation gotcha:** the running `opencode2` service caches resolved
+  per-project configs. After adding/changing a project's `opencode.json`,
+  trigger a reload with `touch ~/.config/opencode/opencode.jsonc` (the daemon
+  watches the global dir) or restart the session — otherwise `opencode2 mcp
+  list` keeps reporting "No MCP servers configured" for that project.
+- Adding another MCP server: same per-project flow
+  (`opencode2 mcp add <name> -- <command…>` in the project). Remote servers
+  use `--url` instead of a command.
 
 ## 4. CodeGraph per project (quick reference)
 
@@ -86,7 +99,8 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 - **New machine:** install codegraph CLI (`npm i -g @colbymchenry/codegraph`),
   clone `git@github.com:reisi007/agents-skills.git`, set the `skills` array in
   `~/.config/opencode/opencode.jsonc` to the repo's `.agents/skills` (or add a
-  symlink `~/.config/opencode/skills` → repo dir). Keep the MCP server block.
+  symlink `~/.config/opencode/skills` → repo dir). MCP servers are per project
+  (§3) — the global config stays without an `mcp` section.
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
   AGENTS.todo.md). Do NOT create new skills in the project — add them to
   agents-skills instead.
