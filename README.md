@@ -14,6 +14,7 @@ agents-skills/
 ├── .agents/skills/          ← Agent-Skills-Spec-Struktur (portabel für OpenCode, Claude Code, …)
 │   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
+│   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
 │   └── ui-review/           ← Playwright-Screenshot-Loop + Vision-Analyse
 └── .githooks/pre-commit     ← CodeGraph-Index-Sync vor jedem Commit (fails open)
 ```
