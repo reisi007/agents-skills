@@ -1,0 +1,151 @@
+// Generic template — copy into ~/.config/opencode/opencode.jsonc "permissions": [ ... ]
+// Replace <user> with your username. Order is load-bearing (V2 last-match-wins).
+[
+  // 1. Broad tool allows
+  { "action": "read", "resource": "*", "effect": "allow" },
+  { "action": "edit", "resource": "*", "effect": "allow" },
+  { "action": "shell", "resource": "*", "effect": "allow" },
+  { "action": "skill", "resource": "*", "effect": "allow" },
+
+  // 2. Username isolation: deny ANY other macOS home, then re-allow only the correct one
+  { "action": "read", "resource": "/Users/*", "effect": "deny" },
+  { "action": "edit", "resource": "/Users/*", "effect": "deny" },
+  { "action": "external_directory", "resource": "/Users/*", "effect": "deny" },
+  { "action": "shell", "resource": "*/Users/*", "effect": "deny" },
+  // correct home — MUST be after the deny
+  { "action": "read", "resource": "/Users/<user>", "effect": "allow" },
+  { "action": "read", "resource": "/Users/<user>/*", "effect": "allow" },
+  { "action": "edit", "resource": "/Users/<user>", "effect": "allow" },
+  { "action": "edit", "resource": "/Users/<user>/*", "effect": "allow" },
+  { "action": "external_directory", "resource": "/Users/<user>", "effect": "allow" },
+  { "action": "external_directory", "resource": "/Users/<user>/*", "effect": "allow" },
+  { "action": "shell", "resource": "*/Users/<user>*", "effect": "allow" },
+
+  // 2b. Username isolation — Linux (uncomment on Linux, same deny-then-allow)
+  // { "action": "read", "resource": "/home/*", "effect": "deny" },
+  // { "action": "edit", "resource": "/home/*", "effect": "deny" },
+  // { "action": "external_directory", "resource": "/home/*", "effect": "deny" },
+  // { "action": "shell", "resource": "*/home/*", "effect": "deny" },
+  // { "action": "read", "resource": "/home/<user>", "effect": "allow" },
+  // { "action": "read", "resource": "/home/<user>/*", "effect": "allow" },
+  // { "action": "edit", "resource": "/home/<user>", "effect": "allow" },
+  // { "action": "edit", "resource": "/home/<user>/*", "effect": "allow" },
+  // { "action": "external_directory", "resource": "/home/<user>", "effect": "allow" },
+  // { "action": "external_directory", "resource": "/home/<user>/*", "effect": "allow" },
+  // { "action": "shell", "resource": "*/home/<user>*", "effect": "allow" },
+
+  // 2c. Username isolation — Windows (uncomment on Windows, forward slashes, case-insensitive)
+  // { "action": "read", "resource": "C:/Users/*", "effect": "deny" },
+  // { "action": "edit", "resource": "C:/Users/*", "effect": "deny" },
+  // { "action": "external_directory", "resource": "C:/Users/*", "effect": "deny" },
+  // { "action": "shell", "resource": "*C:/Users/*", "effect": "deny" },
+  // { "action": "read", "resource": "D:/Users/*", "effect": "deny" },
+  // { "action": "edit", "resource": "D:/Users/*", "effect": "deny" },
+  // { "action": "external_directory", "resource": "D:/Users/*", "effect": "deny" },
+  // { "action": "shell", "resource": "*D:/Users/*", "effect": "deny" },
+  // { "action": "read", "resource": "C:/Users/<user>", "effect": "allow" },
+  // { "action": "read", "resource": "C:/Users/<user>/*", "effect": "allow" },
+  // { "action": "edit", "resource": "C:/Users/<user>", "effect": "allow" },
+  // { "action": "edit", "resource": "C:/Users/<user>/*", "effect": "allow" },
+  // { "action": "external_directory", "resource": "C:/Users/<user>", "effect": "allow" },
+  // { "action": "external_directory", "resource": "C:/Users/<user>/*", "effect": "allow" },
+  // { "action": "shell", "resource": "*C:/Users/<user>*", "effect": "allow" },
+
+  // 3. Secrets & credentials (hard deny — must stay after username allow)
+  { "action": "read", "resource": "~/.ssh/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.ssh/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.gnupg/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.gnupg/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.aws/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.aws/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.config/gcloud/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.config/gcloud/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.azure/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.azure/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.kube/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/.kube/*", "effect": "deny" },
+  { "action": "read", "resource": "~/.netrc", "effect": "deny" },
+  { "action": "edit", "resource": "~/.netrc", "effect": "deny" },
+
+  // 4. Shell history
+  { "action": "read", "resource": "~/.zsh_history", "effect": "deny" },
+  { "action": "edit", "resource": "~/.zsh_history", "effect": "deny" },
+  { "action": "read", "resource": "~/.bash_history", "effect": "deny" },
+  { "action": "edit", "resource": "~/.bash_history", "effect": "deny" },
+
+  // 5. Private macOS data
+  { "action": "read", "resource": "~/Library/Keychains/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Keychains/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Cookies/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Cookies/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Mail/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Mail/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Messages/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Messages/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Safari/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Safari/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Application Support/com.apple.TCC/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Application Support/com.apple.TCC/*", "effect": "deny" },
+  { "action": "read", "resource": "~/Library/Application Support/MobileSync/*", "effect": "deny" },
+  { "action": "edit", "resource": "~/Library/Application Support/MobileSync/*", "effect": "deny" },
+
+  // 5a. Private Linux data — uncomment on Linux (same principle as macOS: keyrings, browser, mail)
+  // { "action": "read", "resource": "~/.local/share/keyrings/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.local/share/keyrings/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.local/share/kwalletd/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.local/share/kwalletd/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.config/google-chrome/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.config/google-chrome/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.config/chromium/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.config/chromium/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.config/BraveSoftware/Brave-Browser/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.config/BraveSoftware/Brave-Browser/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.mozilla/firefox/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.mozilla/firefox/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.thunderbird/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.thunderbird/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.password-store/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.password-store/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/.local/share/Trash/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/.local/share/Trash/*", "effect": "deny" },
+
+  // 5b. Private Windows data — uncomment on Windows (forward slashes, case-insensitive match)
+  // { "action": "read", "resource": "~/AppData/Roaming/Microsoft/Credentials/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Roaming/Microsoft/Credentials/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Local/Microsoft/Credentials/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Local/Microsoft/Credentials/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Roaming/Microsoft/Protect/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Roaming/Microsoft/Protect/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Local/Google/Chrome/User Data/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Local/Google/Chrome/User Data/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Local/Microsoft/Edge/User Data/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Local/Microsoft/Edge/User Data/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Roaming/Mozilla/Firefox/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Roaming/Mozilla/Firefox/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Roaming/Thunderbird/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Roaming/Thunderbird/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Local/BraveSoftware/Brave-Browser/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Local/BraveSoftware/Brave-Browser/*", "effect": "deny" },
+  // { "action": "read", "resource": "~/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/*", "effect": "deny" },
+  // { "action": "edit", "resource": "~/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/*", "effect": "deny" },
+
+  // 6. .env handling
+  { "action": "read", "resource": "~/dev/*.env*", "effect": "allow" },
+  { "action": "read", "resource": "*.env.example", "effect": "allow" },
+  { "action": "read", "resource": "*.env", "effect": "ask" },
+  { "action": "read", "resource": "*.env.*", "effect": "ask" },
+
+  // 7. System config (ask)
+  { "action": "external_directory", "resource": "/etc/*", "effect": "ask" },
+  { "action": "external_directory", "resource": "/private/etc/*", "effect": "ask" },
+
+  // 8. Temp dirs — allow so /tmp never prompts
+  { "action": "external_directory", "resource": "/tmp/*", "effect": "allow" },
+  { "action": "external_directory", "resource": "/private/tmp/*", "effect": "allow" },
+
+  // 9. External dev volume
+  { "action": "external_directory", "resource": "/Volumes/Daten/dev/*", "effect": "allow" },
+
+  // 10. Tooling
+  { "action": "external_directory", "resource": "/opt/homebrew/*", "effect": "allow" }
+]

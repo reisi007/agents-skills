@@ -15,6 +15,8 @@ agents-skills/
 │   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
+│   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
+│   ├── vision-agents/       ← 3 locked-down vision subagents: technical / creative / document
 │   └── ui-review/           ← Playwright-Screenshot-Loop + Vision-Analyse
 └── .githooks/pre-commit     ← CodeGraph-Index-Sync vor jedem Commit (fails open)
 ```

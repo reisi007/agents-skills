@@ -75,3 +75,32 @@ a concrete fix.
 - Logo/header/footer of the tenant/app are present and correct.
 - No missing/duplicate logo or header on any state.
 - Brand assets are not pixelated or stretched; fallback branding is coherent.
+
+## 11. Color contrast matrix (automated)
+
+The screenshot review catches contrast regressions by eye, but every daisyUI
+semantic color combination is also asserted automatically — in **both** the
+light and the dark theme. Run it and treat failures as blocking (same severity
+as a `critical`/`high` finding):
+
+```bash
+pnpm test:contrast
+```
+
+- The spec (`tests/contrast/contrast.spec.ts`, driven by
+  `playwright.contrast.config.ts`) asserts WCAG AA for:
+  - every `badge-{color}` foreground vs its own background,
+  - every `alert-{color}` foreground vs its background **composited over the
+    page surface** (alerts are translucent, so the rendered (surface-composited)
+    color is what matters),
+  - body text and `link link-primary` vs `bg-base-100`.
+- Colors are resolved via a canvas (daisyUI v5 uses `oklch`, which the browser
+  composites for us) so the measured ratio matches what a user actually sees.
+- Coverage must hold for **dark AND light** — a badge that reads fine on light
+  but washes out on dark (or vice-versa) is a real defect. The matrix guards
+  against theme/color-token regressions that would make status badges (e.g. the
+  red "Modell training" privacy badge) or notice text unreadable.
+- When adding a new semantic color, a new badge/alert variant, or changing a
+  theme token, re-run `pnpm test:contrast` and confirm it still passes in both
+  themes before merging.
+

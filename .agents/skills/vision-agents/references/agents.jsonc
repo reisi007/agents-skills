@@ -1,0 +1,43 @@
+// Copy into ~/.config/opencode/opencode.jsonc "agent": { ... }
+// These three share the same lockdown: read-only, no edit/shell/subagent/webfetch/websearch
+{
+  "vision-technical": {
+    "model": "opencode-go/mimo-v2.5", // updated: 2026-08-28
+    "mode": "subagent",
+    "description": "Vision-capable agent for technical image analysis: screenshots, EXIF-relevant visual details, and image categorization. Use for image analysis and categorization tasks (max 10 images at a time).",
+    "permission": {
+      "read": "allow",
+      "edit": "deny",
+      "bash": "deny",
+      "subagent": "deny",
+      "webfetch": "deny",
+      "websearch": "deny"
+    }
+  },
+  "vision-creative": {
+    "model": "opencode-go/glm-5.3-flash", // updated: 2026-08-28
+    "mode": "subagent",
+    "description": "Vision-capable agent for creative and intent-sensitive image tasks: design and aesthetic review, mood and meaning of images, judging whether visuals convey the intended message. Use when creative judgment or intention matters (max 10 images at a time).",
+    "permission": {
+      "read": "allow",
+      "edit": "deny",
+      "bash": "deny",
+      "subagent": "deny",
+      "webfetch": "deny",
+      "websearch": "deny"
+    }
+  },
+  "document": {
+    "model": "opencode-go/glm-5.3-flash", // updated: 2026-08-28
+    "mode": "subagent",
+    "description": "Vision-capable agent for DOCUMENTS (PDFs, rendered pages, reports): reads them and describes their layout, readability and appearance. Configured like the vision agent; use for analyzing the look of documents rather than photos.",
+    "permission": {
+      "read": "allow",
+      "edit": "deny",
+      "bash": "deny",
+      "subagent": "deny",
+      "webfetch": "deny",
+      "websearch": "deny"
+    }
+  }
+}
