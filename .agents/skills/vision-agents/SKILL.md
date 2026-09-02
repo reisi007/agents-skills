@@ -7,11 +7,13 @@ description: TRIGGER when analyzing images, screenshots, EXIF data, UI renders, 
 
 Three `mode: subagent` agents that can **only read**. They never edit, run shell, spawn subagents, or fetch the web. Max ~10 images per call — split larger batches.
 
-| Agent | Model | Use when |
+| Agent | Role | Use when |
 |---|---|---|
-| `vision-technical` | `opencode-go/mimo-v2.5` | Screenshots, EXIF-relevant visual details, image categorization, technical QA (e.g. ui-review). Detached, factual. |
-| `vision-creative` | `opencode-go/glm-5.3-flash` | Design/aesthetic review, mood & meaning, whether visuals convey intent. Creative judgment. |
-| `document` | `opencode-go/glm-5.3-flash` | PDFs, rendered pages, reports — layout, readability, appearance (not photos). |
+| `vision-technical` | technical QA | Screenshots, EXIF-relevant visual details, image categorization, technical QA (e.g. ui-review). Detached, factual. |
+| `vision-creative` | creative | Design/aesthetic review, mood & meaning, whether visuals convey intent. Creative judgment. |
+| `document` | document | PDFs, rendered pages, reports — layout, readability, appearance (not photos). |
+
+> Model is not pinned in this skill — set `agent.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `model-updater` skill choose/refresh it (per-role prefs: `vision` = image/video required, `document` = nice-to-have).
 
 Author agent intentionally omitted (owner preference).
 
@@ -38,20 +40,18 @@ Do **not** use them for code, text-only, or file-writing tasks.
 
 ## Apply / port
 
-Copy the `agent` block from `references/agents.jsonc` into `~/.config/opencode/opencode.jsonc` under `agent`:
+Copy the `agent` block from `references/agents.jsonc` into `~/.config/opencode/opencode.jsonc` under `agent` and add a `model` per role:
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
 "agent": {
-  "vision-technical": { ... },
-  "vision-creative": { ... },
-  "document": { ... }
+  "vision-technical": { "model": "opencode-go/<chosen>", /* ... */ },
+  "vision-creative": { "model": "opencode-go/<chosen>", /* ... */ },
+  "document": { "model": "opencode-go/<chosen>", /* ... */ }
 }
 ```
 
-Then `touch ~/.config/opencode/opencode.jsonc` and verify with `opencode2 service status`.
-
-To update models, keep the `// updated: YYYY-MM-DD` trailing comment on each `model` line (used by `model-updater` skill to detect staleness).
+Then run the `model-updater` skill to pick the concrete models (it adds `// updated: YYYY-MM-DD` which it uses to detect staleness), `touch ~/.config/opencode/opencode.jsonc` and verify with `opencode2 service status`.
 
 ## Reference files
 
