@@ -63,6 +63,16 @@ window.
      - `document`: vision/image input is a *nice-to-have, not required* — a
        text-only model is acceptable for this role.
      - `vision` / `vision-creative`: image (and video) input matters most.
+     - `free` (opencode, **training: true** — data may be used for training): **do NOT
+       use for sensitive tasks** (private data, secrets, credentials). Recommended are
+       models with multimodal input and higher capabilities / cheaper price. Use for
+       cheap fan-out, pre-checks, and non-critical subtasks.
+     - `nonsensitive` (opencode-go, **training: true** — data may be used for training):
+       **do NOT use for sensitive tasks** involving private data, secrets, credentials,
+       or personal information — route those to a trusted model instead. Recommended are
+       models with multimodal input and higher capabilities / cheaper price; prioritize
+       lowest effective $/token over quality, context requirement may be relaxed. Ideal
+       for non-sensitive, non-critical fan-out, pre-checks, boilerplate, and summaries.
    If a role has no explicit rule, fall back to the global preferences.
 
 ## Procedure
