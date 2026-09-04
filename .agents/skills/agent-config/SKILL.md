@@ -45,40 +45,41 @@ Own skills live in **one** git repo, not per project:
 
 ## 3. MCP servers
 
-**Per-project, never global.** The global `~/.config/opencode/opencode.jsonc`
-has **no** `mcp` section. MCP servers are declared per project, so every
-project carries its own `opencode.json`:
+**codegraph is GLOBAL.** The global `~/.config/opencode/opencode.jsonc`
+declares the codegraph MCP server once; every project (and any directory)
+gets it automatically — no per-project MCP entry needed:
 
 ```jsonc
-// ~/dev/<project>/opencode.json
-{
-  "mcp": {
-    "servers": {
-      "codegraph": {
-        "type": "local",
-        "command": ["codegraph", "serve", "--mcp"]
-      }
-    }
+// ~/.config/opencode/opencode.jsonc
+"mcp": {
+  "codegraph": {
+    "type": "local",
+    "command": ["codegraph", "serve", "--mcp"],
+    "enabled": true
   }
 }
 ```
 
-- Canonical way to add it: `cd ~/dev/<project> && opencode2 mcp add codegraph -- codegraph serve --mcp`
-  (writes/merges `opencode.json` in the project; `--global` would write the
-  global config instead). The CLI writes the `mcp.servers.<name>` wrapper; the
-  flat `mcp.<name>` form is also read — both are valid.
-- **Key rules (MCP availability):** the `codegraph_*` tools (e.g.
-  `codegraph_explore`) only work while the active project has a `.codegraph/`
-  index **and** a per-project `opencode.json` MCP entry. Missing either ⇒
-  tools unavailable. Fix by running `codegraph init` + the MCP add — see the
-  `codegraph-project-setup` skill.
+- Do **not** add a `codegraph` entry to project `opencode.json` files — the
+  global one wins/merges anyway and a duplicate is redundant.
+- Project-local MCP entries remain valid for **project-specific** servers
+  (e.g. `nx-mcp` in `angular-material-extended/opencode.json`) — those stay
+  per project.
+- **Key rules (MCP availability):** the global MCP server is always
+  reachable; but the `codegraph_*` tools only *return useful data* when the
+  active project has a `.codegraph/` index (codegraph resolves the nearest
+  index at/above the queried path). Without an index, use Read/Grep instead
+  or run `codegraph init` in the project — see the `codegraph-project-setup`
+  skill.
 - **Activation gotcha:** the running `opencode2` service caches resolved
-  per-project configs. After adding/changing a project's `opencode.json`,
-  trigger a reload with `touch ~/.config/opencode/opencode.jsonc` (the daemon
-  watches the global dir) or restart the session — otherwise `opencode2 mcp
-  list` keeps reporting "No MCP servers configured" for that project.
-- Adding another MCP server: same per-project flow
-  (`opencode2 mcp add <name> -- <command…>` in the project). Remote servers
+  configs. After changing the global `opencode.jsonc` or a project's
+  `opencode.json`, trigger a reload with `touch
+  ~/.config/opencode/opencode.jsonc` (the daemon watches the global dir) or
+  restart the session — otherwise `opencode2 mcp list` keeps reporting the
+  old state.
+- Adding another MCP server: global ones go into the global
+  `opencode.jsonc`; project-specific ones via
+  `opencode2 mcp add <name> -- <command…>` in the project. Remote servers
   use `--url` instead of a command.
 
 ## 4. CodeGraph per project (quick reference)
@@ -99,11 +100,30 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 - **New machine:** install codegraph CLI (`npm i -g @colbymchenry/codegraph`),
   clone `git@github.com:reisi007/agents-skills.git`, set the `skills` array in
   `~/.config/opencode/opencode.jsonc` to the repo's `.agents/skills` (or add a
-  symlink `~/.config/opencode/skills` → repo dir). MCP servers are per project
-  (§3) — the global config stays without an `mcp` section.
+  symlink `~/.config/opencode/skills` → repo dir). codegraph is declared once
+  as a **global MCP server** in the global `opencode.jsonc` (§3) — no
+  per-project MCP entry for it.
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
   AGENTS.todo.md). Do NOT create new skills in the project — add them to
   agents-skills instead.
+
+## 6. Commit convention (agents-skills repo)
+
+Own-repo, single-developer workflow: changes are **amended into the latest
+commit and force-pushed**, not accumulated as separate commits:
+
+```sh
+cd ~/dev/agents-skills && git add -A \
+  && git commit --amend --no-edit \
+  && git push --force-with-lease
+```
+
+- Use `--force-with-lease` (not bare `--force`) — refuses to clobber remote
+  state you haven't seen.
+- This repo is private/single-user, so force-push is safe here. Do NOT apply
+  amend+force-push to shared/team repos.
+- Exception: brand-new, self-contained work the user explicitly wants as its
+  own commit may still get a fresh commit — default to amend unless asked.
 
 ## 6. Ownership rules (which skills live where)
 

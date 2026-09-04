@@ -137,6 +137,14 @@ If the user says "apply it" / "update my config", edit `~/.config/opencode/openc
   comma. Only `//` comments; no block comments.
 - Never touch `read`/`edit`/`shell` permission rules, `description` fields, or other
   settings — change only the `model` value + its `// updated:` comment.
+- **After every applied change, restart the background service** so the running daemon
+  picks up the new models (the daemon caches the resolved config):
+  ```
+  ~/.opencode/bin/opencode2 service restart
+  ```
+  (Use the full path — `opencode2` is not on `PATH` in non-interactive shells. If a
+  future machine's binary is called `opencode` instead, use `opencode service restart`
+  equivalently.) Then verify with `~/.opencode/bin/opencode2 service status`.
 
 ## Preferences file schema (`~/.config/opencode/model-preferences.md`)
 
