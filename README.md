@@ -17,7 +17,7 @@ agents-skills/
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
 │   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
 │   ├── update-opencode-models/ ← Live-Registry: opencode models, reload, free/paid-Prefixe
-│   ├── vision-agents/       ← 3 locked-down vision subagents: technical / creative / document
+│   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + Eskalationsregel
 │   └── ui-review/           ← Playwright-Screenshot-Loop + Vision-Analyse
 └── .githooks/pre-commit     ← CodeGraph-Index-Sync vor jedem Commit (fails open)
 ```

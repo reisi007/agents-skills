@@ -15,12 +15,26 @@ curl -sL $RAW/data/latest.json | jq '{
   fetchedAt, monthlyCredit, monthlyCost,
   models: [ .models[] | {id, name, tier, provider, contextWindow, usage,
                           effectiveInput, effectiveOutput, caps: .capabilities} ],
-  free:   [ .freeModels[] | {id, name, contextWindow} ]
+  free:   [ .freeModels[] | {id, name, contextWindow, caps: .capabilities} ]
 }'
 
 # Changelog — last 15 entries:
 curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
 ```
+
+### `capabilities` is an object — check `.input`
+
+```jsonc
+"capabilities": { "input": ["text","image","video","pdf"], "output": ["text"],
+                  "reasoning": true, "toolCall": true }
+```
+
+- Vision check (the hard requirement): `"image" in .capabilities.input`.
+  `(.capabilities | index("image"))` is **always null** — it searches the object's
+  values, not the input list, and silently reports every model as text-only.
+- `pdf` is a separate entry — vision-capable does not imply PDF-capable.
+- Text-only models in the current snapshot (never recommend these):
+  `curl -sL $RAW/data/latest.json | jq -r '.models[] | select((.capabilities.input|index("image"))|not) | .id'`
 
 ## cc-price-tracker (Command Code) — `provider/model` IDs (supplementary)
 
@@ -31,32 +45,59 @@ curl -sL $RAW/data/latest.json | jq '{
   fetchedAt,
   models: [ .models[] | {id, name, provider, contextWindow, usage: .allowances,
                           effectiveInput, effectiveOutput, caps: .capabilities} ],
-  free:   [ .freeModels[] | {id, name, contextWindow} ]
+  free:   [ .freeModels[] | {id, name, contextWindow, caps: .capabilities} ]
 }'
 
 curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
 ```
 
+Same `capabilities` object shape as OCG — the `"image" in .capabilities.input`
+check works identically here.
+
 ## User's configured models (from global OpenCode config)
 
-`opencode.jsonc` is **JSONC** (contains `//` comments), so plain `jq` chokes on it.
-Use this `node` one-liner (string-aware comment strip) to print `role<TAB>modelID`
-for the root `model` plus every `agent.<role>.model`:
+`opencode.jsonc` is **JSONC**, so plain `jq` chokes on it. The global config uses
+**both** `//` and `/* … */` comments (41 block comments as of 2026-09-26) — a
+stripper that only handles `//` produces invalid JSON, so handle both plus
+trailing commas. This prints `role<TAB>modelID` for the root `model` plus every
+`agent.<role>.model`:
+
+```js
+// node strip-jsonc.js   (or paste as a single-quoted `node -e '…'`)
+const fs = require("fs");
+const t = fs.readFileSync(process.env.HOME + "/.config/opencode/opencode.jsonc", "utf8");
+let o = "", s = false, e = false;
+for (let i = 0; i < t.length;) {
+  const c = t[i];
+  if (s) { o += c; if (e) e = false; else if (c === "\\") e = true; else if (c === '"') s = false; i++; }
+  else if (c === '"') { s = true; o += c; i++; }
+  else if (c === "/" && t[i+1] === "/") { while (i < t.length && t[i] !== "\n") i++; }
+  else if (c === "/" && t[i+1] === "*") { i += 2; while (i < t.length && !(t[i] === "*" && t[i+1] === "/")) i++; i += 2; }
+  else { o += c; i++; }
+}
+const c = JSON.parse(o.replace(/,\s*([}\]])/g, "$1"));
+const m = { default: c.model };
+for (const [k, v] of Object.entries(c.agent || {})) if (v && v.model) m[k] = v.model;
+for (const [k, v] of Object.entries(m)) console.log(k + "\t" + v);
+```
+
+Verified output shape on a real config (IDs omitted — the roles are what matter).
+Every id is on `opencode-go/` here: the subscription is ZDR, so that namespace wins
+whenever a twin exists. An `opencode/<slug>` id in the output is a REPLACE — see the
+namespace hard rule in SKILL.md.
 
 ```
-node -e '
-const fs=require("fs");
-let s=fs.readFileSync(process.env.HOME+"/.config/opencode/opencode.jsonc","utf8");
-let o="",inS=false,e=false;
-for(let i=0;i<s.length;i++){const c=s[i];if(inS){o+=c;if(e)e=false;else if(c==="\\")e=true;else if(c==="\"")inS=false;}else{if(c==="\""){inS=true;o+=c;}else if(c==="/"&&s[i+1]==="/"){while(i<s.length&&s[i]!=="\n")i++;if(i<s.length)o+="\n";}else o+=c;}}
-const c=JSON.parse(o);
-const m={default:c.model};
-for(const [k,v] of Object.entries(c.agent||{})) if(v&&v.model) m[k]=v.model;
-for(const [k,v] of Object.entries(m)) console.log(k+"\t"+v);
-'
+default	opencode-go/<id>
+plan	opencode-go/<id>
+vision-creative	opencode-go/<id>
+document	opencode-go/<different-id>
+free	opencode-go/<id>
+nonsensitive	opencode-go/<id>
 ```
 
-(e.g. `default  opencode-go/hy3`, `vision  opencode-go/mimo-v2.5`). Alternatively,
+Then check every emitted model against the hard requirement
+(`"image" in .capabilities.input`) — `document` must also pass `pdf`.
+Alternatively,
 just **read the small file directly** and collect the `model` / `agent.<role>.model`
 values by eye — no tooling required.
 

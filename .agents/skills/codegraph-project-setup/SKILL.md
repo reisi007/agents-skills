@@ -85,8 +85,9 @@ CLI tools work immediately and the index stays fresh:
     other file MUST be delegated to subagents — implementation goes to the
     `general` subagent (never to `build`). Delegate independent tasks in
     parallel when sensible; a **separate** subagent verifies each
-    implementation (verifier ≠ implementer); use the `vision` subagent for
-    visual/layout/screenshot checks.
+    implementation (verifier ≠ implementer); visual/layout/screenshot checks you
+    do yourself (every configured model is vision-capable) — escalate only
+    ambiguous or high-stakes visual calls to `vision-creative`.
 
 - Create `AGENTS.todo.md` task board (temporary, header pattern: "Stand: <date>.
   Nur offene TODOs.").
