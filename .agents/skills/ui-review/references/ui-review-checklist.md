@@ -15,6 +15,12 @@ a concrete fix.
 
 - Consistent spacing rhythm (gaps, paddings, margins) within and between sections.
 - Elements align on a grid; no arbitrary offsets or ragged edges.
+- **A flex row whose left cell holds a label above a tall status block must put the
+  action on the label's line, not vertically centred against the tall block.**
+  `items-center` in that shape is the single most common own goal: the label reads
+  as the row's title, the action is expected on the same line, and a centred
+  button floats against the alert. Check the action's baseline against the label,
+  not against the sibling's middle.
 - No cramped or overflowing content; card/table content has comfortable padding.
 - Fixed/sticky elements do not overlap content.
 
