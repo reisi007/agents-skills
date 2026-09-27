@@ -109,6 +109,8 @@ non-ZDR and the data is being corrected. Therefore:
    `references/data-sources.md`). These are the models under review. Also read any
    trailing `// updated: <date>` comment on each `model` line — it records when that
    assignment last changed and tells you how stale it is vs. the changelog.
+   Read `agent.<role>.variant` alongside it — see **Reasoning variants** below; a
+   role is only fully described by `(model, variant)`, not by `model` alone.
 2. **Preferences** — read `~/.config/opencode/model-preferences.md`. If it does not
    exist yet, **create it** with the default schema (below) and tell the user you
    seeded it. Honour its fields when scoring:
@@ -222,11 +224,61 @@ table:
 Then a short "Optional new candidates" list — vision-capable only. Keep reasons one
 line and always tie them to a concrete changelog event or a current-price fact.
 
+## Reasoning variants — `variant`, never a `#suffix`
+
+A model can expose several **reasoning variants** of itself. `variant` is its
+**own `AgentConfig` field**, a **sibling of `model`**, never part of the model
+string:
+
+```jsonc
+"free": {
+  "model": "opencode-go/space-bunny-free",  // ✅ no suffix
+  "variant": "max",                          // ✅ own field, on the same $0 model
+  "mode": "subagent"
+}
+```
+
+Two traps, both hit in practice on 2026-09-27:
+
+- **Do NOT write `"opencode-go/space-bunny-free#max"`.** The `#max` form is the
+  syntax for the *per-call* `model` override of a `subagent` tool call, not the
+  config field. In `opencode.jsonc` it is a model id that does not exist, so it
+  silently resolves to nothing. Proven against the SDK type: `AgentConfig` has
+  `variant?: string` on its own line (`@opencode-ai/sdk` `types.gen.d.ts`).
+- **Not every model has variants.** Before proposing one, check that the
+  configured model actually advertises any — via the **`models` tool** with
+  `query` and `all: true`, and read the `variants` array it returns. Do **not**
+  try to read variants from the shell: `opencode models` prints flat model ids
+  only (no JSON, no variants, and no `--all` flag), so there is nothing there to
+  `jq`. An empty array means there is nothing to select, and a `variant` key on
+  such a role is ignored at best. Measured examples: `space-bunny-free` →
+  `[low, medium, high, xhigh, max]`; `longcat-2.5-preview-free` → `[]`.
+
+Variants change **reasoning depth, not price** — the top variant of a `$0` model
+is still `$0`. So a variant bump is the cheapest possible quality win and needs
+no price/changelog justification; recommend it whenever a role's model has one
+and the user wants more care for free. Two consequences for this skill:
+
+- When comparing two models, compare `(model, variant)`. A role on
+  `space-bunny-free` with `"variant": "max"` is **not** equivalent to the same
+  role on the default variant, and a table that lists only the model hides a real
+  difference. Write the pair as `space-bunny-free [max]` so a reader does not
+  mistake the variant for part of the id.
+- When you *switch* a role to a different model (any REPLACE/UPDATE above), the
+  `variant` key does **not** carry over — the new model may have a different or
+  empty variant set. Re-check it, and drop a `variant` line that the new model
+  cannot honour instead of leaving a dangling key.
+
 ## Applying changes (only when the user asks)
 
 If the user says "apply it" / "update my config", edit `~/.config/opencode/opencode.jsonc`:
 
 - Update the `model` field (root `model` or `agent.<role>.model`) for each changed role.
+- Update `agent.<role>.variant` as its own field when the role's variant should
+  change — **never** by appending `#<variant>` to the `model` string. Write
+  `"variant": "<name>"` on its own line directly after `model`, and give that line
+  its own `// updated: <date>` comment so the recency signal covers it. Only write
+  a variant the model actually advertises (check first — see **Reasoning variants**).
 - Apply the namespace hard rule on every line you touch: if the `opencode-go/<slug>`
   twin exists, the ID you write must be the `opencode-go/` one.
 - On **every changed `model` line**, add or refresh a trailing date comment — this is the
