@@ -4,6 +4,13 @@ Apply this checklist to every screenshot. Report findings per image, referencing
 the file name. Keep it factual: name the element and the visual defect; propose
 a concrete fix.
 
+Before fixing a finding, confirm **which element actually renders it**. A pattern
+is often duplicated — in this repo the mobile brand lockup (logo + portal name)
+existed in three dashboard headers, and a fix applied to the copy you happened to
+open first left the defect visible on the screen you were reviewing. `grep` for
+the class or component before editing, fix **every** copy, and prefer extracting a
+shared component over repairing copies one by one so they cannot drift apart again.
+
 ## 1. Contrast & readability
 
 - Text is readable against its background (no low-contrast gray-on-gray for body
