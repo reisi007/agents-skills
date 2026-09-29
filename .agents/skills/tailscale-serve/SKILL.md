@@ -1,6 +1,6 @@
 ---
 name: Tailscale Serve
-description: TRIGGER when a locally started dev server (Vite/Hono/anything on localhost:PORT) must be reachable from another device on the tailnet, when the user asks for a "Tailscale link"/tailnet URL, or when tailscale fails with "Failed to connect to local tailscaled … /var/run/tailscale/tailscaled.sock: no such file or directory", "Serve is not enabled on your tailnet", HTTP 502 on the MagicDNS URL, or Vite's "Blocked request. This host … is not allowed". Reference for exposing a dev server via `tailscale serve`: the manual Serve prerequisite, the daemon socket path, the IPv4-vs-IPv6 localhost trap, the Vite host allowlist, and verifying from a second device.
+description: TRIGGER when a locally started dev server (Vite/Hono/anything on localhost:PORT) must be reachable from another device on the tailnet, when the user asks for a "Tailscale link"/tailnet URL, or when tailscale fails with "Failed to connect to local tailscaled … /var/run/tailscale/tailscaled.sock: no such file or directory", "Serve is not enabled on your tailnet", ERR_SSL_PROTOCOL_ERROR, HTTP 502 on the MagicDNS URL, or Vite's "Blocked request. This host … is not allowed". Reference for exposing a dev server via `tailscale serve`: the manual Serve prerequisite, the daemon socket path, TLS certificate provisioning, the IPv4-vs-IPv6 localhost trap, the Vite host allowlist, and verifying from a second device.
 ---
 
 # Tailscale Serve — a local dev server on the tailnet
@@ -47,6 +47,48 @@ tailscale --socket=$TS_SOCKET status
 Pass `--socket` explicitly on every command. An env var like `TS_SOCKET` is
 typically **ignored** by the CLI — only the flag counts. Without `ps`:
 `tr '\0' ' ' < /proc/*/cmdline | grep tailscaled`.
+
+## Step 0.5 — provision the TLS certificate
+
+**`serve` configures HTTPS but does not guarantee a certificate exists.** With no
+valid cert, the TLS handshake never completes and the browser reports
+`ERR_SSL_PROTOCOL_ERROR` — while every local check still looks perfect:
+`serve --bg` prints the URL, `serve status` lists an `HTTPS` handler, and
+`serve status --json` even contains `"HTTPS": true`. **None of that proves a
+certificate is present.** Treat the browser as the only real oracle (Step 3).
+
+```sh
+cd /some/private/dir                 # see the warning below — this matters
+tailscale --socket=$TS_SOCKET cert <node>.<tailnet>.ts.net
+```
+
+It prints `Wrote public cert to …crt` / `Wrote private key to …key` on success.
+If it succeeds and the URL still fails, re-arm the handler so serve picks the new
+cert up:
+
+```sh
+tailscale --socket=$TS_SOCKET serve --https=443 off
+tailscale --socket=$TS_SOCKET serve --bg http://127.0.0.1:<port>
+```
+
+### The private key lands in your CWD
+
+`tailscale cert` writes **both files into the current working directory**, with no
+`-o` flag and no path argument. That is a live exposure whenever the CWD happens
+to be a directory you are about to serve — a static report, a build output, a
+public folder. The key is then fetchable over HTTP from the very URL you just
+exposed, and if it is committed it is in git history too.
+
+Before running it, `cd` somewhere private (`$HOME`, a `mktemp -d` dir) and never
+run it inside a served directory. If it already ran in the wrong place, move the
+key out and confirm the URL 404s:
+
+```sh
+mkdir -p "$HOME/.local/share/tailscale/certs" && chmod 700 "$HOME/.local/share/tailscale/certs"
+mv -f <node>.ts.net.crt <node>.ts.net.key "$HOME/.local/share/tailscale/certs/"
+chmod 600 "$HOME/.local/share/tailscale/certs/"*.key
+curl -o /dev/null -w "%{http_code}\n" http://127.0.0.1:<port>/<node>.ts.net.key   # expect 404
+```
 
 ## The 0.0.0.0 rule — bind all interfaces
 
@@ -143,15 +185,22 @@ another device and report back. Decode their error:
 
 | User sees | Meaning |
 | --- | --- |
+| `ERR_SSL_PROTOCOL_ERROR` | serve is up, **no usable TLS certificate** → Step 0.5. `serve status` still looks green, ignore it |
 | `HTTP 502` | TLS+serve fine, backend unreachable → apply the 0.0.0.0 rule |
 | `Blocked request … not allowed` | backend reachable, host header rejected → allowedHosts rule |
 | `ERR_CONNECTION_REFUSED` | serve not running, or Serve not enabled → prerequisite |
 | page renders | done |
 
+A local `curl` to the node's own tailnet URL cannot distinguish any of these —
+see Step 3. When the fix is uncertain, **re-check the certificate before
+re-diagnosing the backend**; the two failure modes look identical locally.
+
 ## Gotchas
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
+| `ERR_SSL_PROTOCOL_ERROR` while `serve status` looks healthy | no certificate provisioned | `tailscale cert <domain>` (Step 0.5) |
+| private `.key` appears in a served directory | `tailscale cert` writes to CWD | move it out, verify 404, `cd` elsewhere first |
 | `502` on the tailnet URL, `localhost` fine | server bound to `::1` only | bind `0.0.0.0` |
 | `Blocked request. This host … is not allowed` | Vite host check | allowlist the tailnet domain |
 | `ERR_CONNECTION_REFUSED` | Serve not enabled on the tailnet | user opens the `login.tailscale.com/f/serve` link |
@@ -188,6 +237,14 @@ Not tied to any one machine — check whether these apply before you debug.
   intended default. Start them with an explicit port.
 - Minimal containers ship without `ps` and `pkill`. Enumerate
   `/proc/*/cmdline` and stop processes with `kill`.
+- A container with no `/dev/net/tun` and no capabilities (`CapEff: 0`) can only
+  run `tailscaled --tun=userspace-networking`. That is a hard limit, not a
+  misconfiguration: it cannot be changed from inside, and it makes local
+  verification of serve impossible. Don't chase it — confirm locally, then let
+  the user report back.
+- Serving a **directory** (static report, build output) rather than a dev server
+  also exposes everything else in it. Check the tree for secrets, `.env` files,
+  key material and raw data before exposing a project root.
 
 Never write host-identifying data into a published skill: node names, tailnet
 IPs, LAN addresses, hostnames. Record the *pattern* (socket path shape, env
