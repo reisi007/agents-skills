@@ -16,6 +16,7 @@ agents-skills/
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
 │   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
+│   ├── tailscale-serve/     ← Lokalen Dev-Server per `tailscale serve` ins Tailnet exposen
 │   ├── update-opencode-models/ ← Live-Registry: opencode models, reload, free/paid-Prefixe
 │   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + Eskalationsregel
 │   └── ui-review/           ← Playwright-Screenshot-Loop + Vision-Analyse
