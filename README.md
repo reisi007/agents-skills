@@ -14,6 +14,7 @@ agents-skills/
 ├── .agents/skills/          ← Agent-Skills-Spec-Struktur (portabel für OpenCode, Claude Code, …)
 │   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
+│   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: Doku-only Commits überspringen die Pipeline
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
 │   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
 │   ├── tailscale-serve/     ← Lokalen Dev-Server per `tailscale serve` ins Tailnet exposen
