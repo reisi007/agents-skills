@@ -11,8 +11,11 @@ Projekt.
 
 ```
 agents-skills/
+├── .agents/rules/            ← immer im Kontext (globaler `instructions`-Key)
+│   └── build-verify.md       ← Build-/Verify-Flow: nicht-verhandelbare Kernregeln
 ├── .agents/skills/          ← Agent-Skills-Spec-Struktur (portabel für OpenCode, Claude Code, …)
 │   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
+│   ├── build-verify/        ← Build-/Verify-Flow im Detail: Verifikator, Amend, Commit-Schema
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: Doku-only Commits überspringen die Pipeline
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
@@ -31,6 +34,7 @@ git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
 
 # ~/.config/opencode/opencode.jsonc
 "skills": ["/Users/<user>/dev/agents-skills/.agents/skills"],
+"instructions": ["/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md"],
 ```
 
 Danach in **jeder** OpenCode-Session verfügbar. Einzelheiten & MCP-CodeGraph:
@@ -47,11 +51,16 @@ git add -A && git commit && git push
 
 Keine Config-Änderung nötig — das Verzeichnis ist bereits registriert.
 
+Für eine Regel, die **immer** im Kontext sein soll (nicht erst bei einem Trigger):
+Datei nach `.agents/rules/` legen und den Pfad im `instructions`-Array der globalen
+Config eintragen. Details im Skill `agent-config`.
+
 ## Ownership-Regeln
 
 | Skills | Ort |
 |---|---|
 | Eigene Skills | **hier** (`agents-skills/.agents/skills/`) |
+| Immer geladene Regeln | **hier** (`agents-skills/.agents/rules/`) |
 | Offizielle/Third-Party-Packs (daisyui, find-skills, stripe-*) | dort, wo der Installer sie platziert |
 | Projekt-spezifische Skills (nx-*, blog-beitrag, testimonial) | im jeweiligen Projekt |
 
@@ -59,6 +68,7 @@ Keine Config-Änderung nötig — das Verzeichnis ist bereits registriert.
 
 - `codegraph-project-setup` — CodeGraph-Index + Hook für neue Projekte
 - `agent-config` — globale Agent-Konfiguration (Single Source of Truth)
+- `build-verify` — Build-/Verify-Flow: pull, delegieren, verifizieren, committen, amenden, pushen
 
 ## License
 
