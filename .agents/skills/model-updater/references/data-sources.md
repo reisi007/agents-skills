@@ -82,17 +82,17 @@ for (const [k, v] of Object.entries(m)) console.log(k + "\t" + v);
 ```
 
 Verified output shape on a real config (IDs omitted — the roles are what matter).
-Every id is on `opencode-go/` here: the subscription is ZDR, so that namespace wins
-whenever a twin exists. An `opencode/<slug>` id in the output is a REPLACE — see the
-namespace hard rule in SKILL.md.
+Every id is on `opencode/` here: the setup is free-tier-only, so that namespace wins
+whenever a twin exists. An `opencode-go/<slug>` id in the output is a REPLACE — see the
+namespace rule in SKILL.md.
 
 ```
-default	opencode-go/<id>
-plan	opencode-go/<id>
-vision-creative	opencode-go/<id>
-document	opencode-go/<different-id>
-free	opencode-go/<id>
-nonsensitive	opencode-go/<id>
+default	opencode/<id>
+plan	opencode/<id>
+vision-creative	opencode/<id>
+document	opencode/<different-id>
+free	opencode/<id>
+nonsensitive	opencode/<id>
 ```
 
 Then check every emitted model against the hard requirement

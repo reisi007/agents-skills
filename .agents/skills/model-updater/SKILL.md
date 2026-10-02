@@ -22,8 +22,9 @@ Both trackers publish small, structured JSON. Fetch the raw files (see
 tiny). Never scrape the rendered HTML site — the JSON is purpose-built, ~30–50 KB,
 and already diff-friendly.
 
-- **OCG (OpenCode Go)** — `opencode-go/<slug>` model IDs live here. Primary source
-  of truth for the user's configured `opencode-go/*` models.
+- **OCG (OpenCode Go)** — both `opencode-go/<slug>` and `opencode/<slug>` model IDs
+  live here. Primary source of truth for the user's configured models (all of which
+  are `opencode/*` since 2026-10-02).
   - `data/latest.json` — current snapshot: `models[]` (`id`, `name`, `provider`,
     `tier`, `contextWindow`, `usage`, `effectiveInput/Output`, `capabilities`,
     `privacy`) and `freeModels[]`.
@@ -65,28 +66,37 @@ Two traps:
   The `document` role needs `pdf` as well; a vision-capable model that cannot read
   PDFs is fine everywhere else.
 
-## Namespace hard rule — the `opencode-go/` twin always wins
+## Namespace rule — the free-tier `opencode/` twin always wins
 
-The user's **opencode-go subscription is ZDR** (zero data retention). The registry
-lists many models under *both* namespaces (`opencode-go/<slug>` and
-`opencode/<slug>`), often at identical price (usually both `$0`). Rule:
+**Changed 2026-10-02 (user decision).** The registry lists many models under *both*
+namespaces (`opencode-go/<slug>` and `opencode/<slug>`), often at identical price
+(usually both `$0`). Rule:
 
-> **If a model exists in both namespaces, always configure the `opencode-go/<slug>`
-> variant — never `opencode/<slug>`, even when the `opencode/` twin is also free.**
+> **Configure `opencode/<slug>` — never the `opencode-go/<slug>` twin, even when the
+> paid one is ZDR and the free one is not.**
 
-- This applies to **every** role — root, build, plan, and the cheap background
-  roles included. It is not a free-tier-only rule.
-- The **`opencode/` namespace is the free tier for users without a subscription**
-  and is not used in this setup at all.
-- **The reason is ZDR, not rename durability.** Say so when justifying the change:
-  a model on `opencode/<slug>` does not get the subscription's zero-data-retention
-  guarantee, even at the same $0 price. "It survives a free-tier rename" is a much
-  weaker argument and is not the user's reason.
+- The **opencode-go subscription is still paid but is NOT used** by any role. The whole
+  setup is one `$0` model family, so the paid/ZDR namespace adds nothing here.
+- **Accepted trade: no zero-data-retention guarantee.** Do not re-raise ZDR as a reason
+  to move a role back — the decision is made and the trade is known.
+- The reason is **not** rename durability either. If asked to justify, say: one model
+  family, everything free, no namespace juggling.
+- This applies to **every** role — root, build, plan, and the cheap background roles.
 - A slug ending in `-free` says nothing about namespace, price, or privacy — never
   infer any of the three from the slug; check the registry.
-- A configured `opencode/<slug>` that has an `opencode-go/<slug>` twin is a
-  **REPLACE** (namespace-only change, same model family) unless a standing user
-  decision in `model-preferences.md` says otherwise for that role.
+- **Exception: capability beats namespace.** A role with a hard capability need
+  (`document` needs `pdf`) stays on a model that has it, even if that means a different
+  model family. `opencode/muse-spark-1.3-contributor-free` is the current pick there.
+- **A configured `opencode-go/<slug>` is a REPLACE** (namespace-only change, same model
+  family) unless a standing user decision in `model-preferences.md` says otherwise.
+
+### Verworfen — `opencode-go-first` (bis 2026-09-26)
+
+The old rule was "the `opencode-go/` twin always wins, because the subscription is ZDR".
+It is **retired**. Do not reinstate it, and do not treat a configured `opencode/<slug>`
+as an error to be corrected. If a future conversation quotes ZDR as the reason for a
+namespace move, that reasoning is stale — the current rule is `opencode-free-tier`
+(see `model-preferences.md`).
 
 ### Privacy flags in the tracker are currently wrong
 
@@ -120,10 +130,13 @@ non-ZDR and the data is being corrected. Therefore:
    - `maxEffectiveInputPerMTok` (default `null`) — optional hard cap on effective
      input $/1M tokens.
    - `notes` — free-form priorities.
-   - **`namespaceRule`** (default `opencode-go-first`) — the namespace hard rule above.
-     Honour it as a filter, *before* scoring: drop every `opencode/<slug>` candidate
-     that has an `opencode-go/<slug>` twin, and flag a configured one as REPLACE
-     (namespace-only change, same model family). Justify with ZDR, not rename durability.
+   - **`namespaceRule`** (default `opencode-free-tier`) — the namespace rule above.
+     Honour it as a filter, *before* scoring: drop every `opencode-go/<slug>` candidate
+     that has an `opencode/<slug>` twin, and flag a configured one as REPLACE
+     (namespace-only change, same model family). Do NOT justify with ZDR — that trade
+     was already made (see "Verworfen" below).
+   - **`variants`** (default `none`) — when `none`, never propose a `variant` field and
+     flag a configured one as REPLACE by deleting the line.
    - **`privacyDataCaveat`** — when set, the tracker's `privacy.training` /
      `privacy.retentionDays` flags are known-wrong; do not use them to reject a model.
    - **Per-role preferences** (under `## Per-role preferences`): apply them when
@@ -135,8 +148,8 @@ non-ZDR and the data is being corrected. Therefore:
        every other role.
      - `vision` / `vision-creative`: image (and video) input matters most; among
        vision-capable models pick the strongest visual reader, not the cheapest.
-     - `free` (the cheap fan-out role; **namespace follows the namespace hard rule**,
-       so `opencode-go/<slug>`; the *model* is still a $0 one — the role is about cost,
+     - `free` (the cheap fan-out role; **namespace follows the namespace rule**,
+       so `opencode/<slug>`; the *model* is still a $0 one — the role is about cost,
        not about namespace): **do NOT use for sensitive tasks** (private data, secrets,
        credentials). Must be free **and** vision-capable — the free tier's
        vision-capable subset is small, so check `capabilities.input` explicitly instead
@@ -144,7 +157,7 @@ non-ZDR and the data is being corrected. Therefore:
        slug suffix as the signal, some free ids carry no suffix. Then prefer higher
        capabilities / cheaper price. Use for cheap fan-out, pre-checks, and
        non-critical subtasks.
-     - `nonsensitive` (namespace follows the namespace hard rule, so `opencode-go/<slug>`):
+     - `nonsensitive` (namespace follows the namespace rule, so `opencode/<slug>`):
        **do NOT use
        for sensitive tasks** involving private data, secrets, credentials,
        or personal information — route those to a trusted model instead. Image input
@@ -155,7 +168,7 @@ non-ZDR and the data is being corrected. Therefore:
 
 ## Procedure
 
-For each configured model (e.g. `opencode-go/<configured-id>`):
+For each configured model (e.g. `opencode/<configured-id>`):
 
 0. **Capability gate — first, before any scoring.** Read `.capabilities.input` for
    the model. No `image` → verdict is **REPLACE**, full stop, reason "text-only, no
@@ -163,14 +176,16 @@ For each configured model (e.g. `opencode-go/<configured-id>`):
    never propose it anywhere — not as an UPDATE, not as a successor, not as a cheap
    fallback, not in "Optional new candidates".
 0b. **Namespace gate — every role, right after the capability gate.** If the
-    configured `opencode/<slug>` has an `opencode-go/<slug>` twin in the registry
-    (`opencode2 models` lists both), the verdict is **REPLACE** with the
-    `opencode-go/` twin: same model family, usually identical price, but it carries
-    the subscription's ZDR guarantee. This holds for the root model and the cheap
-    background roles too, not just `free` — a slug ending in `-free` never makes an
-    `opencode/` ID the right one. `opencode/` is the no-subscription free tier and is
-    not used here. The same filter applies to every candidate you propose, not just
-    to what is already configured.
+    configured `opencode-go/<slug>` has an `opencode/<slug>` twin in the registry
+    (`opencode models` lists both), the verdict is **REPLACE** with the `opencode/`
+    twin: same model family, usually identical price, and the setup is deliberately
+    free-tier-only. This holds for the root model and the cheap background roles too,
+    not just `free` — a slug ending in `-free` never makes an `opencode-go/` ID the
+    right one. Do not let the subscription's ZDR guarantee pull a role back: that
+    trade was made knowingly. **Exception:** a hard capability need (currently
+    `document` → `pdf`) overrides the namespace filter and keeps the role wherever
+    `pdf` and the context bar are both met. The same filter applies to every candidate
+    you propose, not just to what is already configured.
 0c. **Privacy-flag gate.** If `privacyDataCaveat` is set in the preferences, the
     tracker's `privacy.training` / `privacy.retentionDays` values are known-wrong —
     do not REPLACE, downgrade, or reject anything over a `training: true` flag.
@@ -199,12 +214,12 @@ For each configured model (e.g. `opencode-go/<configured-id>`):
    that meet the preferences (cheap effective price, ≥ `minUsableContext`, recent
    `model_added`, or free) as "worth trying". All hard rules apply here too —
    only surface candidates with `image` in `capabilities.input`, never propose an
-   `opencode/<slug>` when an `opencode-go/<slug>` twin exists, and never reject one
+   `opencode-go/<slug>` when an `opencode/<slug>` twin exists, and never reject one
    over a `training:true` flag while `privacyDataCaveat` is set. A text-only model
    is never "worth trying", no matter how cheap it is.
 
 Cross-check CC when a family appears in both trackers; otherwise OCG is authoritative
-for `opencode-go/*` IDs.
+for `opencode/*` and `opencode-go/*` IDs.
 
 ## Output format
 
@@ -214,76 +229,48 @@ table:
 ```
 | Configured model              | Role(s)           | Verdict  | Reason (from changelog / prices) |
 |-------------------------------|-------------------|----------|----------------------------------|
-| opencode-go/<cheap-vision>   | default, build, … | KEEP     | caps input [text,image]; cheapest vision-capable option, ctx meets pref |
-| opencode-go/<text-only>       | default, …        | REPLACE  | `capabilities.input: [text]` → violates the vision requirement, price irrelevant |
-| opencode-go/<oldver>          | general           | UPDATE → opencode-go/<newver> | <Family>-<newver> added 2026-08-14; meets ctx pref, flash variant cheaper |
-| opencode-go/<discontinued>    | build             | REPLACE  | model_removed 2026-08-25; successor opencode-go/<x> added same day |
-| opencode/<x>-free             | nonsensitive      | REPLACE → opencode-go/<x>-free | same model, `opencode-go/` twin exists — carries the ZDR guarantee, price identical |
+| opencode/<cheap-vision>      | default, build, … | KEEP     | caps input [text,image]; cheapest vision-capable option, ctx meets pref |
+| opencode/<text-only>          | default, …        | REPLACE  | `capabilities.input: [text]` → violates the vision requirement, price irrelevant |
+| opencode/<oldver>             | general           | UPDATE → opencode/<newver> | <Family>-<newver> added 2026-08-14; meets ctx pref, flash variant cheaper |
+| opencode/<discontinued>       | build             | REPLACE  | model_removed 2026-08-25; successor opencode/<x> added same day |
+| opencode-go/<x>-free          | nonsensitive      | REPLACE → opencode/<x>-free | same model, `opencode/` twin exists — free tier only, price identical |
 ```
 
 Then a short "Optional new candidates" list — vision-capable only. Keep reasons one
 line and always tie them to a concrete changelog event or a current-price fact.
 
-## Reasoning variants — `variant`, never a `#suffix`
+## Reasoning variants — DISABLED by user decision (2026-10-02)
 
-A model can expose several **reasoning variants** of itself. `variant` is its
-**own `AgentConfig` field**, a **sibling of `model`**, never part of the model
-string:
+The user's preferences set `variants: none`. **Do not propose, keep, or re-add any
+`variant` field.** The configured models advertise variants (`space-bunny-free` →
+`[low, medium, high, xhigh, max]`, all `$0`), and they work — they are simply not
+wanted: fewer moving parts than reasoning-effort juggling. Treat a configured
+`variant` line as a REPLACE by deleting it. This section is kept for reference only.
 
-```jsonc
-"free": {
-  "model": "opencode-go/space-bunny-free",  // ✅ no suffix
-  "variant": "max",                          // ✅ own field, on the same $0 model
-  "mode": "subagent"
-}
-```
-
-Two traps, both hit in practice on 2026-09-27:
-
-- **Do NOT write `"opencode-go/space-bunny-free#max"`.** The `#max` form is the
-  syntax for the *per-call* `model` override of a `subagent` tool call, not the
-  config field. In `opencode.jsonc` it is a model id that does not exist, so it
-  silently resolves to nothing. Proven against the SDK type: `AgentConfig` has
-  `variant?: string` on its own line (`@opencode-ai/sdk` `types.gen.d.ts`).
-- **Not every model has variants.** Before proposing one, check that the
-  configured model actually advertises any — via the **`models` tool** with
-  `query` and `all: true`, and read the `variants` array it returns. Do **not**
-  try to read variants from the shell: `opencode models` prints flat model ids
-  only (no JSON, no variants, and no `--all` flag), so there is nothing there to
-  `jq`. An empty array means there is nothing to select, and a `variant` key on
-  such a role is ignored at best. Measured examples: `space-bunny-free` →
-  `[low, medium, high, xhigh, max]`; `longcat-2.5-preview-free` → `[]`.
-
-Variants change **reasoning depth, not price** — the top variant of a `$0` model
-is still `$0`. So a variant bump is the cheapest possible quality win and needs
-no price/changelog justification; recommend it whenever a role's model has one
-and the user wants more care for free. Two consequences for this skill:
-
-- When comparing two models, compare `(model, variant)`. A role on
-  `space-bunny-free` with `"variant": "max"` is **not** equivalent to the same
-  role on the default variant, and a table that lists only the model hides a real
-  difference. Write the pair as `space-bunny-free [max]` so a reader does not
-  mistake the variant for part of the id.
-- When you *switch* a role to a different model (any REPLACE/UPDATE above), the
-  `variant` key does **not** carry over — the new model may have a different or
-  empty variant set. Re-check it, and drop a `variant` line that the new model
-  cannot honour instead of leaving a dangling key.
+Historical notes (retired rule, do not re-apply): `variant` is its own
+`AgentConfig` field, a sibling of `model` — **never** a `#max` suffix on the model
+string. `"opencode-go/space-bunny-free#max"` is the syntax for the *per-call*
+`model` override of a `subagent` tool call, not a config field; in `opencode.jsonc`
+it is a model id that does not exist, so it silently resolves to nothing. Proven
+against the SDK type: `AgentConfig` has `variant?: string` on its own line
+(`@opencode-ai/sdk` `types.gen.d.ts`). Also, not every model has variants — check
+the `models` tool (`query` + `all: true`) rather than the shell, since
+`opencode models` prints flat ids with no variants array. Measured:
+`longcat-2.5-preview-free` → `[]`, i.e. no variants at all.
 
 ## Applying changes (only when the user asks)
 
 If the user says "apply it" / "update my config", edit `~/.config/opencode/opencode.jsonc`:
 
 - Update the `model` field (root `model` or `agent.<role>.model`) for each changed role.
-- Update `agent.<role>.variant` as its own field when the role's variant should
-  change — **never** by appending `#<variant>` to the `model` string. Write
-  `"variant": "<name>"` on its own line directly after `model`, and give that line
-  its own `// updated: <date>` comment so the recency signal covers it. Only write
-  a variant the model actually advertises (check first — see **Reasoning variants**).
-- Apply the namespace hard rule on every line you touch: if the `opencode-go/<slug>`
-  twin exists, the ID you write must be the `opencode-go/` one.
+- Do **not** add a `variant` field — `variants: none` is a standing user decision.
+  If a role has one, remove the line.
+- Apply the namespace rule on every line you touch: if the `opencode/<slug>` twin
+  exists, the ID you write must be the `opencode/` one (unless a hard capability
+  need, e.g. `pdf`, keeps the role elsewhere).
 - On **every changed `model` line**, add or refresh a trailing date comment — this is the
   recency signal the skill reads on future runs:
-  `{ "model": "opencode-go/<new-id>"  // updated: 2026-08-28`
+  `{ "model": "opencode/<new-id>"  // updated: 2026-08-28`
   Read any existing `// updated:` comments first; if a role's assignment is older than
   the latest relevant changelog entry, call that out as "stale".
 - Keep the file valid JSONC: a trailing `,` is only allowed when another property follows
@@ -292,8 +279,8 @@ If the user says "apply it" / "update my config", edit `~/.config/opencode/openc
 - Never touch `read`/`edit`/`shell` permission rules, `description` fields, or other
   settings — change only the `model` value + its `// updated:` comment. The one
   exception: if a model change makes a `description` factually wrong about the
-  *namespace* (e.g. a role described as `opencode, training: true` that now sits
-  on `opencode-go/<slug>`), correct that. Leaving it stale is worse than
+  *namespace* (e.g. a role described as `opencode-go, training: true` that now sits
+  on `opencode/<slug>`), correct that. Leaving it stale is worse than
   touching it. Do not, however, write "training: true" into a description as a
   fact while `privacyDataCaveat` is set — that data is known-wrong.
 - **After every applied change, restart the background service** so the running daemon
