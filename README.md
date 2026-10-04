@@ -1,38 +1,42 @@
 # agents-skills
 
-**Persönliche Agent-Skills (OpenCode & Co.) — portabel über die Agent-Skills-Spec.**
+**Personal agent skills (OpenCode & co.) — portable via the Agent Skills spec.**
 
-Zentrales, versioniertes Repo für alle **eigenen** Skills. Kein Skill lebt mehr
-in einem Einzelprojekt — hier ist die einzige Quelle. Registriert via globalem
-`skills`-Array in `~/.config/opencode/opencode.jsonc` → verfügbar in **jedem**
-Projekt.
+Central, versioned repo for all **own** skills. No skill lives in a
+single project anymore — this is the single source. Registered via the global
+`skills` array in `~/.config/opencode/opencode.jsonc` → available in **every**
+project.
 
-## Struktur
+## Structure
 
 ```
 agents-skills/
-├── .agents/rules/            ← immer im Kontext (globaler `instructions`-Key)
-│   ├── ask.md                ← Fragen: immer über das question-Tool, Antworten vorgeschlagen
-│   └── build-verify.md       ← Build-/Verify-Flow: nicht-verhandelbare Kernregeln
-├── .agents/skills/          ← Agent-Skills-Spec-Struktur (portabel für OpenCode, Claude Code, …)
-│   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
-│   ├── build-verify/        ← Build-/Verify-Flow im Detail: Verifikator, Amend, Commit-Schema
-│   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
-│   ├── docker-test-image/  ← E2E/CI-Test-Image: environment-only, Browser-Version aus dem Lockfile
+├── .agents/rules/            ← always in context (inlined into global `AGENTS.md`)
+│   ├── ask.md                ← questions: always via the question tool, answers suggested
+│   └── build-verify.md       ← build/verify flow: non-negotiable core rules
+├── .agents/skills/          ← Agent Skills spec structure (portable for OpenCode, Claude Code, …)
+│   ├── agent-config/        ← global setup: opencode.jsonc, MCP, skills registration
+│   ├── build-verify/        ← build/verify flow in detail: verifier, amend, commit schema
+│   ├── codegraph-project-setup/  ← bootstrap: codegraph init + pre-commit hook + AGENTS.md
+│   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
-│   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: Doku-only Commits überspringen die Pipeline
-│   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
-│   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
-│   ├── playwright-parallel/  ← Playwright-E2E parallel statt seriell: named locks, workers, shards
-│   ├── skills-marker/  ← Skills-Stand pro Projekt (AGENTS.skills.md): welcher Commit geprüft, welche Skills angewendet
-│   ├── tailscale-serve/     ← Lokalen Dev-Server per `tailscale serve` ins Tailnet exposen
-│   ├── update-opencode-models/ ← Live-Registry: opencode models, reload, free/paid-Prefixe
-│   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + Eskalationsregel
-│   └── ui-review/           ← Playwright-Screenshot-Loop + Vision-Analyse
-└── .githooks/pre-commit     ← CodeGraph-Index-Sync vor jedem Commit (fails open)
+│   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
+│   ├── model-updater/       ← model recommendations against ocgo/cc price tracker (UPDATE/KEEP)
+│   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
+│   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
+│   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
+│   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
+│   ├── update-opencode-models/ ← live registry: opencode models, reload, free/paid prefixes
+│   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + escalation rule
+│   └── ui-review/           ← Playwright screenshot loop + vision analysis
+└── .githooks/pre-commit     ← CodeGraph index sync before every commit (fails open)
 ```
 
-## Installation / Registrierung (einmalig pro Maschine)
+Always-on rules are inlined into the global `~/.config/opencode/AGENTS.md`,
+loaded in every session; the `instructions` entry stays in the config as the
+intended mechanism for when it works.
+
+## Installation / registration (once per machine)
 
 ```sh
 git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
@@ -42,39 +46,39 @@ git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
 "instructions": ["/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md"],
 ```
 
-Danach in **jeder** OpenCode-Session verfügbar. Einzelheiten & MCP-CodeGraph:
-siehe Skill `agent-config`.
+Afterwards available in **every** OpenCode session. Details & MCP CodeGraph:
+see skill `agent-config`.
 
-## Skills erweitern
+## Adding skills
 
 ```sh
-# Neuer Skill
+# New skill
 mkdir -p .agents/skills/<id>/
-# SKILL.md mit Frontmatter (name + description), kebab-case-ID = Ordnername
+# SKILL.md with frontmatter (name + description), kebab-case ID = folder name
 git add -A && git commit && git push
 ```
 
-Keine Config-Änderung nötig — das Verzeichnis ist bereits registriert.
+No config change needed — the directory is already registered.
 
-Für eine Regel, die **immer** im Kontext sein soll (nicht erst bei einem Trigger):
-Datei nach `.agents/rules/` legen und den Pfad im `instructions`-Array der globalen
-Config eintragen. Details im Skill `agent-config`.
+For a rule that should **always** be in context (not only on a trigger):
+place the file in `.agents/rules/` and add the path to the `instructions` array
+of the global config. Details in skill `agent-config`.
 
-## Ownership-Regeln
+## Ownership rules
 
-| Skills | Ort |
+| Skills | Location |
 |---|---|
-| Eigene Skills | **hier** (`agents-skills/.agents/skills/`) |
-| Immer geladene Regeln | **hier** (`agents-skills/.agents/rules/`) |
-| Offizielle/Third-Party-Packs (daisyui, find-skills, stripe-*) | dort, wo der Installer sie platziert |
-| Projekt-spezifische Skills (nx-*, blog-beitrag, testimonial) | im jeweiligen Projekt |
+| Own skills | **here** (`agents-skills/.agents/skills/`) |
+| Always-loaded rules | **here** (`agents-skills/.agents/rules/`) |
+| Official/third-party packs (daisyui, find-skills, stripe-*) | where the installer puts them |
+| Project-specific skills (nx-*, blog-beitrag, testimonial) | in the respective project |
 
-## Verwandt
+## Related
 
-- `codegraph-project-setup` — CodeGraph-Index + Hook für neue Projekte
-- `agent-config` — globale Agent-Konfiguration (Single Source of Truth)
-- `build-verify` — Build-/Verify-Flow: pull, delegieren, verifizieren, committen, amenden, pushen
+- `codegraph-project-setup` — CodeGraph index + hook for new projects
+- `agent-config` — global agent configuration (single source of truth)
+- `build-verify` — build/verify flow: pull, delegate, verify, commit, amend, push
 
 ## License
 
-Private — persönliche Skills, nicht zur Weitergabe gedacht.
+Private — personal skills, not intended for sharing.
