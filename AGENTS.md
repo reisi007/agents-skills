@@ -10,6 +10,27 @@ Amend + `--force-with-lease`, per `agent-config` §6. Exception: brand-new,
 self-contained work (e.g. a new skill) gets its own Conventional Commit — the
 history shows the pattern (`feat(skill): …`).
 
+## Sprache
+
+Dateien in diesem Repo sind **englisch** — Code, Kommentare, Doku, Skills, Regeln. Das gilt
+für die Skills **in diesem** Repo; fremde Packs (`~/.agents/skills`, projektlokale
+`.agents/skills` eines anderen Projekts) bleiben, wie ihre Autorinnen sie geschrieben haben,
+und werden **nicht** übersetzt.
+
+## Token-Disziplin
+
+Dateien in diesem Repo landen im Kontext eines Modells — `rules/` als always-on, weil sie auf diesem Setup in die globale `AGENTS.md` inlined sind, sonst bei Bedarf wie ein Skill gelesen, `SKILL.md` erst bei passendem Trigger. Deshalb gilt eine Größenordnung als **Ziel, keine Mauer** — länger ist erlaubt, wenn der Inhalt es trägt und der Überlauf benannt ist:
+
+| Ort | Ziel | wenn es darüber wächst |
+|---|---|---|
+| `.agents/rules/*.md` | **~60 Zeilen** | aufteilen, nicht polstern |
+| `SKILL.md` | **~150 Zeilen** | Details wandern nach `references/` |
+| `references/*.md` | ohne Ziel | Träger der Belege und Tabellen |
+
+Gemessen wird mit `wc -l`. Wer länger wird, lagert den Überlauf nach `references/` aus und benennt, was wohin wanderte — „es wurde länger" allein zählt nicht. Eine Regel, die nur noch einen Verweis wiederholt, ist löschbar:
+Was eine Entscheidung nicht ändert und was ein Link nicht schon sagt, gehört gestrichen, nicht
+umformuliert.
+
 ## After pull: setup drift check
 
 A `git pull` here can change what the local machine needs — the repo is the source
