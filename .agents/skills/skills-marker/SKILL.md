@@ -75,7 +75,7 @@ bilden (Fälle und Begründung: `references/notes.md`).
 
 | Ergebnis | Eintrag im Marker |
 |---|---|
-| Trifft zu **und** ist drin | `angewendet: ja` \| `wo im Projekt` = `Datei:Zeile` \| offene Position leer |
+| Trifft zu **und** ist drin | `angewendet: ja` \| `wo im Projekt` = stabile Referenz (Abschnitt/Überschrift oder Suchstring), Zeile nur Lesehilfe \| offene Position leer |
 | Trifft zu, ist aber nicht drin | `offene Position` = Verweis auf den Eintrag in `AGENTS.todo.md` |
 | Trifft nicht zu | `angewendet: nein` \| kurzer Grund: „betrifft CI-Image, Repo hat keins" |
 
@@ -87,6 +87,8 @@ Erst wenn für **jeden** Skill aus der Range eine dieser drei Zeilen steht, wird
 Marker auf den neuen SHA gesetzt. Nie vorher: ein Marker, der auf einen SHA zeigt, bis zu
 dem nicht alles geprüft ist, ist eine Lüge, die sich erst beim nächsten Pull auffällt —
 und dann ist die Range weg, mit der man sie hätte aufdecken können.
+**Anker, die nicht driften:** eine Zeile in einer Datei, die wächst, hat ein
+Verfallsdatum — Projekt-`AGENTS.md` und Workflows wachsen, eine gepinnte Version nicht.
 
 ## 4. Wann trifft eine Skill-Änderung dieses Projekt zu?
 
@@ -108,10 +110,8 @@ Geltungsbereich mitliefert: steht dort „in jedem Projekt" oder „in CI-Workfl
 ist die Antwort sofort klar — und im Zweifel gewinnt **ja** mit offener Position,
 nicht **nein**.
 
-**Konventionen sind Zeilen, keine Annahmen:** Sprache (Englisch für die Skills
-in diesem Repo), Größen-Disziplin (`SKILL.md` ~150 Zeilen, Überlauf nach
-`references/`) und eingebettete Always-on-Regeln (inlined, `agent-config` §2a)
-bekommen je eine Tabellenzeile wie jeder Skill.
+**Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und
+eingebettete Always-on-Regeln bekommen je eine Tabellenzeile wie jeder Skill.
 
 ## 5. Nach einem `git pull` im Skills-Repo
 
@@ -122,10 +122,11 @@ bekommen je eine Tabellenzeile wie jeder Skill.
    der globalen `~/.config/opencode/AGENTS.md` diffen — eine neuere Regeldatei
    ist Drift, bis die Kopie nachgezogen ist (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
-5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als `Datei:Zeile`.
+5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
 6. **Marker fortschreiben**: `agents-skills-consumed` auf
    `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am` auf heute, Tabellen- und
-   Bereichs-Abschnitt ersetzen.
+   Bereichs-Abschnitt ersetzen — und **alle bestehenden Anker re-verifizieren**:
+   Advancing ist kein Updating, der Marker akkumuliert, und Akkumulation verrottet.
 7. **Reload**, falls Regeln oder Skills betroffen sind:
    `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
@@ -141,7 +142,7 @@ verschiedene Dateien, und keiner ersetzt den anderen.
 | Muster | Warum es schadet | Stattdessen |
 |---|---|---|
 | Den Marker wegschieben, weil eine Änderung „nicht wichtig" wirkt | Genau solche Änderungen waren in der Praxis die wichtigen — das ist der Fall, in dem sie wichtig waren | prüfen, eintragen, **dann** weiterschieben |
-| Einen Skill als „angewendet" markieren, nachdem nur die Doku gelesen wurde | Angewendet heißt am Code geprüft; sonst verliert der Marker genau die Aussage, für die er da ist | `Datei:Zeile` als Beleg — oder offene Position |
+| Einen Skill als „angewendet" markieren, nachdem nur die Doku gelesen wurde | Angewendet heißt am Code geprüft; sonst verliert der Marker genau die Aussage, für die er da ist | stabile Referenz + Zeile als Lesehilfe als Beleg — oder offene Position |
 | Eine offene Position als „trifft nicht zu, weil klein" wegkassieren | Solche Begründungen stehen im nächsten Range-Log ohne ihr Prüfergebnis | die Auswahlregel aus §4 anwenden und den Grund aufschreiben |
 | Zahlen in den Marker schreiben („5 Skills offen", „80 % angewendet") | Sie veralten still und werden falsch, ohne dass etwas alarmiert | SHA + Datum; Zahl bei Bedarf aus der Range neu berechnen |
 | Zwei Marker je Repo (eine in `docs/` als „richtige" Version) | Zwei Cursoren laufen auseinander; welcher gilt, ist dann eine Vermutung | genau eine, Repo-Root; Subpackages verweisen auf sie |

@@ -129,6 +129,19 @@ Bereichs-Abschnitt des nächsten Pulls „`docker-test-image` — entfernt in `<
 notieren, dann verschwindet sie beim nächsten Fortschreiben mit. Sonst bleibt die Frage
 offen, ob das Projekt den Inhalt inzwischen selbst braucht.
 
+## Gemessen: Anker verrotten (`portal.reisinger.pictures` × `agents-skills`)
+
+Erster vollständiger Anker-Audit: Nach dem Fortschreiben des Markers in
+`portal.reisinger.pictures` auf einen neuen `agents-skills`-SHA wurden alle
+Belege geprüft — 13 `Datei:Zeile`-Referenzen plus eine Behauptung ganz ohne
+Zeile. **Fünf der dreizehn Anker waren falsch (38 %)** — alle aus demselben
+Grund: Die Zieldatei war gewachsen (`AGENTS.md` hatte Abschnitte gewonnen, ein
+Workflow Zeilen), die protokollierten Zeilennummern nicht; die fünf zeigten
+still auf fremden Inhalt. Eine Zeile war schlimmer als veraltet: Eine
+„trifft nicht zu, weil keine Path-Filter"-Begründung war falsch geworden, weil
+ein späterer Commit sie hinzugefügt hatte. Eine Zahl ohne Herkunft ist genau das,
+was dieses Repo sonst entfernt — darum steht sie hier mit beiden Repos.
+
 ## Wo steht was
 
 | Aussage | Datei |
