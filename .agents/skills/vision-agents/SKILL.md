@@ -10,9 +10,7 @@ requirement* for the root `model` and for every `agent.<role>.model` — see
 `model-updater` → "Hard requirements". So the main agent reads images itself.
 There is no capability gap to bridge.
 
-> `vision-technical` was removed for exactly that reason. Reading a screenshot,
-> pulling out EXIF-relevant visual details, and categorising an image are *your*
-> job now — do them inline, don't delegate them.
+(`vision-technical` was removed for exactly that reason — history in [`references/notes.md`](references/notes.md).)
 
 What remains is **role separation, not capability separation**: two `mode: subagent`
 agents that are read-only specialists and second opinion. Max ~10 images per call —
@@ -24,8 +22,6 @@ split larger batches.
 | `document` | document domain | PDFs, rendered pages, reports — layout, readability, appearance (not photos). |
 
 > Model is not pinned in this skill — set `agent.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `model-updater` skill choose/refresh it. Per-role prefs: `vision-creative` = image + video, strongest vision model wins; `document` = image **and** `pdf` capability.
-
-Author agent intentionally omitted (owner preference).
 
 ## Vision ≠ PDF
 
@@ -56,7 +52,7 @@ a routine, and not because you cannot see.
 2. One concrete question, not "what do you see?" — e.g. "is the 8px gap between
    the card title and the meta row consistent across these three cards?"
 3. Ask what it would look at to be more certain, and for a confidence read.
-4. 10 images max per call; batch by state → viewport → route.
+4. Batch by state → viewport → route.
 
 **Who to ask:** `vision-creative` for aesthetic, intent, and fine-detail reads.
 `document` for anything that is a PDF or a rendered page. For a purely factual
@@ -103,8 +99,10 @@ Copy the `agent` block from `references/agents.jsonc` into `~/.config/opencode/o
 
 Then run the `model-updater` skill to pick the concrete models (it adds
 `// updated: YYYY-MM-DD` which it uses to detect staleness), `touch ~/.config/opencode/opencode.jsonc`
-and verify with `opencode2 service status`.
+and verify with `~/.opencode/bin/opencode2 service status` (full path — bare
+`opencode2` is not on `PATH` in non-interactive shells).
 
 ## Reference files
 
 - `references/agents.jsonc` — copy-paste `agent` definitions for the two agents.
+- `references/notes.md` — why the roles exist in this shape (history, rationale).

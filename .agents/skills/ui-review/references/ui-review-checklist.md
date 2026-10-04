@@ -5,7 +5,7 @@ the file name. Keep it factual: name the element and the visual defect; propose
 a concrete fix.
 
 Before fixing a finding, confirm **which element actually renders it**. A pattern
-is often duplicated — in this repo the mobile brand lockup (logo + portal name)
+is often duplicated — in `portal.reisinger.pictures` the mobile brand lockup (logo + portal name)
 existed in three dashboard headers, and a fix applied to the copy you happened to
 open first left the defect visible on the screen you were reviewing. `grep` for
 the class or component before editing, fix **every** copy, and prefer extracting a
@@ -71,7 +71,7 @@ shared component over repairing copies one by one so they cannot drift apart aga
 
 ## 8. Design system consistency
 
-- Components use the design system's primitives (this repo: daisyUI classes —
+- Components use the design system's primitives (in `portal.reisinger.pictures`: daisyUI classes —
   `btn`, `card`, `badge`, `alert`, `table`, `menu`, etc.); no hand-rolled
   look-alikes.
 - Colors come from the theme palette, not ad-hoc hex values.
@@ -100,8 +100,8 @@ as a `critical`/`high` finding):
 pnpm test:contrast
 ```
 
-- The spec (`tests/contrast/contrast.spec.ts`, driven by
-  `playwright.contrast.config.ts`) asserts WCAG AA for:
+- The spec (`tests/contrast/contrast.spec.ts` in the consuming project, driven by
+  its `playwright.contrast.config.ts`) asserts WCAG AA for:
   - every `badge-{color}` foreground vs its own background,
   - every `alert-{color}` foreground vs its background **composited over the
     page surface** (alerts are translucent, so the rendered (surface-composited)

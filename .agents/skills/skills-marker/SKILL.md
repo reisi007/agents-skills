@@ -14,11 +14,8 @@ fortgeschrieben — dieselbe Unterscheidung, die der `build-verify`-Flow für
 
 Der Nutzen: aus „lies den Diff und rate, was davon dieses Projekt betrifft" wird eine
 konkrete Liste. `git log <marker-sha>..HEAD` benennt jeden geänderten oder neuen Skill,
-und für jeden steht danach eine Zeile im Marker. Diese Datei ist **der Ablauf**;
-Begründung, Beispiel-Range und Fallstricke stehen in
-[`references/notes.md`](references/notes.md). **Was in einem konkreten Projekt gelten
-muss, steht in dessen `AGENTS.md`** — der Marker hält fest, dass geprüft wurde, nicht
-was zu tun ist.
+und für jeden steht danach eine Zeile im Marker. Diese Datei ist **der Ablauf** (Details: `references/notes.md`); was gelten
+muss, steht in dessen `AGENTS.md` — der Marker hält Prüfungen fest, keine Pflichten.
 
 ## 1. Wo die Datei liegt
 
@@ -28,15 +25,11 @@ was zu tun ist.
 | Marker | `<projekt>/AGENTS.skills.md`, neben `AGENTS.md`/`AGENTS.todo.md` | **genau eine** je Repo |
 | Format | `<skills-repo>/.agents/skills/skills-marker/SKILL.md` (diese Datei) | wird hier festgelegt, nicht im Projekt |
 
-Der Marker liegt im **Projekt**, weil er eine Aussage über das Projekt macht, nicht über
-die Skills. Skills-Repo und Projekt können auf verschiedenen Maschinen in
-verschiedenen Verzeichnissen liegen — deshalb steht **kein Pfad zum Skills-Repo** im
-Marker, sondern nur dessen SHA. Wird der Ordner umbenannt oder verschoben, bleibt der
-Marker gültig; das ist der Grund für diese Beschränkung.
+Der Marker liegt im **Projekt** und nennt nur den SHA, nie einen Pfad zum
+Skills-Repo — Begründung in [`references/notes.md`](references/notes.md).
 
-**`AGENTS.skills.md` heißt bewusst nicht `AGENTS.md`:** Agenten injizieren nur
-`AGENTS.md` in den Kontext. Der Marker soll beim Trigger gelesen werden und nicht in
-jeder Session Tokens verbrauchen.
+**`AGENTS.skills.md` heißt bewusst nicht `AGENTS.md`:** sie wird beim Trigger
+gelesen, nicht in jede Session injiziert.
 
 ## 2. Format und Vorlage
 
@@ -52,18 +45,14 @@ cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md \
 | `## Skill-Stand` | Tabelle: `Skill \| angewendet? \| wo im Projekt \| offene Position` |
 | `## Offen aus dem Bereich <alt>..<neu>` | genau die Skills, die in dieser Range neu dazugekommen oder geändert wurden |
 
-Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst**, kein Beschreibungstext
-über eine Vorlage — sie enthält die leere Tabelle, die Fortschreib-Anleitung und den
-Marker-Stand im Klartext. HTML-Kommentare in der Vorlage sind Arbeitsanleitung und
+Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst** (leere Tabelle,
+Fortschreib-Anleitung). HTML-Kommentare darin sind Arbeitsanleitung und
 fallen beim ersten Fortschreiben weg.
 
-**SHA + Datum, sonst nichts.** Keine Skill-Version (`v3`), kein „3 von 8 angewendet",
-keine Coverage-Zahl: jeder dieser Werte altert still und wird beim nächsten Pull
-falsch, ohne dass irgendetwas alarmiert. Wer eine Zahl braucht, rechnet sie aus der
-Range neu — die Range ist reproduzierbar, die Zahl nicht.
+**SHA + Datum, sonst nichts.** Keine Version, keine Zähler — Begründung und
+Beispiel-Range in [`references/notes.md`](references/notes.md).
 
-**Angewendet** heißt **am Code geprüft**, nicht gelesen. „Angewendet: nein, weil …" ist
-ein vollwertiges Ergebnis und kein Makel — die Auswahlregel dafür steht in §4.
+**Angewendet** heißt **am Code geprüft**, nicht gelesen — Auswahlregel in §4.
 
 ## 3. Die Range — was seit dem Marker passiert ist
 
@@ -78,11 +67,9 @@ git -C <skills-repo> log --diff-filter=A --name-only <marker-sha>..HEAD -- .agen
 git -C <skills-repo> log --name-only --format= <marker-sha>..HEAD -- .agents/skills | sort -u   # alle berührten Skills
 ```
 
-Der letzte Befehl ist der eigentliche Arbeitsauftrag: er liefert die Liste der Skills,
-die gegen **dieses** Projekt geprüft werden **müssen**. `--diff-filter=A` allein reicht
-nicht — eine Änderung ohne neue Datei ist der Normalfall, nicht die Ausnahme. Die Range
-wird **nach** dem Pull gebildet, sonst vergleicht man zwei lokale Stände und prüft
-dieselben Commits zweimal.
+Der letzte Befehl ist der Arbeitsauftrag: die Liste der Skills, die gegen
+**dieses** Projekt geprüft werden **müssen**. Range immer **nach** dem Pull
+bilden (Fälle und Begründung: `references/notes.md`).
 
 **Für jeden dieser Skills gilt genau eine von drei Entscheidungen:**
 
@@ -92,11 +79,9 @@ dieselben Commits zweimal.
 | Trifft zu, ist aber nicht drin | `offene Position` = Verweis auf den Eintrag in `AGENTS.todo.md` |
 | Trifft nicht zu | `angewendet: nein` \| kurzer Grund: „betrifft CI-Image, Repo hat keins" |
 
-Die zweite Zeile ist der wichtigste Fall: ein Skill, der etwas Neues weiß und im Projekt
-nicht umgesetzt ist, wird **nicht stillschweigend übersprungen** und nicht als erledigt
-markiert. Er wandert nach `AGENTS.todo.md` — wo er wiederum ein **Log, kein Auftrag**
-ist (`build-verify`) und nur auf ausdrücklichen Auftrag umgesetzt wird. Der Marker
-selbst ist dafür ausdrücklich nicht zuständig.
+Die zweite Zeile ist der wichtigste Fall: Neues, das hier nicht umgesetzt ist,
+wandert als **Log, kein Auftrag** nach `AGENTS.todo.md` (`build-verify`) —
+nie stillschweigend übersprungen, nie als erledigt markiert.
 
 Erst wenn für **jeden** Skill aus der Range eine dieser drei Zeilen steht, wird der
 Marker auf den neuen SHA gesetzt. Nie vorher: ein Marker, der auf einen SHA zeigt, bis zu
@@ -123,18 +108,25 @@ Geltungsbereich mitliefert: steht dort „in jedem Projekt" oder „in CI-Workfl
 ist die Antwort sofort klar — und im Zweifel gewinnt **ja** mit offener Position,
 nicht **nein**.
 
+**Konventionen sind Zeilen, keine Annahmen:** Sprache (Englisch für die Skills
+in diesem Repo), Größen-Disziplin (`SKILL.md` ~150 Zeilen, Überlauf nach
+`references/`) und eingebettete Always-on-Regeln (inlined, `agent-config` §2a)
+bekommen je eine Tabellenzeile wie jeder Skill.
+
 ## 5. Nach einem `git pull` im Skills-Repo
 
 1. **Marker lesen** → `<marker-sha>`. Fehlt die Datei, ist das Projekt nicht gescaffoldet
    — `codegraph-project-setup`, Schritt 2.5.
 2. **Range bilden** (Kommandos aus §3) → Liste der betroffenen Skills.
-3. **Jeden davon gegen das Projekt prüfen** (§4) → ja / nein + Grund.
-4. **Offene Positionen in `AGENTS.todo.md` eintragen**, angewendete Zeilen mit
-   `Datei:Zeile` belegen.
-5. **Marker fortschreiben**: `agents-skills-consumed` auf
+3. **Regel-Drift prüfen:** `.agents/rules/*` gegen die eingebetteten Kopien in
+   der globalen `~/.config/opencode/AGENTS.md` diffen — eine neuere Regeldatei
+   ist Drift, bis die Kopie nachgezogen ist (`agent-config` §8).
+4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
+5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als `Datei:Zeile`.
+6. **Marker fortschreiben**: `agents-skills-consumed` auf
    `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am` auf heute, Tabellen- und
    Bereichs-Abschnitt ersetzen.
-6. **Reload**, falls Regeln oder Skills betroffen sind:
+7. **Reload**, falls Regeln oder Skills betroffen sind:
    `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
 Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — neue

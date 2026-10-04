@@ -9,6 +9,11 @@ Everything about this developer's agent tooling: where config lives, how the
 skills repo is registered, how MCP servers are wired, and how to bring a new
 machine/project online.
 
+> **Size note:** this file keeps decisions and wiring rules; verbatim config
+> lives in `references/snippets.md`. Still over the ~150-line target — the
+> overflow is the §2a/§8 wiring detail, which loses its force if shortened
+> further.
+
 ## 1. Global config files
 
 | File | Purpose |
@@ -20,30 +25,19 @@ machine/project online.
 
 ## 2. Skills repo registration (the `skills` array)
 
-Own skills live in **one** git repo, not per project:
-
-```jsonc
-// ~/.config/opencode/opencode.jsonc
-"skills": {
-  "paths": [
-    "/Users/<user>/dev/agents-skills/.agents/skills"
-  ]
-},
-```
-
-- Point this at the cloned repo's `.agents/skills` directory (structure
-  follows the portable Agent Skills spec, so other agents can consume the same
-  dir).
+Own skills live in **one** git repo, not per project — the `skills` array
+points at its `.agents/skills` directory (verbatim: `references/snippets.md`
+§1). The structure follows the portable Agent Skills spec, so other agents
+can consume the same dir.
 - OpenCode also **auto-discovers** project-local `.agents/skills`,
   `.opencode/skills`, `.claude/skills` (compat) — but the convention here is:
   **no own skills inside projects**; everything own lives in agents-skills.
 - Adding a new own skill: create `<agents-skills>/.agents/skills/<id>/SKILL.md`
   (frontmatter `name` + `description`, kebab-case ID = directory name), commit,
   push. No config change needed — the dir is already registered.
-- Skill precedence (low → high): builtin → `.claude/skills` → `.agents/skills`
-  (compat) → `~/.config/opencode/skills` → project `.opencode/skills` →
-  explicit `skills` array entries. The repo entry therefore wins over any
-  leftover project copy. Same ID in two sources: later source wins.
+- Same ID in two sources: later source wins, so the repo entry wins over any
+  leftover project copy (low → high: builtin → compat → global → project →
+  `skills` array).
 
 ## 2a. Always-on rules (the `instructions` array) — NOT the same as a skill
 
@@ -56,15 +50,8 @@ skill is a rule that gets skipped exactly when it is inconvenient.
 
 For those, the config has a second key — `instructions`, "Additional instruction
 files or patterns to include". **One entry per rule file**, and several entries are
-the normal case, not the exception: currently `build-verify.md` and `ask.md`.
-
-```jsonc
-// ~/.config/opencode/opencode.jsonc
-"instructions": [
-  "/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md",
-  "/Users/<user>/dev/agents-skills/.agents/rules/ask.md"
-],
-```
+the normal case, not the exception: currently `build-verify.md` and `ask.md`
+(verbatim: `references/snippets.md` §2).
 
 > **Note (installed opencode v2.0.22 — verified, not assumed):** the
 > `instructions` key parses but does not deliver the file into the system
@@ -77,12 +64,14 @@ the normal case, not the exception: currently `build-verify.md` and `ask.md`.
   an entry **silently contributes nothing** — an unregistered, misspelled or wrong path
   looks exactly like a working setup until it is tested.
 
-- **Absolute paths and `~/` paths both work**; relative paths and globs are
-  resolved against the project (an absolute glob works too — it is globbed with
-  `cwd = dirname`). Remote `https://` URLs are fetched with a 5 s timeout.
-- The file's content is injected as `Instructions from: <path>` into the system
-  prompt, alongside every `AGENTS.md` — it is **not** read on demand, so it costs
-  context in every session. Keep it short: one screen, no examples, no history.
+- **Path forms** (resolution, not delivery on v2.0.22): absolute and `~/`
+  paths; relative paths and globs resolve against the project (an absolute
+  glob works too — it is globbed with `cwd = dirname`). Remote `https://`
+  URLs are fetched with a 5 s timeout.
+- Intended delivery (not the path on v2.0.22 — see note above): the file's
+  content is injected as `Instructions from: <path>` into the system prompt,
+  alongside every `AGENTS.md` — **not** read on demand, so it costs context in
+  every session. Keep it short: one screen, no examples, no history.
 - That is the split: `.agents/rules/` = always in context, short and absolute;
   `.agents/skills/` = on demand, with the reasoning, tables and evidence. The
   rule file points at the skill; it does not duplicate it.
@@ -91,32 +80,26 @@ the normal case, not the exception: currently `build-verify.md` and `ask.md`.
   the new file stays invisible until that entry is there.
 - **Reloading:** like any config change, the running `opencode2` service caches
   resolved config — `touch ~/.config/opencode/opencode.jsonc` or restart the
-  session (see §3 for the same gotcha on MCP). Verify the wiring **once** after
-  setup: in a fresh session, ask the agent to repeat the rule file's first
-  heading without reading the file — if it can, the entry resolved. A path that
-  does not exist **silently contributes nothing**, so a wrong path looks exactly
-  like a working setup until you test it.
+  session (see §3 for the same gotcha on MCP). Once the feature works, verify
+  the wiring **once** after setup: in a fresh session, ask the agent to repeat
+  the rule file's first heading without reading the file — if it can, the entry
+  resolved. On v2.0.22 verify the inlined copy in the global `AGENTS.md` the
+  same way instead. A path that does not exist **silently contributes nothing**,
+  so a wrong path looks exactly like a working setup until you test it.
 - **Do not put an always-on rule into the global `AGENTS.md` just because it is
   easier** — that file is not in this repo and not versioned with it. The
   `instructions` path keeps the rule in `agents-skills`, versioned and
-  reviewable, which is the whole point of the repo.
+  reviewable, which is the whole point of the repo. Interim exception on
+  v2.0.22: the inlined copies there ARE the delivery path (see note above) —
+  updated in the same change as the rule file, never instead of the
+  `instructions` entries.
 
 ## 3. MCP servers
 
 **codegraph is GLOBAL.** The global `~/.config/opencode/opencode.jsonc`
 declares the codegraph MCP server once; every project (and any directory)
-gets it automatically — no per-project MCP entry needed:
-
-```jsonc
-// ~/.config/opencode/opencode.jsonc
-"mcp": {
-  "codegraph": {
-    "type": "local",
-    "command": ["codegraph", "serve", "--mcp"],
-    "enabled": true
-  }
-}
-```
+gets it automatically — no per-project MCP entry needed (verbatim:
+`references/snippets.md` §3).
 
 - Do **not** add a `codegraph` entry to project `opencode.json` files — the
   global one wins/merges anyway and a duplicate is redundant.
@@ -142,27 +125,21 @@ gets it automatically — no per-project MCP entry needed:
 
 ## 4. CodeGraph per project (quick reference)
 
-For the full runbook see the `codegraph-project-setup` skill. One-liner
-checklist:
-
-1. `codegraph init` (creates `.codegraph/` + tracked-able `.codegraph/.gitignore`)
-2. `git add .codegraph/.gitignore && git commit …`
-3. `mkdir -p .githooks && cp <agents-skills>/.agents/skills/codegraph-project-setup/templates/pre-commit.sh .githooks/pre-commit && chmod +x .githooks/pre-commit`
-4. `git config core.hooksPath .githooks`
-5. Verify: `codegraph status`, `git hook run pre-commit` → `codegraph: index synced`
+For the full runbook see the `codegraph-project-setup` skill: `codegraph init`
+(index + gitignore), commit the gitignore, install the hook from that skill's
+`templates/pre-commit.sh`, `git config core.hooksPath .githooks`, then verify
+(`codegraph status`, `git hook run pre-commit` → `codegraph: index synced`).
 
 Status commands: `codegraph status | sync | index | explore | upgrade`.
 
 ## 5. New machine / new project bring-up
 
 - **New machine:** install codegraph CLI (`npm i -g @colbymchenry/codegraph`),
-  clone `git@github.com:reisi007/agents-skills.git`, set the `skills` array in
-  `~/.config/opencode/opencode.jsonc` to the repo's `.agents/skills` (or add a
-  symlink `~/.config/opencode/skills` → repo dir) **and the `instructions` array
-  to `.agents/rules/*.md`** (§2a) — both entries are required, one gives the
-  skills, the other the always-on rules. codegraph is declared once
-  as a **global MCP server** in the global `opencode.jsonc` (§3) — no
-  per-project MCP entry for it.
+  clone `git@github.com:reisi007/agents-skills.git`, wire the `skills` array
+  (§2) **and the `instructions` array** (§2a) in the global `opencode.jsonc` —
+  both entries are required (or symlink `~/.config/opencode/skills` → repo
+  dir for the `skills` side). codegraph is declared once as a **global MCP
+  server** (§3) — no per-project MCP entry for it.
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
   AGENTS.todo.md). Do NOT create new skills in the project — add them to
   agents-skills instead.
@@ -170,13 +147,8 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 ## 6. Commit convention (agents-skills repo)
 
 Own-repo, single-developer workflow: changes are **amended into the latest
-commit and force-pushed**, not accumulated as separate commits:
-
-```sh
-cd ~/dev/agents-skills && git add -A \
-  && git commit --amend --no-edit \
-  && git push --force-with-lease
-```
+commit and force-pushed**, not accumulated as separate commits (verbatim:
+`references/snippets.md` §4).
 
 - Use `--force-with-lease` (not bare `--force`) — refuses to clobber remote
   state you haven't seen.
@@ -202,12 +174,8 @@ cd ~/dev/agents-skills && git add -A \
 
 Every `git pull` (or fresh clone) in `agents-skills` can change what the local
 machine needs. The repo is the source of truth; the machine is a copy that rots.
-After pulling, diff what landed and re-apply setup if the source moved under you:
-
-```sh
-cd ~/dev/agents-skills && git log --oneline -5   # what landed?
-git diff HEAD@{1} HEAD --stat                     # what exactly changed?
-```
+After pulling, diff what landed (`references/snippets.md` §5) and re-apply
+setup if the source moved under you:
 
 | Changed path | Setup step to re-check |
 |---|---|

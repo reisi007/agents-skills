@@ -16,9 +16,9 @@ CLI tools work immediately and the index stays fresh:
 
 ## 1. Why per-project init is required
 
-- CodeGraph is used exclusively via the **CLI** (`codegraph explore`,
-  `codegraph status`, `codegraph sync`). There is no MCP server component —
-  the `codegraph` binary must be on `PATH`.
+- CodeGraph is used via the **CLI** (`codegraph explore`, `codegraph status`,
+  `codegraph sync`) and a **global MCP server** (single source: `agent-config`
+  §3). The CLI needs the `codegraph` binary on `PATH`.
 - The CLI works in any repository that has a `.codegraph/` index. Missing the
   index ⇒ `codegraph explore` reports "no index" and the agent falls back to
   grep/read.

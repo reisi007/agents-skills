@@ -72,8 +72,8 @@ function resolvePath(pattern: string, params: Record<string, unknown>): string {
 async function waitForAppSettled(page: Page, expectedTitle?: string): Promise<void> {
     await page.waitForLoadState('networkidle');
     if (expectedTitle) {
-        // Guard: stellt sicher, dass wirklich diese App gerendert wird und nicht ein
-        // fremder Dev-Server, der zufällig den Port belegt (verhindert stille Fehl-Captures).
+        // Guard: makes sure this app is really what got rendered — not a
+        // foreign dev-server that happens to occupy the port (prevents silent mis-captures).
         await expect(page).toHaveTitle(expectedTitle);
     }
     await page.waitForTimeout(300);

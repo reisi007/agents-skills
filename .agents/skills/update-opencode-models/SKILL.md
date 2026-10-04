@@ -30,8 +30,10 @@ path. (`opencode2` is at `/usr/local/bin`; not `~/.opencode/bin`.)
 
 A "missing" model is often a prefix mistake — but note which direction. Older free
 models appeared only under `opencode/`, so searching `opencode-go/<slug>-free` found
-nothing. That is no longer true: current free models (`space-bunny-free`,
-`longcat-2.5-preview-free`, `muse-spark-1.3-contributor-free`) are listed under
+nothing. That is no longer true: free models (snapshot 2026-10-02:
+`space-bunny-free`,
+`longcat-2.5-preview-free`, `muse-spark-1.3-contributor-free` — re-check with
+`opencode2 models | grep -i free`) are listed under
 **both** prefixes. Never conclude "no such model" from one prefix alone — grep the
 family name and look at every row that comes back.
 
@@ -44,19 +46,20 @@ uses it. Accepted trade: no zero-data-retention guarantee.
 
 - The **`opencode/`** provider namespace is the free tier → **use it whenever it exists.**
 - The **`opencode-go/`** namespace is the subscription one → only when a hard capability
-  need forces it. Current case: none (`document` uses
+  need forces it (snapshot 2026-10-02: none; `document` uses
   `opencode/muse-spark-1.3-contributor-free`, which is free and PDF-capable).
 
-Price is frequently identical (`effectiveInput: 0` either way). The reason is the
+Price is frequently identical (snapshot 2026-10-02: `effectiveInput: 0`
+either way). The reason is the
 one-model-family decision, **not** ZDR and not free-tier rename durability. A slug
 ending in `-free` says nothing about namespace, price, or privacy; check the registry
 instead of inferring.
 
-**Verworfen (bis 2026-10-02):** the rule was "always the `opencode-go/<slug>` twin,
+**Retired (held until 2026-10-02):** the rule was "always the `opencode-go/<slug>` twin,
 because the subscription is ZDR". Retired. Do not revive it, and do not treat a
 configured `opencode/<slug>` as a mistake to correct.
 
-Configured today: every role → `opencode/space-bunny-free`, except
+Configured (snapshot 2026-10-02): every role → `opencode/space-bunny-free`, except
 `document` → `opencode/muse-spark-1.3-contributor-free` (the `pdf` exception).
 
 Check for a twin before writing any ID:

@@ -25,6 +25,8 @@ geprüft am: <YYYY-MM-DD>
 
   | `playwright-parallel` | ja | `playwright.config.ts:41` | |
   | `docker-test-image`   | nein | | trifft CI-Image zu, Repo hat keins |
+  Konventionen (Sprache, Größen-Disziplin, eingebettete Regeln) bekommen je eine
+  Zeile wie jeder Skill — nie stillschweigend vorausgesetzt (`skills-marker` §4).
 -->
 
 | Skill | angewendet? | wo im Projekt | offene Position |
@@ -64,5 +66,6 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
    `geprüft am:` auf heute, Abschnitte ersetzen.
-6. Falls Regeln oder Skills betroffen waren:
+6. Falls Regeln oder Skills betroffen waren: eingebettete Regel-Kopien in der
+   globalen `~/.config/opencode/AGENTS.md` nachziehen (Drift!), dann
    `touch ~/.config/opencode/opencode.jsonc`.

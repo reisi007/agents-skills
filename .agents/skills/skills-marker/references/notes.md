@@ -20,6 +20,10 @@ keine, weil sie eine Aussage vortäuscht, die niemand mehr prüft.
 Zweite Folge, die den Ausschlag gab: nur mit SHA lässt sich die Prüfung **reproduzieren**.
 Ein Satz wie „Stand 3.8." im Fließtext nicht.
 
+Der Marker nennt nur den SHA, nie einen Pfad zum Skills-Repo: Repo und Projekt können
+auf verschiedenen Maschinen in verschiedenen Verzeichnissen liegen. Wird der Ordner
+umbenannt oder verschoben, bleibt der Marker gültig.
+
 ## Warum SHA + Datum und keine Version
 
 Der skills-Marker trägt bewusst **keine** Skill-Version, keinen Coverage-Zähler, keinen
@@ -67,6 +71,22 @@ Danach erst wird der Marker auf `9f0e1aa` gesetzt. Die drei Commits tauchen beim
 nächsten Pull **nicht** wieder auf — genau das ist der Zweck. Ein Projekt, das keinen
 Playwright hat, schreibt in derselben Lage `trifft nicht zu` mit dem Grund
 „keine E2E-Suite" und ist fertig.
+
+## Konventionen und eingebettete Regeln als Zeilen
+
+Ändert sich eine Repo-Konvention — Sprache (Englisch für die Skills in diesem Repo),
+Größen-Disziplin (`SKILL.md` ~150 Zeilen, Überlauf nach `references/`) oder eine
+eingebettete Always-on-Regel (inlined in die globale `AGENTS.md`, weil `instructions`
+auf v2.0.22 nicht liefert) — bekommt sie eine Tabellenzeile wie jeder Skill:
+
+| Konvention | angewendet? | wo im Projekt | offene Position |
+|---|---|---|---|
+| `build-verify` (eingebettete Kopie) | ja | `~/.config/opencode/AGENTS.md` = Regelstand | |
+| Sprache / Größen-Disziplin | nein | | Projekt hat eigene Doku-Konvention |
+
+Regel-Drift diagnostizieren: die Regeldatei mit dem eingebetteten Abschnitt in der
+globalen `AGENTS.md` vergleichen — ist die Datei neuer, ist die Kopie Drift, und der
+Marker hält das erst als geprüft fest, wenn die Kopie nachgezogen ist.
 
 ## Fallstrick: der Marker-SHA verschwindet
 

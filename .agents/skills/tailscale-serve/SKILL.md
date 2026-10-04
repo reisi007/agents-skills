@@ -6,17 +6,17 @@ description: TRIGGER when a locally started dev server (Vite/Hono/anything on lo
 # Tailscale Serve — a local dev server on the tailnet
 
 Exposes a dev server bound to `localhost` so another device on the tailnet can
-open it over HTTPS. Generic workflow — host-specific values live in
-**Host facts** at the bottom.
+open it over HTTPS.
 
-Placeholders used below: `$TS_SOCKET` (daemon socket), `<node>.<tailnet>.ts.net`
-(the node's MagicDNS name), `<port>` (the dev server port).
+Placeholders: `$TS_SOCKET` (daemon socket), `<node>.<tailnet>.ts.net` (this
+node's MagicDNS name), `<port>` (dev server port). Resolve live values from the
+CLI — never copy them from anywhere else. Rationale lives in
+[`references/notes.md`](references/notes.md).
 
 ## Prerequisite — the user must enable Serve manually
 
 **`tailscale serve` does not work until Serve is enabled on the tailnet, and no
-command can enable it.** It is an admin-console setting that needs the tailnet
-owner's account:
+command can enable it.** It is an admin-console action for the tailnet owner:
 
 ```
 Serve is not enabled on your tailnet.
@@ -24,67 +24,53 @@ To enable, visit:
     https://login.tailscale.com/f/serve?node=<node-id>
 ```
 
-- Tell the user to open that link and confirm. Do **not** look for a workaround
-  (no flag, no config file, no API call) — it is an interactive admin action.
-- Until then `serve status` reports `No serve config` and the URL answers
-  `ERR_CONNECTION_REFUSED`.
-- The CLI does **not** fail fast here: `serve --bg` hung for minutes and only
-  printed the message once the process was killed. Always wrap it:
-  `timeout 60 tailscale … serve --bg …`.
+- Tell the user to open that link and confirm — no flag, config file, or API
+  call is a workaround.
+- Until then: `serve status` reports `No serve config`, the URL answers
+  `ERR_CONNECTION_REFUSED`, and `serve --bg` hangs without failing fast —
+  always wrap it in `timeout 60`.
 
 ## Step 0 — find the daemon socket
 
-If `tailscale` reports `Failed to connect to local tailscaled (pid N) …
-/var/run/tailscale/tailscaled.sock: no such file or directory`, the daemon is
-**running** — the message even names a live pid — just not on the default path.
-Do not start a second `tailscaled`; it dies with `address already in use`.
+The `Failed to connect … no such file or directory` error names a live pid: the
+daemon is **running**, just on a non-default socket. Never start a second
+`tailscaled` (`address already in use`). Find the real socket and use it:
 
 ```sh
-TS_SOCKET=$HOME/.local/share/tailscale/tailscaled.sock
+tr '\0' ' ' < /proc/*/cmdline | grep tailscaled   # prints the daemon's real socket path
+TS_SOCKET=<socket-from-above>
 tailscale --socket=$TS_SOCKET status
 ```
 
-Pass `--socket` explicitly on every command. An env var like `TS_SOCKET` is
-typically **ignored** by the CLI — only the flag counts. Without `ps`:
-`tr '\0' ' ' < /proc/*/cmdline | grep tailscaled`.
+Pass `--socket` explicitly on **every** command — env vars are ignored; only the
+flag counts.
 
 ## Step 0.5 — provision the TLS certificate
 
-**`serve` configures HTTPS but does not guarantee a certificate exists.** With no
-valid cert, the TLS handshake never completes and the browser reports
-`ERR_SSL_PROTOCOL_ERROR` — while every local check still looks perfect:
-`serve --bg` prints the URL, `serve status` lists an `HTTPS` handler, and
-`serve status --json` even contains `"HTTPS": true`. **None of that proves a
-certificate is present.** Treat the browser as the only real oracle (Step 3).
+**`serve` configures HTTPS but does not guarantee a certificate exists.**
+Without one the browser reports `ERR_SSL_PROTOCOL_ERROR` while `serve status`
+still looks healthy — treat the browser as the only oracle (Step 3).
 
 ```sh
-cd /some/private/dir                 # see the warning below — this matters
+cd <private-dir>   # $HOME or a `mktemp -d` dir — never a directory you are about to serve
 tailscale --socket=$TS_SOCKET cert <node>.<tailnet>.ts.net
 ```
 
-It prints `Wrote public cert to …crt` / `Wrote private key to …key` on success.
-If it succeeds and the URL still fails, re-arm the handler so serve picks the new
-cert up:
+Success prints `Wrote …crt` / `…key`. If the URL still fails, re-arm the handler
+so serve picks the new cert up:
 
 ```sh
 tailscale --socket=$TS_SOCKET serve --https=443 off
 tailscale --socket=$TS_SOCKET serve --bg http://127.0.0.1:<port>
 ```
 
-### The private key lands in your CWD
-
-`tailscale cert` writes **both files into the current working directory**, with no
-`-o` flag and no path argument. That is a live exposure whenever the CWD happens
-to be a directory you are about to serve — a static report, a build output, a
-public folder. The key is then fetchable over HTTP from the very URL you just
-exposed, and if it is committed it is in git history too.
-
-Before running it, `cd` somewhere private (`$HOME`, a `mktemp -d` dir) and never
-run it inside a served directory. If it already ran in the wrong place, move the
-key out and confirm the URL 404s:
+**The private key lands in your CWD** — `cert` writes both files there by
+default, so in a served directory the key is fetchable over HTTP (and stays in
+git history if committed). Hence the `cd` first; if it already ran in the wrong
+place, move the key out and confirm the URL 404s:
 
 ```sh
-mkdir -p "$HOME/.local/share/tailscale/certs" && chmod 700 "$HOME/.local/share/tailscale/certs"
+mkdir -p "$HOME/.local/share/tailscale/certs" && chmod 700 "$HOME/.local/share/tailscale/certs"   # example private dir
 mv -f <node>.ts.net.crt <node>.ts.net.key "$HOME/.local/share/tailscale/certs/"
 chmod 600 "$HOME/.local/share/tailscale/certs/"*.key
 curl -o /dev/null -w "%{http_code}\n" http://127.0.0.1:<port>/<node>.ts.net.key   # expect 404
@@ -92,42 +78,33 @@ curl -o /dev/null -w "%{http_code}\n" http://127.0.0.1:<port>/<node>.ts.net.key 
 
 ## The 0.0.0.0 rule — bind all interfaces
 
-**The most common cause of a 502 on the tailnet URL.**
-
-Vite binds `localhost`, which on many systems resolves to the **IPv6** loopback
-`::1` only. `tailscale serve` dials the **IPv4** literal `127.0.0.1`. The proxy
-cannot connect and answers `HTTP 502` — while `curl http://localhost:<port>`
-happily returns `200`, so the dev server looks perfectly healthy.
-
-Compare the two stack families explicitly:
+A dev server binding `localhost` may listen on the **IPv6** loopback `::1` only,
+while `tailscale serve` dials the **IPv4** literal `127.0.0.1` — `HTTP 502` on
+the tailnet URL while `curl http://localhost:<port>` returns `200`.
+Disambiguate explicitly:
 
 ```sh
 curl -o /dev/null -w "%{http_code}\n" http://127.0.0.1:<port>/   # 000 = wrong family
 curl -o /dev/null -w "%{http_code}\n" http://[::1]:<port>/        # 200 = actually here
 ```
 
-**A dev server that will be proxied must listen on `0.0.0.0`.**
-
-- Vite: `vite --host 0.0.0.0` (equivalent to `server.host: true`)
-- Node/Hono (`serve({ port })`): bind all interfaces, not `localhost`
-- Verify afterwards: `http://127.0.0.1:<port>/` must return `200`.
-
-Point `tailscale serve` at `127.0.0.1`, not the tailnet IP, so the proxy never
-depends on the host's own tailnet route.
+- **Listen on `0.0.0.0`:** Vite → `vite --host 0.0.0.0` (= `server.host: true`);
+  Node/Hono (`serve({ port })`) → bind all interfaces, not `localhost`.
+- Verify: `http://127.0.0.1:<port>/` must return `200`.
+- Point serve at `127.0.0.1`, never the tailnet IP — the proxy must not depend
+  on the host's own tailnet route.
 
 ## The allowedHosts rule — Vite blocks the Tailscale hostname
 
-Once the port is right, Vite's own DNS-rebinding protection rejects the request:
+With the port fixed, Vite's DNS-rebinding protection rejects the MagicDNS name:
 
 ```
 Blocked request. This host ("<node>.<tailnet>.ts.net") is not allowed.
 ```
 
-Vite allows `localhost`, `*.localhost` and any IP literal by default; a MagicDNS
-name is none of those, so it must be allowlisted. Semantics (verified in
-`vite/dist/node/chunks/node.js`): an entry matches if it is **exactly** the
-hostname, or if it **starts with `.`** and the hostname ends with that suffix
-(so `.ts.net` allows `ts.net` itself plus every `*.ts.net` subdomain).
+Vite allows `localhost`, `*.localhost`, and IP literals — a MagicDNS name is
+none of those. An entry matches on exact hostname, or on suffix with a leading
+`.` (`.ts.net` covers every `*.ts.net` subdomain).
 
 ```ts
 server: {
@@ -136,83 +113,48 @@ server: {
 }
 ```
 
-**Do not use `allowedHosts: true`.** It skips the check entirely. Since the
-server now listens on `0.0.0.0` and dev APIs usually have no auth, any site the
-user visits could DNS-rebind to the dev server and read its data. Prefer a
-narrower allowlist:
+**Never `allowedHosts: true`.** It skips the check on a server now listening on
+`0.0.0.0` with usually no auth — any visited site could DNS-rebind to it.
+Ladder, tightest last: `.ts.net` (every tailnet) → `.<tailnet>.ts.net` (one
+tailnet) → exact node. Same knob elsewhere: webpack `allowedHosts`/`host`,
+Next.js `allowedDevOrigins`.
 
-| Value | Scope |
-| --- | --- |
-| `.ts.net` | every tailnet on the internet — convenient, vendor-neutral |
-| `.<tailnet>.ts.net` | only that tailnet's nodes — tighter, same convenience |
-| `["<node>.<tailnet>.ts.net"]` | exactly one node |
-
-Other dev servers have the same knob under a different name (webpack
-`allowedHosts`/`host`, Next.js `allowedDevOrigins`) — same reasoning applies.
-
-## Step 1 — verify locally
+## Steps 1–2 — verify locally, then expose
 
 ```sh
 curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:<port>/
 ```
 
-`200` **before** exposing it — otherwise you debug a broken dev server through a
-TLS proxy.
-
-## Step 2 — expose it
+`200` **before** exposing it — never debug a broken dev server through a TLS
+proxy. Then:
 
 ```sh
 tailscale --socket=$TS_SOCKET serve --bg http://127.0.0.1:<port>
 tailscale --socket=$TS_SOCKET serve status
 ```
 
-- `--bg` keeps it running past the shell.
-- The URL is the node's MagicDNS name, **https, no port**:
-  `https://<node>.<tailnet>.ts.net/` — TLS terminates on 443, the real port
-  never appears.
-- Multiple ports: repeat `serve --bg`; each gets its own path or host.
+`--bg` survives the shell; the URL is the MagicDNS name, **https, no port**
+(`https://<node>.<tailnet>.ts.net/`, TLS on 443). Multiple ports: repeat
+`serve --bg`, each gets its own path or host.
 
 ## Step 3 — verify from a second tailnet device
 
-**On a userspace host you cannot verify it yourself.** `tailscaled` in
-`--tun=userspace-networking` mode has no TUN interface, so the host cannot route
-into its own netstack: `curl https://<node>.<tailnet>.ts.net/` from inside
-returns `HTTP 000` even when serve is healthy, and a normally-bound listening
-socket is likewise not reachable over the tailnet IP.
+**On a userspace host you cannot verify it yourself** — without a TUN interface
+the host's own tailnet URL answers `HTTP 000` even when serve is healthy.
+Confirm `serve status` locally, then ask the user to open the URL from another
+device and decode their error:
 
-So: confirm `serve status` locally, then ask the user to open the URL from
-another device and report back. Decode their error:
-
-| User sees | Meaning |
-| --- | --- |
-| `ERR_SSL_PROTOCOL_ERROR` | serve is up, **no usable TLS certificate** → Step 0.5. `serve status` still looks green, ignore it |
-| `HTTP 502` | TLS+serve fine, backend unreachable → apply the 0.0.0.0 rule |
-| `Blocked request … not allowed` | backend reachable, host header rejected → allowedHosts rule |
-| `ERR_CONNECTION_REFUSED` | serve not running, or Serve not enabled → prerequisite |
-| page renders | done |
-
-A local `curl` to the node's own tailnet URL cannot distinguish any of these —
-see Step 3. When the fix is uncertain, **re-check the certificate before
-re-diagnosing the backend**; the two failure modes look identical locally.
-
-## Gotchas
-
-| Symptom | Cause | Fix |
+| User sees | Meaning | Fix |
 | --- | --- | --- |
-| `ERR_SSL_PROTOCOL_ERROR` while `serve status` looks healthy | no certificate provisioned | `tailscale cert <domain>` (Step 0.5) |
-| private `.key` appears in a served directory | `tailscale cert` writes to CWD | move it out, verify 404, `cd` elsewhere first |
-| `502` on the tailnet URL, `localhost` fine | server bound to `::1` only | bind `0.0.0.0` |
-| `Blocked request. This host … is not allowed` | Vite host check | allowlist the tailnet domain |
-| `ERR_CONNECTION_REFUSED` | Serve not enabled on the tailnet | user opens the `login.tailscale.com/f/serve` link |
-| `Failed to connect to local tailscaled … /var/run/…` | non-default socket | add `--socket=$TS_SOCKET` |
-| `address already in use` starting tailscaled | one is already running | don't start one — use `--socket` |
-| API crashes with `EADDRINUSE` | `PORT` preset in the environment | start with `PORT=<wanted>` explicitly |
-| `serve --bg` prints nothing and hangs | CLI blocks until killed when not enabled | wrap in `timeout` |
-| `command not found: ps` / `pkill` | minimal container | list via `/proc/*/cmdline`, stop with `kill` |
+| `ERR_SSL_PROTOCOL_ERROR` | serve up, **no usable certificate** (`serve status` still looks green — ignore it) | Step 0.5 |
+| `HTTP 502` | backend unreachable | 0.0.0.0 rule |
+| `Blocked request … not allowed` | backend reachable, host header rejected | allowedHosts rule |
+| `ERR_CONNECTION_REFUSED` | serve not running, or Serve not enabled | prerequisite |
+| private `.key` reachable under the served URL | `cert` ran in a served CWD | move it out, verify 404 |
+| page renders | done | — |
 
-**Secrets:** an auth key may sit in the environment (`TS_AUTHKEY`,
-`TS_TAILSCALE_HOSTNAME`). It is a secret — pass it to `tailscaled`, never echo it
-into files, logs, answers, or commits.
+When the fix is uncertain, **re-check the certificate before re-diagnosing the
+backend** — the two failure modes look identical locally.
 
 ## Cleanup
 
@@ -224,28 +166,26 @@ tailscale --socket=$TS_SOCKET serve reset            # remove all serve config
 
 ## Environment caveats
 
-Not tied to any one machine — check whether these apply before you debug.
+Check whether these apply before debugging — none is tied to one machine:
 
-- The daemon socket is often **not** at `/var/run/tailscale/`. Find the real
-  one with `tr '\0' ' ' < /proc/*/cmdline | grep tailscaled`, then pass it via
-  `--socket`.
-- On a userspace host (`--tun=userspace-networking`, no TUN interface) you
-  cannot reach the node's own tailnet IP or MagicDNS name from inside at all.
-  See Step 3.
-- A `PORT` preset in the environment can hijack projects that read
-  `process.env.PORT`; they then crash with `EADDRINUSE` instead of using their
-  intended default. Start them with an explicit port.
-- Minimal containers ship without `ps` and `pkill`. Enumerate
-  `/proc/*/cmdline` and stop processes with `kill`.
-- A container with no `/dev/net/tun` and no capabilities (`CapEff: 0`) can only
-  run `tailscaled --tun=userspace-networking`. That is a hard limit, not a
-  misconfiguration: it cannot be changed from inside, and it makes local
-  verification of serve impossible. Don't chase it — confirm locally, then let
-  the user report back.
-- Serving a **directory** (static report, build output) rather than a dev server
-  also exposes everything else in it. Check the tree for secrets, `.env` files,
-  key material and raw data before exposing a project root.
+- The daemon socket is often **not** at the default path — find it via
+  `/proc/*/cmdline` (Step 0). Minimal containers lack `ps`/`pkill`: list via
+  `/proc/*/cmdline`, stop with `kill`.
+- No `/dev/net/tun` and no capabilities means `tailscaled` can only run with
+  `--tun=userspace-networking`: a hard limit, not a misconfiguration — local
+  verification of serve is then impossible (Step 3).
+- A `PORT` preset in the environment hijacks projects reading
+  `process.env.PORT` (crash with `EADDRINUSE` instead of their default) — start
+  them with an explicit port.
+- Serving a **directory** exposes everything in it: audit for secrets, `.env`
+  files, key material, and raw data before exposing a project root.
 
-Never write host-identifying data into a published skill: node names, tailnet
-IPs, LAN addresses, hostnames. Record the *pattern* (socket path shape, env
-trap), not the *value* — and read live values from the CLI.
+**Secrets:** `TS_AUTHKEY` / `TS_TAILSCALE_HOSTNAME` may sit in the environment —
+pass an auth key to `tailscaled` only, never into files, logs, answers, or
+commits. Never write host-identifying data (node names, tailnet IPs, LAN
+addresses, hostnames) into a published skill: record the *pattern*, read live
+values from the CLI.
+
+## Reference files
+
+- `references/notes.md` — rationale, observed failure narratives, version notes.

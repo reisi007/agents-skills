@@ -37,7 +37,7 @@ human or you can judge the design. Nothing here gates CI.
 
 ## Step 1 — Capture
 
-Run the screenshot set with the project's script (this repo):
+Run the screenshot set with the consuming project's script (in `portal.reisinger.pictures`):
 
 ```bash
 cd frontend && pnpm test:screenshots
@@ -48,7 +48,7 @@ Equivalent in other projects: `playwright test -c playwright.screenshots.config.
 standard suite (`playwright test`) stays untouched — the screenshot set never
 runs in CI's normal E2E pipeline.
 
-PNGs land under the config's `outputDir` (this repo:
+PNGs land under the config's `outputDir` (in `portal.reisinger.pictures`:
 `frontend/test-results/ui-screenshots/`), organized as:
 
 ```
@@ -63,7 +63,8 @@ PNGs land under the config's `outputDir` (this repo:
 ```
 
 Long pages produce **multiple** `-secN` files; a short page only `-sec0`. The
-manifest (`tests/screenshots/ui-review.config.ts` here) defines which routes ×
+manifest (in `portal.reisinger.pictures`:
+`frontend/tests/screenshots/ui-review.config.ts`) defines which routes ×
 states × viewports are captured. A failed screenshot test means the harness (or
 the page) is broken — fix it before moving on.
 
@@ -119,7 +120,7 @@ separate verifier). After a change:
 
 ## Adding routes / states
 
-Edit the manifest (`tests/screenshots/ui-review.config.ts`): add one entry per
+Edit the manifest (in `portal.reisinger.pictures`: `frontend/tests/screenshots/ui-review.config.ts`): add one entry per
 route to the `routes` array. Each entry declares the route pattern, the states
 (`filled`/`empty`), the required auth, the viewports, and — for dynamic params —
 a `seeds` map (per state) that resolves real ids/credentials from the seeded
@@ -129,7 +130,7 @@ else changes. Keep login-bearing seeds per-worker-cached (see
 
 ### The Caddy-per-mandant static-file fallback idea
 
-This app renders mandant branding from `frontend/public/brands/`. The long-term
+In `portal.reisinger.pictures`, the app renders mandant branding from `frontend/public/brands/`. The long-term
 goal is a web-server layer (Caddy) that overrides those static brand assets per
 mandant host (Caddy serves the per-mandant file if present), while the React
 files in `frontend/public/` remain the **fallback**. The `ui-review` harness

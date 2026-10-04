@@ -10,7 +10,7 @@ Create `playwright.screenshots.config.ts` next to the standard
 never runs inside the normal E2E suite:
 
 - `testDir` points at a dedicated folder (e.g. `./tests/screenshots`).
-- Own `outputDir` for artifacts (e.g. `test-results/ui-screenshots`).
+- Own `outputDir` for artifacts (e.g. `test-results/ui-screenshots`) — Playwright cleans this directory at the start of every run, wiping the whole tree including subdirectories it did not create, so never park anything else inside it.
 - Same browser projects as the standard config (desktop + mobile viewport) so
   the set reviews both form factors.
 - `baseURL` pointing at the local dev server.
