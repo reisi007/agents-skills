@@ -1,139 +1,101 @@
 ---
 name: Build Verify Flow
-description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — at the START of any such task, not only when the user says "verify". NOT for research, questions, reading, or throwaway experiments. This is the flow the always-on rule (`~/dev/agents-skills/.agents/rules/build-verify.md`, Regel 0) points to for everything beyond the Kleinheits-Ausnahme. Covers: pull before changing, the Kleinheits-Check, delegation to an implementer subagent, the verify run with an independent verifier and its `nach-verify` flag, commit after EVERY verify round regardless of the verdict, Conventional Commits with a verify-round footer, amend on redo, one commit per task, push plus CI watch. Also TRIGGER when deciding whether a change is small enough to skip the loop, when a commit message should be written, when deciding between `git commit --amend` and a new commit, when a verifier must be told whether it is a redo, when a verdict was CHANGES REQUIRED, or when a repo''s AGENTS.md duplicates this flow.'
+description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — at the START of any such task, not only when the user says "verify". NOT for research, questions, reading, or throwaway experiments. This is the flow the always-on rule (the `build-verify` rule file, Rule 0) points to for everything beyond the Kleinheits-Ausnahme. Covers: pull before changing, the Kleinheits-Check, delegation to an implementer subagent, the verify run with an independent verifier and its `nach-verify` flag, commit after EVERY verify round regardless of the verdict, Conventional Commits with a verify-round footer, amend on redo, one commit per task, push plus CI watch. Also TRIGGER when deciding whether a change is small enough to skip the loop, when a commit message should be written, when deciding between `git commit --amend` and a new commit, when a verifier must be told whether it is a redo, when a verdict was CHANGES REQUIRED, or when a repo''s AGENTS.md duplicates this flow.'
 ---
 
 # Build Verify — pull, delegate, verify, commit, amend, push
 
-Der Flow, nach dem gearbeitet wird. Das nicht-verhandelbare Minimum steht als
-Always-on-Datei in `~/dev/agents-skills/.agents/rules/build-verify.md`, verdrahtet
-über den `instructions`-Key der globalen Config — sie ist dadurch in **jeder** Session
-im Kontext und ihre **Regel 0** verweist bei allem jenseits der Kleinigkeits-Ausnahme
-ausdrücklich hierher. Der Flow startet auf **Auftrag** des Users und gilt für alles,
-was committet werden soll; Recherche, Nachfragen und verwerfbares Ausprobieren sind
-ausgenommen. Diese Datei ist **nur der Ablauf**. Begründungen, Belege,
-Entscheidungstabellen und belegte Fehlermuster stehen in
-[`references/notes.md`](references/notes.md); **was in einem konkreten Repo wann grün
-sein muss, steht in dessen `AGENTS.md`.**
+The sequence to work by. The non-negotiable minimum is the always-on
+`build-verify` rule file, wired via the `instructions`
+key of the global config — so it is in context in **every** session, and its
+**Rule 0** points here for everything beyond the Kleinheits-Ausnahme. The flow
+starts on user **commission** and covers everything to be committed; research,
+questions, and throwaway experiments are excluded. **What counts as green in a
+given repo lives in that repo's `AGENTS.md`.**
 
-## Der Flow auf einen Blick
+## The flow at a glance
 
 ```
-0  git pull --rebase          bevor wirklich geändert wird
-1  Auftrag prüfen (TODO-Eintrag allein ist KEIN Auftrag) → in AGENTS.todo.md protokollieren
-2  Kleinigkeits-Check → a) delegieren (Regelfall)  b) ODER selbst, wenn alle 4 Kriterien erfüllt sind
-3  Verify-Lauf durch separaten Subagenten → APPROVED | CHANGES REQUIRED   (bei b entfällt)
-4  Commit — IMMER, egal wie das Verdict lautet        ein Commit pro Task
-5  bei CHANGES REQUIRED: fixen → Verify-Lauf mit nach-verify: true → git commit --amend
-6  Push + CI bis grün beobachten — außer der User hat manuelle Verifikation angefordert
+0  git pull --rebase          before any real change
+1  check commission (a TODO entry alone is NO commission) → log in AGENTS.todo.md
+2  Kleinheit check → a) delegate (default)  b) OR do it yourself if all 4 criteria hold
+3  verify run by a separate subagent → APPROVED | CHANGES REQUIRED   (omitted for b)
+4  commit — ALWAYS, whatever the verdict says        one commit per task
+5  on CHANGES REQUIRED: fix → verify run with nach-verify: true → git commit --amend
+6  push + watch CI until green — unless the user requested manual verification
 ```
 
-**Zwei Nummernsysteme:** Die Zahlen im Diagramm sind Schritte, die `Step`-Überschriften
-sind Kapitel — 0 = Pull (Step 0), 1+2 = Auftrag/Delegation (Step 1), 3 = Verify (Step 2),
-4 = Commit (Step 3), 5 = Redo (zu Verify/Commit, ohne eigene Überschrift), 6 = Push (Step 4).
+Diagram numbers are steps, `Step` headings are chapters: 0 = pull, 1+2 =
+commission/delegation, 3 = verify, 4 = commit, 5 = redo, 6 = push. **The order is
+not negotiable.**
 
-**Die Reihenfolge ist nicht verhandelbar.** Gepullt wird *bevor* die erste Änderung
-entsteht, committet wird *nach* dem Verify-Lauf — nicht davor und nicht erst bei
-`APPROVED`.
+## References — open each when the flow reaches it
 
-## Step 0 — pullen, bevor wirklich geändert wird
+- Briefing the verifier (Step 2) → [`references/verifier-prompt.md`](references/verifier-prompt.md): contract plus first-run and redo templates.
+- Redo commit after `CHANGES REQUIRED` (Step 3/5) → [`references/amend.md`](references/amend.md): amend-vs-new-commit table plus reflog recovery.
+- Why-questions, traps, measured evidence → [`references/notes.md`](references/notes.md).
+
+## Step 0 — pull before any real change
 
 ```sh
-git status --porcelain          # zuerst: ist der Baum überhaupt sauber?
-git pull --rebase               # nur bei sauberem Baum
+git status --porcelain          # first: is the tree clean at all?
+git pull --rebase               # only on a clean tree
 ```
 
-**Ein dirty Tree wird nicht automatisch weggeräumt.** `git stash --autostash`,
-`git checkout .` oder ein blindes `git pull` nehmen Arbeit weg, die niemandem mehr
-gehört. Wenn der Tree dirty ist: anhalten und fragen, wessen Arbeit das ist.
+**A dirty tree is never cleared away automatically.** Ask before touching it.
 
-## Step 1 — delegieren, es sei denn, es ist Kleinigkeit
+## Step 1 — delegate, unless it is trivia
 
-| Rolle | Wer | Darf |
+| Role | Who | May |
 |---|---|---|
-| **Orchestrator** | Hauptagent | `AGENTS.md` / `AGENTS.todo.md` **lesen**; echte Entscheidungen immer loggen (globale Arbeitsregel), sonst schreiben nur nach der Kleinigkeits-Ausnahme. Delegieren, verifizieren lassen, committen |
-| **Implementer** | Subagent | Code/Tests schreiben, Ziel-Dateien + vollständige Spezifikation |
-| **Verifikator** | **anderer** Subagent | prüfen, messen, Befunde melden — **nicht** fixen |
+| **Orchestrator** | main agent | **read** `AGENTS.md` / `AGENTS.todo.md`; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
+| **Implementer** | subagent | write code/tests, target files + full specification |
+| **Verifier** | **different** subagent | check, measure, report findings — **not** fix |
 
-**Kleinigkeits-Check:** Sind alle vier Kriterien aus
-`~/dev/agents-skills/.agents/rules/build-verify.md`, Abschnitt `Kleinigkeits-Ausnahme`,
-erfüllt, macht der Orchestrator die Änderung
-selbst — mit Conventional Commit, Push + CI und dem Footer
-`Verify: entfällt (Kleinigkeits-Ausnahme, 0 Runden)`. Sonst: delegieren, mit
-Zieldateien und vollständiger Spezifikation.
+**Kleinheit check:** if all four criteria from the always-on rule's
+`Kleinheits-Ausnahme` section hold, the orchestrator makes the change itself —
+Conventional Commit, push + CI, footer `Verify: none (Kleinheits-Ausnahme, 0
+rounds)`, self-checked with the repo `AGENTS.md`'s sub-minute commands.
+Otherwise: delegate, with target files and a full specification. No
+`AGENTS.todo.md` entry except for a real decision. Config with no repo (e.g.
+`~/.config/opencode/opencode.jsonc`): no pull/commit/CI — reload via `touch`,
+check in a fresh session.
 
-**Der Verifikator ist nie der Implementierer desselben Tasks** — sein frischer
-Kontext ist der ganze Zweck. Er darf Implementierer-Arbeit nicht zerstören:
-`git checkout`, `git restore` und `git reset --hard` auf Pfade mit uncommitteten
-Änderungen sind verboten. Ausweg: vorher committen, auf einer Kopie arbeiten, oder
-ein bewusst dokumentiertes `git stash` mit `stash pop` am Ende. Passiert es trotzdem,
-sofort und vollständig melden — inklusive welcher Aussage danach nicht mehr möglich
-ist.
+**The verifier is never the implementer of the same task** — its fresh context is
+the whole point (contract in
+[`references/verifier-prompt.md`](references/verifier-prompt.md)).
 
-## Step 2 — der Verify-Lauf und sein `nach-verify`-Flag
+## Step 2 — the verify run
 
-Der Orchestrator übergibt dem Verifikator **ausdrücklich**, welcher Lauf das ist: ohne
-Bezug zur Vor-Runde kann ein Redo-Lauf nicht unterscheiden, ob ein Befund behoben
-oder nur verschoben wurde.
+A separate subagent verifies. First run passes `nach-verify: false`, a redo run
+`nach-verify: true` — see
+[`references/verifier-prompt.md`](references/verifier-prompt.md) for the briefing.
 
-| Modus | Flag | Was der Verifikator zusätzlich liefert |
-|---|---|---|
-| Erster Lauf | `nach-verify: false` | voller Lauf: Diff-Review, alle Kommandos aus der `AGENTS.md`, Architektur-/Security-Review, Befunde mit `Datei:Zeile` + `critical/high/medium/low` |
-| Redo-Lauf | `nach-verify: true` | zusätzlich: **welche Befunde der Vor-Runde behoben sind, welche nicht, welche neu sind** + Gegenprobe, dass kein Fix den Befund nur verschoben hat |
-
-`critical`/`high` blockieren `APPROVED` und werden als eigene Fix-Tasks delegiert.
-Ein Verdict ohne vollständigen Befunde-Bericht wird nicht akzeptiert.
-
-**Prompt-Template für den Verifikator:**
-
-```
-Projekt: <pfad>   Task: <was>
-nach-verify: <true|false>
-Vor-Runde: <letztes Verdict + Befundliste>       (nur bei true)
-
-Prüfe: <Kommandos aus der AGENTS.md dieses Repos>
-Liefere: Verdict APPROVED | CHANGES REQUIRED, Befunde mit Datei:Zeile + Schweregrad.
-Bei nach-verify: true zusätzlich eine Liste je Vor-Befund — behoben / offen / neu —
-mit dem Beleg, woran du das festmachst.
-Fasse dich in Nichts, was du nicht belegen kannst.
-```
-
-## Step 3 — nach jedem Verify-Lauf committen, egal wie das Verdict lautet
-
-Ein `CHANGES REQUIRED` wird genauso committet wie ein `APPROVED` — der Commit ist der
-Arbeitsstand, an dem die nächste Runde ansetzt. **Ein Commit pro Task**, nie eine
-gemeinsame Welle.
+## Step 3 — commit after every verify run, whatever the verdict says
 
 ```sh
-git add <datei1> <datei2> …        # explizite Pfade, NIE git add -A
-git show --stat                    # Inhaltsprüfung vor dem Commit
+git add <file1> <file2> …        # explicit paths, NEVER git add -A
+git show --stat                    # content check before the commit
 git commit -F - <<'MSG'
 feat(pricing): add peak-window calculation for z.ai plans
 
-Verify: Runde 1 CHANGES REQUIRED (2 Befunde: 1 high, 1 medium)
-Verify: Runde 2 APPROVED (behoben: f64-Overflow bei 1M-Peak, fehlender Test)
+Verify: round 1 CHANGES REQUIRED (2 findings: 1 high, 1 medium)
+Verify: round 2 APPROVED (fixed: f64 overflow at 1M peak, missing test)
 MSG
 ```
 
-**Commit-Schema:** Conventional Commits (`feat|fix|docs|refactor|test|chore|perf` +
-optionaler Scope) für die Headline, der `Verify:`-Footer protokolliert die Runden.
+Headline: Conventional Commits (`feat|fix|docs|refactor|test|chore|perf` +
+optional scope); the `Verify:` footer logs the rounds. **One commit per task.**
+On `CHANGES REQUIRED`: fix, re-verify, then commit per
+[`references/amend.md`](references/amend.md).
 
-**Amend oder neuer Commit?** Amend nur, solange HEAD der Verify-Commit **dieses**
-Tasks ist, nichts davon gepusht wurde und keine fremde Arbeit im Baum liegt; sonst
-neuer Commit. Die Entscheidungstabelle und die Reflog-Kommandos für den Delta der
-letzten Runde stehen in [`references/notes.md`](references/notes.md).
-
-## Step 4 — pushen und die CI beobachten
-
-Nach dem Commit wird gepusht und die CI bis zum grünen Lauf verfolgt. **Einzige
-Ausnahme:** der User hat ausdrücklich eine manuelle Verifikation angefordert — dann
-nicht pushen, die CI aber weiter beobachten, falls es eine hat.
+## Step 4 — push and watch CI
 
 ```sh
 git push
-gh run list -L 3                    # welche Läufe gestartet sind
-gh run watch <run-id> --exit-status # bis grün oder rot
+gh run list -L 3                    # which runs started
+gh run watch <run-id> --exit-status # until green or red
 ```
 
-Ist die CI rot, hat deren Fix **Vorrang vor aller neuen Arbeit** — ein liegen
-gebliebener roter Push wird sonst zur falschen Diagnose.
+Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes
+**priority over all new work**.

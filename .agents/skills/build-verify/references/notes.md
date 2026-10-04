@@ -1,139 +1,143 @@
-# Build-Verify — Notizen, Belege, Begründungen
+# Build-Verify — notes, evidence, rationale
 
-Nicht geladen, nur gelesen, wenn jemand nach dem **Warum** fragt. Der Ablauf selbst
-steht in [`../SKILL.md`](../SKILL.md), das nicht-verhandelbare Minimum in
-`../../../rules/build-verify.md`. Alles hier ist Begründung zu einer dort getroffenen
-Entscheidung — Regeln, die hier stehen, gelten nicht ohne ihre Entsprechung dort.
+Not loaded, only read when someone asks **why**. The sequence itself lives in
+[`../SKILL.md`](../SKILL.md), the non-negotiable minimum in
+`../../../rules/build-verify.md`. Everything here is rationale for a decision
+taken there — rules stated here apply only through their counterpart there.
 
-## Warum der Flow so geschnitten ist
+## Why the flow is cut this way
 
-- **Der Flow ist ein Commit-Flow.** Er regelt Arbeit, die committet wird,
-  und startet auf Auftrag. Recherche, Nachfragen, Nachschlagen, Annahmen testen und
-  verwerfbares Ausprobieren laufen ohne Pull, Subagent, Verify, Commit und
-  TODO-Eintrag — dort zählt die Interaktivität, und ein Prozess, der dazwischenkommt,
-  kostet mehr als die falsche Config, die man gerade ausprobiert. Der Test dafür ist
-  simpel: **wird es committet, oder ist es Interaktion?**
-- **Ein TODO-Eintrag ist ein Log, kein Auftrag.** Anlegen bleibt Pflicht, Abarbeiten
-  nicht — sonst erfindet sich der Agent Aufgaben aus einer Checkliste, die eigentlich
-  Entscheidungen protokolliert. Ein `[ ]`-Eintrag löst für sich allein keinen
-  Verify-Lauf aus; erst der Auftrag tut das.
-- **Getrennte Implementierer- und Verifikator-Rollen.** Ein Verifikator, der denselben
-  Kontext wie der Autor hat, prüft die eigenen Annahmen mit. Ein frischer Kontext ist
-  der ganze Zweck des Loops — er hat die Annahmen nicht mitgebaut, die er prüft.
-- **Committen nach jedem Lauf, unabhängig vom Verdict.** Der Commit ist der
-  Arbeitsstand, an dem die nächste Runde ansetzt. Ohne ihn hat der nächste Agent
-  keinen Rückweg, und jeder Abbruch verliert die Arbeit.
-- **Der `Verify:`-Footer protokolliert die Runden.** Er ist der Grund, warum die
-  Historie nach einem Amend trotzdem lesbar bleibt — sonst bliebe nur der Reflog.
-- **Ein Commit pro Task.** `--amend` kann technisch immer nur `HEAD` umschreiben,
-  nie einen früheren Commit. Zwei parallele Tasks als eine Welle zu committen trifft
-  den falschen Commit oder scheitert; ein Task, der auf alle anderen wartet,
-  blockiert die anderen.
-- **`--rebase` statt Merge**, weil auf `main` konsolidiert wird — keine
-  per-Task-Branches.
-- **Verifikationsläufe sequenziell, nie parallel** (Regel 8). CPU-Überschreibung macht
-  eine grüne Ampel ohne Aussagekraft.
+- **The flow is a commit flow.** It governs work that gets committed, and it
+  starts on commission. Research, questions, lookups, testing assumptions, and
+  throwaway experiments run without pull, subagent, verify, commit, or TODO
+  entry — there interactivity counts, and a process getting in the way costs more
+  than the wrong config just being tried out. The test for it is simple: **will
+  it be committed, or is it interaction?**
+- **A TODO entry is a log, not an order.** Creating it stays mandatory, working
+  it off does not — otherwise the agent invents tasks for itself out of a
+  checklist that actually logs decisions. A `[ ]` entry alone triggers no verify
+  run; only the order does.
+- **Separate implementer and verifier roles.** A verifier sharing the author's
+  context co-checks its own assumptions. A fresh context is the whole point of
+  the loop — it did not co-build the assumptions it checks.
+- **Commit after every run, regardless of the verdict.** The commit is the work
+  state the next round starts from. Without it the next agent has no way back,
+  and every abort loses the work.
+- **The `Verify:` footer logs the rounds.** It is why history stays readable
+  after an amend — otherwise only the reflog would remain. The
+  `Verify: none (Kleinheits-Ausnahme, 0 rounds)` footer is not dropped either —
+  otherwise later no one can tell whether a run happened at all.
+- **One commit per task** — the reason lives under "Amend or new commit?"
+  below. Committing two parallel tasks as one wave hits the
+  wrong commit or fails; one task waiting for all others blocks the others.
+- **`--rebase` instead of merge**, because `main` is consolidated onto — no
+  per-task branches.
+- **Verification runs sequential, never parallel** (Rule 8). CPU oversubscription
+  produces a green light with no meaning.
 
 ## Kleinheits-Ausnahme
 
-Nicht jede Änderung braucht den Loop: bei einem Tippfehler kostet er zwei
-Subagenten-Runden. Der Orchestrator macht Kleinigkeiten selbst — die Schwelle ist
-bewusst **weit** gesetzt (5 Dateien, ~80 Zeilen), weil bei Kleinigkeiten niemand
-Unabhängiges gegenliest; das Risiko trägt deshalb K2 bis K4, nicht die Größe.
+Not every change needs the loop: on a typo it costs two subagent rounds. The
+orchestrator does trivia itself — the bar is deliberately set **wide** (see K1
+in the always-on rule), because nobody independent re-reads trivia; K2 through
+K4 carry the risk, not the size.
 
-Die vier Kriterien stehen in `../../../rules/build-verify.md` (immer geladen, damit sie
-ohne diesen Skill gelten) — hier nur ihre Herleitung, damit sie nicht auseinanderlaufen.
-„K1" bis „K4" meinen diese vier Kriterien in der Reihenfolge der Immer-Regel:
+The four criteria live in `../../../rules/build-verify.md` (always loaded, so
+they hold without this skill) — here only their derivation, so the two don't
+drift apart. "K1" through "K4" mean those four criteria in the always-on rule's
+order:
 
-- **K1 ist bewusst weit, K2 bis K4 sind die eigentlichen Grenzen.** Fünf kleine
-  Textdateien mit zusammen ~80 Zeilen sind reviewbar, ohne dass ein zweiter Agent
-  sie gegenliest. Was sie nicht sein dürfen, regeln K2 bis K4 — dort liegt das
-  Fehlerpotenzial. Pro Einzelschritt gemessen würde die Größenhälfte umgangen werden
-  (drei kleine Edits in drei Tasks), deshalb „gemessen über den gesamten Task".
-- **Neue Config-Schlüssel sind drin, wenn kein Anwendungscode sie liest.** Test: Liest
-  Anwendungscode den Schlüssel? Ja → voller Loop. Nein → drin. Beispiel: eine neue
-  Rolle in `opencode.jsonc` bleibt drin, ein neues Feld in einer vom Anwendungscode
-  gelesenen Configdatei nicht. Tool-Konfiguration ist die eine Ausnahme: was Berechtigungen, Plugins, `instructions` oder Hooks berührt, ist auch ohne Leser raus — dafür gibt es den `permissions`-Skill.
-- **Neue Dateien sind drin.** Eine neue Doku-Datei ist kein Code-Risiko. **Gelöschte auch — aber nur Doku- und reine Textdateien;** eine gelöschte Datei, die Logik enthielt, ist raus. (K2 prüft Geschriebenes, nicht Gelöschtes — deshalb steht die Grenze hier.)
-- **„Verschärfte Pflicht/Schwelle" ist raus, „Begründungssatz" ist drin.** Das ist die
-  schärfste offene Grenze der ganzen Ausnahme und genau der Fall, in dem der stille
-  Fehler entsteht: eine Regel umformulieren ist harmlos, eine Pflicht verschärfen
-  nicht.
-- **Der Amend aus dem Verify-Redo-Pfad entfällt, der repo-spezifische nicht.** Die
-  Amend-Regel in `agent-config §6` (`agents-skills` selbst) ist eine andere: sie
-  betrifft die Branch-Policy dieses einen Repos, nicht den Redo-Pfad des Flows.
+- **K1 is deliberately wide, K2 through K4 are the real boundaries.** A change
+  at the K1 size is reviewable without a second agent
+  re-reading it. What it must not be is governed by K2 through K4 — that is
+  where the failure potential lies. Measured per single step, the size half
+  would be circumvented (three small edits in three tasks), hence "measured over
+  the whole task".
+- **New config keys are in if no application code reads them.** Test: does
+  application code read the key? Yes → full loop. No → in. Example: a new role
+  in `opencode.jsonc` stays in, a new field in a config file read by application
+  code does not. Tool configuration is the one exception: anything touching
+  permissions, plugins, `instructions`, or hooks is out even with no reader —
+  the `permissions` skill exists for that.
+- **New files are in.** A new docs file is no code risk. **Deleted ones too —
+  but only docs and pure text files;** a deleted file that contained logic is
+  out. (K2 checks what is written, not what is deleted — hence the boundary
+  lives here.)
+- **"Tightened duty/threshold" is out, "rationale sentence" is in.** This is the
+  sharpest open boundary of the whole exception and exactly the case that
+  produces the silent failure: rephrasing a rule is harmless, tightening a duty
+  is not.
+- **The amend from the verify-redo path is omitted, the repo-specific one is
+  not.** The amend rule in `agent-config` §6 (`agents-skills` itself) is a
+  different one: it concerns that one repo's branch policy, not the flow's redo
+  path.
+- **The test is not "is it easy" but "is it clearly under the bar."** Two rounds
+  for a cheap task cost less than a feature with a silent defect.
 
-| drin | raus |
+| in | out |
 |---|---|
-| `docs(x): clarify flag name`, Tippfehler in `AGENTS.md`, Port in `.env.example`, Begründungssatz zu einer bestehenden Regel, neue Doku-Datei, neue Rolle in `opencode.jsonc`, 4 Sprachdateien mit je 20 Zeilen | mehr als 5 Dateien oder mehr als ~80 Zeilen (add + del, gesamter Task), Logik, Control-Flow, API-/Signaturänderung, neue Dependency, Build-/Test-/Schemaänderung, neues Feld in einer vom Anwendungscode gelesenen Config, was Berechtigungen, Plugins, `instructions` oder Hooks berührt, neue Regel **oder verschärfte Pflicht/Schwelle** in `AGENTS.md` oder einem Skill |
+| `docs(x): clarify flag name`, typo in `AGENTS.md`, port in `.env.example`, rationale sentence for an existing rule, new docs file, new role in `opencode.jsonc`, 4 language files at 20 lines each | more than 5 files or more than ~80 lines (add + del, whole task), logic, control flow, API/signature change, new dependency, build/test/schema change, new field in an application-code-read config, anything touching permissions, plugins, `instructions`, or hooks, a new rule **or tightened duty/threshold** in `AGENTS.md` or a skill |
 
-**Verworfene Alternativen** (bewusst nicht, siehe `~/.config/opencode/AGENTS.todo.md`
-§Verworfen (Build-/Verify-Flow)): die Ausnahme abschaffen — dann bleibt jeder Tippfehler zwei Runden; und
-die Ausnahme mit weiterhin verpflichtendem Verifikator — das ist bezahlte Reibung ohne
-Aussagekraft. Wer die Unabhängigkeit abschafft, will den Loop abschaffen.
+**Discarded alternatives** (deliberately not, see `~/.config/opencode/AGENTS.todo.md`
+§Verworfen (Build-/Verify-Flow)): scrapping the exception — then every typo costs
+two rounds; and keeping the exception with a still-mandatory verifier — that is
+paid friction with no signal. Abolish independence and you abolish the loop.
 
-## Amend oder neuer Commit?
+## Amend or new commit?
 
-| | Amend | Neuer Commit |
-|---|---|---|
-| Bedingung | HEAD ist der Verify-Commit **dieses** Tasks **und** nichts davon ist gepusht **und** keine fremde Arbeit liegt im Baum | alles andere |
-| Wann | Redo-Lauf desselben Tasks nach `CHANGES REQUIRED` | neuer Task, fremder Commit dazwischen, schon gepusht, fremde Arbeit im Baum |
-| Commit-Message | Headline bleibt, `Verify:`-Footer bekommt die neue Runde | neuer `feat:`/`fix:`/`docs:`-Commit |
+Moved to [`amend.md`](amend.md): the amend-vs-new-commit decision table and the
+reflog commands for the last round's delta. Rationale kept here: amend rewrites
+`HEAD` only, never an earlier commit — so two parallel
+tasks committed as one wave hit the wrong commit or fail, and one task waiting
+for all others blocks the others.
 
-Was sich **innerhalb** der Runde geändert hat, steht nach dem Amend im Reflog:
+## Verifier: what it must not do
 
-```sh
-git diff HEAD@{1} HEAD      # Delta der letzten Runde
-git log --oneline -3        # Commit-Historie des Tasks
-```
+`git checkout`, `git restore`, and `git reset --hard` on paths with uncommitted
+changes are forbidden — `git checkout` takes the **index**, not the commit state,
+and then no way back exists. Only these are admissible: the orchestrator
+committed the state beforehand (the normal case), the verifier works on a copy,
+or a deliberately documented `git stash` with a `stash pop` at the end. If it
+happens anyway, report it **immediately and completely** — including which
+statement can no longer be made afterwards.
 
-## Verifikator: was er nicht darf
+## References without (still) retrievable evidence
 
-`git checkout`, `git restore` und `git reset --hard` auf Pfade mit uncommitteten
-Änderungen sind verboten — `git checkout` nimmt den **Index**, nicht den Commit-Stand,
-ein Rückweg existiert dann nicht mehr. Zulässig sind nur: der Orchestrator hat den
-Stand vorher committet (der Normalfall), der Verifikator arbeitet auf einer Kopie, oder
-ein bewusst dokumentiertes `git stash` mit `stash pop` am Ende. Passiert es trotzdem,
-ist es **sofort und vollständig** zu melden — inklusive der Angabe, welche Aussage
-danach nicht mehr möglich ist.
+Two references deliberately stay without evidence in the repo, so no invented
+quotes land here:
 
-## Verweise ohne (mehr) auffindbaren Beleg
-
-Zwei Verweise bleiben bewusst ohne Beleg im Repo, damit hier keine erfundenen
-Zitate landen:
-
-- **`portal.reisinger.pictures/AGENTS.md` §5** — der dokumentierte Unfall mit
-  weggeräumtem Working Tree (dort Punkt 6; die Abschnittsnummerierung hat sich
-  inzwischen verschoben, der Beleg ist nicht mehr auffindbar).
-- **Roter Push, der liegen bleibt** — `open-accreditation/AGENTS.md` §5 (f) „CI-Grün
-  hat immer Priorität, Vorrang vor aller neuen Arbeit". Der Satz gilt, der Verweis
-  von hier dorthin wird nicht gepflegt, weil das Repo fremd ist.
+- **`portal.reisinger.pictures/AGENTS.md` §5** — the documented accident with a
+  cleared-away working tree (point 6 there; the section numbering has since
+  shifted, the evidence is no longer retrievable).
+- **Red push left lying around** — `open-accreditation/AGENTS.md` §5 (f) "CI
+  green always takes priority, ahead of all new work". The sentence holds; the
+  reference from here to there is not maintained because the repo is foreign.
 
 ## Project facts
 
-Repo-spezifisch — **das steht in der `AGENTS.md` des jeweiligen Repos**, nicht hier:
-Build-/Lint-/Test-Kommandos, E2E-Tags, Screenshot-Pflicht, Abhängigkeiten zwischen
-Modulen, Sonderfälle ohne automatisierbaren Test (Lightroom-Restart, manuelle
-Checklisten).
+Repo-specific — **that lives in each repo's `AGENTS.md`**, not here:
+build/lint/test commands, E2E tags, screenshot duty, dependencies between
+modules, special cases without an automatable test (Lightroom restart, manual
+checklists).
 
-Falls eine `AGENTS.md` den Flow noch selbst ausformuliert statt auf diesen Skill zu
-verweisen: **die Doppelnennung entfernen.** Zwei Regeln im selben Prompt haben keine
-Rangfolge, und die schwächere gewinnt. Das gilt besonders für Zeilen wie „KEINE
-Commits/Pushes ohne explizite Anweisung" — die widersprechen Step 3 (Commit) und
-Step 4 (Push) direkt.
+If an `AGENTS.md` still spells out the flow itself instead of pointing at this
+skill: **remove the duplication.** Two rules in the same prompt have no rank
+order, and the weaker one wins. That holds especially for lines like "NO
+commits/pushes without explicit instruction" — they contradict Step 3 (commit)
+and Step 4 (push) directly.
 
 ## Traps
 
-| Trap | Was tatsächlich passiert | Stattdessen |
+| Trap | What actually happens | Instead |
 |---|---|---|
-| Erster Verify-Lauf ohne Modus-Angabe | der Verifikator prüft den Baum wie nach einer Korrektur und meldet „passt“ — ohne Bezug zu den Befunden | `nach-verify:`-Flag bei **jedem** Lauf mitgeben |
-| `git checkout <datei>` beim Mutationstest | zerstört uncommittete Arbeit des Implementierers; kein Rückweg existiert dann mehr | vorher committen (Step 3, Commit), Kopie, oder dokumentiertes `git stash` |
-| `git add -A` in einem geteilten Baum | zieht die Arbeit eines **gleichzeitig laufenden** Agenten mit auf: belegt ein Commit mit 14 Dateien / 408 Zeilen aus `features/`, die nicht seine waren — Inhalt korrekt, Nachricht falsch, Historie fortan irreführend | immer explizite Pfade; `git show --stat` vor dem Commit |
-| Erst bei `APPROVED` committen | der Arbeitsstand zwischen den Runden existiert nur im Working Tree; jeder Abbruch verliert ihn | nach **jedem** Verify-Lauf committen, Verdict egal |
-| Amend, obwohl schon gepusht | `git push --force` auf einem gelesenen Stand überschreibt fremde Commits | `--force-with-lease`, und im Regelfall: gar nicht erst amendieren |
-| Commit aus einer Welle paralleler Tasks | `--amend` trifft den falschen Commit oder scheitert; ein `revert` zieht dann fremde Arbeit mit | ein Commit pro Task |
-| Zwei volle Suites parallel fahren | CPU-Überschreibung: Testzeiten blähen um 3–5× auf (gemessen 14 → 56 ms), ein Reserve-Test riss ein 10-s-Budget, obwohl er intrinsisch ~563 ms kostet — grün ohne Aussagekraft | Verifikationsläufe **sequenziell**, auch gemischt (Backend neben Frontend) |
-| Einen lokal roten, in CI grünen Test als Code-Defekt behandeln | drei belegte Fälle in `portal.reisinger.pictures` — Umgebung, nicht Defekt (`Storage::fake`-Pfad, `E2E_CHECKOUT_LIMIT`, Shard-Last) | erst die Umgebung prüfen; keine zweite Hypothese erfinden, um die erste passend zu machen |
-| `pnpm add` / Dependency-Änderung ohne Rückfrage | verändert Lockfile und CI-Zeit ohne Auftrag | nachfragen, wie in `angular-material-extended/AGENTS.md` §19 |
-| Doku-only-Commit in einem Repo ohne `paths-ignore` | die volle Pipeline startet für einen Satz: in einem gemessenen Fall 11 Jobs inkl. 6 Playwright-Shards | siehe Skill `github-ci-filters` |
-| Dirty Tree eigenmächtig wegräumen | `git stash --autostash` oder ein blindes `git pull` nehmen Arbeit weg, die niemandem mehr gehört | anhalten und fragen, wessen Arbeit das ist |
+| First verify run without a mode flag | the verifier checks the tree as if after a fix and reports "fits" — with no reference to the findings | pass the `nach-verify:` flag on **every** run |
+| `git checkout <file>` during mutation testing | destroys the implementer's uncommitted work; no way back exists then | commit beforehand (Step 3, commit), a copy, or a documented `git stash` |
+| `git add -A` in a shared tree | pulls in a **concurrently running** agent's work: evidenced by a commit with 14 files / 408 lines from `features/` that were not its own — content correct, message wrong, history misleading from then on | always explicit paths; `git show --stat` before the commit |
+| Only committing on `APPROVED` | the work state between rounds exists only in the working tree; every abort loses it | commit after **every** verify run, verdict irrelevant |
+| Amending although already pushed | `git push --force` on a read state overwrites foreign commits | `--force-with-lease`, and normally: don't amend in the first place |
+| Commit from a wave of parallel tasks | `--amend` hits the wrong commit or fails; a `revert` then drags foreign work along | one commit per task |
+| Running two full suites in parallel | CPU oversubscription: test times bloat 3–5× (measured 14 → 56 ms), a reserve test tore a 10-s budget although it intrinsically costs ~563 ms — green with no meaning | **sequential** verification runs, even mixed ones (backend next to frontend) |
+| Treating a locally red, CI-green test as a code defect | three evidenced cases in `portal.reisinger.pictures` — environment, not defect (`Storage::fake` path, `E2E_CHECKOUT_LIMIT`, shard load) | check the environment first; don't invent a second hypothesis to fit the first |
+| `pnpm add` / dependency change without asking back | changes lockfile and CI time without commission | ask back, as in `angular-material-extended/AGENTS.md` §19 |
+| Docs-only commit in a repo without `paths-ignore` | the full pipeline starts for one sentence: in one measured case 11 jobs incl. 6 Playwright shards | see the `github-ci-filters` skill |
+| Clearing a dirty tree on your own authority | `git stash --autostash` or a blind `git pull` take away work that belongs to nobody anymore | stop and ask whose work it is |
