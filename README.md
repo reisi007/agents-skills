@@ -12,14 +12,19 @@ Projekt.
 ```
 agents-skills/
 ├── .agents/rules/            ← immer im Kontext (globaler `instructions`-Key)
+│   ├── ask.md                ← Fragen: immer über das question-Tool, Antworten vorgeschlagen
 │   └── build-verify.md       ← Build-/Verify-Flow: nicht-verhandelbare Kernregeln
 ├── .agents/skills/          ← Agent-Skills-Spec-Struktur (portabel für OpenCode, Claude Code, …)
 │   ├── agent-config/        ← Globales Setup: opencode.jsonc, MCP, Skills-Registrierung
 │   ├── build-verify/        ← Build-/Verify-Flow im Detail: Verifikator, Amend, Commit-Schema
 │   ├── codegraph-project-setup/  ← Bootstrap: codegraph init + Pre-Commit-Hook + AGENTS.md
+│   ├── docker-test-image/  ← E2E/CI-Test-Image: environment-only, Browser-Version aus dem Lockfile
+│   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: Doku-only Commits überspringen die Pipeline
 │   ├── model-updater/       ← Modell-Empfehlungen gegen ocgo/cc Preis-Tracker (UPDATE/KEEP)
 │   ├── permissions/         ← Security-Policy: username isolation, secrets, macOS privacy, .env
+│   ├── playwright-parallel/  ← Playwright-E2E parallel statt seriell: named locks, workers, shards
+│   ├── skills-marker/  ← Skills-Stand pro Projekt (AGENTS.skills.md): welcher Commit geprüft, welche Skills angewendet
 │   ├── tailscale-serve/     ← Lokalen Dev-Server per `tailscale serve` ins Tailnet exposen
 │   ├── update-opencode-models/ ← Live-Registry: opencode models, reload, free/paid-Prefixe
 │   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + Eskalationsregel

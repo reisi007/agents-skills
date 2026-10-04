@@ -11,7 +11,8 @@ CLI tools work immediately and the index stays fresh:
 1. `codegraph init` → `.codegraph/` index + `.codegraph/.gitignore` (index stays out of git)
 2. `.githooks/pre-commit` + `core.hooksPath` → index refresh before every commit (fails open)
 3. `AGENTS.md` + `AGENTS.todo.md` → project conventions incl. build-agent rules
-4. Skill registration → available in every project, not just the one holding it
+4. `AGENTS.skills.md` → which state of the central skills repo this project consumes
+5. Skill registration → available in every project, not just the one holding it
 
 ## 1. Why per-project init is required
 
@@ -92,7 +93,21 @@ CLI tools work immediately and the index stays fresh:
 - Create `AGENTS.todo.md` task board (temporary, header pattern: "Stand: <date>.
   Nur offene TODOs.").
 
-### 2.5 Skill availability for new projects
+### 2.5 Skills-Marker (AGENTS.skills.md)
+
+- Create `AGENTS.skills.md` next to `AGENTS.md` by copying the template:
+  `cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md AGENTS.skills.md`
+- Fill in the two header fields with the **current** SHA of the skills repo and today's
+  date — `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)` plus
+  `geprüft am: <YYYY-MM-DD>`. The skill table starts empty: a fresh project has nothing
+  to apply yet, because nothing has been checked against it yet.
+- **Why at scaffold time:** the marker records which state of the skills repo this
+  project has checked. Without it, the first `git pull` in the skills repo produces a
+  diff without a starting point, and "read the diff and guess what applies here" is
+  exactly what the marker replaces. Format, range workflow and anti-patterns: skill
+  `skills-marker` — not duplicated here.
+
+### 2.6 Skill availability for new projects
 
 - This skill is versioned in the central skills repo
   `agents-skills/.agents/skills/codegraph-project-setup/` (GitHub:
@@ -115,11 +130,17 @@ CLI tools work immediately and the index stays fresh:
 - [ ] `git status` shows `.codegraph/.gitignore` as the only new file below
       `.codegraph/` (DB/logs/daemon files must NOT appear)
 - [ ] `core.hooksPath` = `.githooks` (`git config --get core.hooksPath`)
+- [ ] `AGENTS.skills.md` exists, its `agents-skills-consumed:` matches
+      `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am:` is today's date
 - [ ] Commit 1: `.codegraph/.gitignore`; Commit 2: `.githooks/`, `AGENTS.md`,
-      `AGENTS.todo.md`
+      `AGENTS.todo.md`, `AGENTS.skills.md`
 
 ## 4. Maintenance
 
 - CodeGraph CLI: `codegraph status | index | sync | explore | upgrade`.
 - The `.codegraph/` index is maintained by the pre-commit hook and the
   codegraph daemon. No additional configuration files are needed.
+- `AGENTS.skills.md` is advanced on every `git pull` in the skills repo: build the range
+  from `agents-skills-consumed:`, check each touched skill against this project, record
+  the result, then move the marker to the new SHA. Format, selection rule and
+  anti-patterns: skill `skills-marker`.

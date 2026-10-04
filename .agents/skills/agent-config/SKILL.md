@@ -55,14 +55,27 @@ second subagent, commit after every verify round). A rule that lives only in a
 skill is a rule that gets skipped exactly when it is inconvenient.
 
 For those, the config has a second key — `instructions`, "Additional instruction
-files or patterns to include":
+files or patterns to include". **One entry per rule file**, and several entries are
+the normal case, not the exception: currently `build-verify.md` and `ask.md`.
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
 "instructions": [
-  "/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md"
+  "/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md",
+  "/Users/<user>/dev/agents-skills/.agents/rules/ask.md"
 ],
 ```
+
+> **Note (installed opencode v2.0.22 — verified, not assumed):** the
+> `instructions` key parses but does not deliver the file into the system
+> prompt — a listed rule file demonstrably never reaches it, while `AGENTS.md`
+> files do. Interim path: the always-on rules are inlined into the global
+> `~/.config/opencode/AGENTS.md` (with provenance line). Keep the
+> `instructions` entries in place so they work when the feature does.
+
+- **`build-verify.md` and `ask.md` are the two registered rules.** A rule file without
+  an entry **silently contributes nothing** — an unregistered, misspelled or wrong path
+  looks exactly like a working setup until it is tested.
 
 - **Absolute paths and `~/` paths both work**; relative paths and globs are
   resolved against the project (an absolute glob works too — it is globbed with
@@ -73,8 +86,9 @@ files or patterns to include":
 - That is the split: `.agents/rules/` = always in context, short and absolute;
   `.agents/skills/` = on demand, with the reasoning, tables and evidence. The
   rule file points at the skill; it does not duplicate it.
-- Adding a second always-on rule: new file in `.agents/rules/` + one more entry
-  in the array. Nothing else to wire.
+- Adding another always-on rule (e.g. a third one after `ask.md`): new file in
+  `.agents/rules/` + one more entry in the array. Nothing else to wire — and
+  the new file stays invisible until that entry is there.
 - **Reloading:** like any config change, the running `opencode2` service caches
   resolved config — `touch ~/.config/opencode/opencode.jsonc` or restart the
   session (see §3 for the same gotcha on MCP). Verify the wiring **once** after
@@ -198,6 +212,7 @@ git diff HEAD@{1} HEAD --stat                     # what exactly changed?
 | Changed path | Setup step to re-check |
 |---|---|
 | `.agents/rules/*` (new or changed) | global `opencode.jsonc` `instructions` array covers every rule file (§2a) — a new rule file without an entry **silently contributes nothing** |
+| `.agents/rules/*` (changed content) | update the inlined copies in the global `~/.config/opencode/AGENTS.md` in the same change — the §2a `instructions` mechanism is recorded as non-functional on v2.0.22, so it is not the delivery path |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
 | `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
 | `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) |
