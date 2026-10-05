@@ -82,7 +82,7 @@ in `t` or `<Trans>`.
 ## 6. Component usage
 
 ```tsx
-import { Trans } from "@lingui/macro"
+import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 
 // JSX:
@@ -95,6 +95,11 @@ const label = t`Im Hintergrund ausführen`
 // Schema with translated messages: factory called in the component body.
 const createSchema = () => z.object({ name: z.string().min(1, t`Name erforderlich`) })
 ```
+
+Note (v6.9, verified 2026-10-05 in `all-the-rest/opencode-pwa`): the macros
+live in `@lingui/core/macro` (`t`) and `@lingui/react/macro` (`Trans`) — the
+bare `@lingui/macro` package is not installed and `extract` finds zero
+messages with those imports. Never use the bare path.
 
 ## 7. Verification
 
