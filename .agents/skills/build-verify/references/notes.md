@@ -59,6 +59,20 @@ order:
   code does not. Tool configuration is the one exception: anything touching
   permissions, plugins, `instructions`, or hooks is out even with no reader —
   the `permissions` skill exists for that.
+- **Pure plumbing is text — the reader test applies to the reader, not the
+  mapping.** Mapping an existing key into env changes no behavior by itself;
+  the behavior lives in the reader. If the reader predates the task and is
+  untouched by it, the mapping carries no failure potential of its own.
+  Measured 2026-10-07: a one-line `environment:` mapping for a key whose
+  reader was live and unchanged — the line was trivially correct; the two
+  real defects of that task sat in the accompanying prose, not the mapping.
+- **Accompanying docs ride with the functional change.** Judging docs
+  separately from the change they document double-counts the task against K1
+  and pushes minis into the loop. The bar is the whole task under K1; K4
+  catches self-standing rules for future work, not the change's own
+  explanation. Stated tradeoff: prose defects can ship this way — mitigation
+  is the orchestrator's self-check with machine proof (`config` render,
+  `validate`, `grep`) before committing.
 - **New files are in.** A new docs file is no code risk. **Deleted ones too —
   but only docs and pure text files;** a deleted file that contained logic is
   out. (K2 checks what is written, not what is deleted — hence the boundary
@@ -76,7 +90,7 @@ order:
 
 | in | out |
 |---|---|
-| `docs(x): clarify flag name`, typo in `AGENTS.md`, port in `.env.example`, rationale sentence for an existing rule, new docs file, new role in `opencode.jsonc`, 4 language files at 20 lines each | more than 5 files or more than ~80 lines (add + del, whole task), logic, control flow, API/signature change, new dependency, build/test/schema change, new field in an application-code-read config, anything touching permissions, plugins, `instructions`, or hooks, a new rule **or tightened duty/threshold** in `AGENTS.md` or a skill |
+| `docs(x): clarify flag name`, typo in `AGENTS.md`, port in `.env.example`, rationale sentence for an existing rule, new docs file, new role in `opencode.jsonc`, 4 language files at 20 lines each, mapping an existing key into env (reader unchanged and predating the task), docs accompanying the change while the whole task stays under K1 | more than 5 files or more than ~80 lines (add + del, whole task), logic, control flow, API/signature change, new dependency, build/test/schema change, new field in an application-code-read config, a reader changed or introduced by this task, anything touching permissions, plugins, `instructions`, or hooks, a self-standing behavioral rule beyond the change **or tightened duty/threshold** in `AGENTS.md` or a skill |
 
 **Discarded alternatives** (deliberately not, see `~/.config/opencode/AGENTS.todo.md`
 §Verworfen (Build-/Verify-Flow)): scrapping the exception — then every typo costs
