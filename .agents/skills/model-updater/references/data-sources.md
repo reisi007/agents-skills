@@ -82,21 +82,26 @@ for (const [k, v] of Object.entries(m)) console.log(k + "\t" + v);
 ```
 
 Verified output shape on a real config (IDs omitted — the roles are what matter).
-Every id is on `opencode/` here: the setup is free-tier-only, so that namespace wins
-whenever a twin exists. An `opencode-go/<slug>` id in the output is a REPLACE — see the
-namespace rule in SKILL.md.
+Since 2026-10-08 every id sits on `opencode-go/` — one $0 model family, and the
+`opencode/` twin of it is deliberately unused, so it is **not** a REPLACE. An
+`opencode-go/<slug>` id only counts as a REPLACE while `model-preferences.md`
+still carries the free-tier namespace rule — it does not (see the namespace rule
+in SKILL.md).
 
 ```
-default	opencode/<id>
-plan	opencode/<id>
-vision-creative	opencode/<id>
-document	opencode/<different-id>
-free	opencode/<id>
-nonsensitive	opencode/<id>
+default   opencode-go/<id>
+plan      opencode-go/<id>
+general   opencode-go/<id>
+build     opencode-go/<id>
+…         (opencode-go/<id>)
+vision-creative  opencode-go/<id>
+free      opencode-go/<id>
+nonsensitive      opencode-go/<id>
 ```
 
 Then check every emitted model against the hard requirement
-(`"image" in .capabilities.input`) — `document` must also pass `pdf`.
+(`"image" in .capabilities.input`). No role needs `pdf` — the `document` role was
+removed 2026-10-08.
 Alternatively,
 just **read the small file directly** and collect the `model` / `agent.<role>.model`
 values by eye — no tooling required.

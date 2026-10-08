@@ -1,6 +1,6 @@
 ---
 name: Update OpenCode Models
-description: TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the opencode models refresh/reload command, or when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces (default: always the opencode/* free-tier one, because the setup is free-tier-only since 2026-10-02; the retired opencode-go-first rule cited ZDR and must not be revived). Reference for listing, refreshing, and diagnosing the live OpenCode model registry.
+description: TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the opencode models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check for a twin and the capability gate first). Namespace default since 2026-10-08: one $0 model family on `opencode-go/` (`opencode-go/step-5-preview-free`), whose `opencode/` twin is deliberately unused — follow `model-preferences.md`, never infer from the slug. Reference for listing, refreshing, and diagnosing the live OpenCode model registry.
 ---
 
 # Update OpenCode Models — live registry, not config advice
@@ -39,32 +39,41 @@ family name and look at every row that comes back.
 
 ## Which namespace belongs on which role
 
-**Rule: if a model exists under both namespaces, use the `opencode/<slug>` variant**
-— for *every* role, root included. Since 2026-10-02 the whole setup runs on the
-free tier: one `$0` model family, so the paid/ZDR namespace adds nothing and no role
-uses it. Accepted trade: no zero-data-retention guarantee.
+**Rule: follow `~/.config/opencode/model-preferences.md` — never the slug, and
+never a stale snapshot of this file.** Current standing decision (2026-10-08):
+**every role runs on `opencode-go/step-5-preview-free`**, a single `$0` model
+family (it is listed in the tracker's `freeModels[]`). Its `opencode/` twin
+exists at the same price and is **deliberately unused** — do not "fix" the
+configured `opencode-go/<slug>` into `opencode/<slug>`.
 
-- The **`opencode/`** provider namespace is the free tier → **use it whenever it exists.**
-- The **`opencode-go/`** namespace is the subscription one → only when a hard capability
-  need forces it (snapshot 2026-10-02: none; `document` uses
-  `opencode/muse-spark-1.3-contributor-free`, which is free and PDF-capable).
+- The **`opencode/`** provider namespace is the free tier → use it whenever it
+  exists **and** the preferences say so.
+- The **`opencode-go/`** namespace is the subscription one → normally only when
+  a hard capability need forces it; since 2026-10-08 it is also the home of the
+  single free model the whole setup uses, so the namespace alone says nothing
+  about price. Check the registry, not the prefix.
 
-Price is frequently identical (snapshot 2026-10-02: `effectiveInput: 0`
-either way). The reason is the
-one-model-family decision, **not** ZDR and not free-tier rename durability. A slug
+Price is frequently identical (`effectiveInput: 0` either way). The reason for
+the current single-family setup is the user decision of 2026-10-08, **not** ZDR
+and not rename durability. A slug
 ending in `-free` says nothing about namespace, price, or privacy; check the registry
 instead of inferring.
 
-**Retired (held until 2026-10-02):** the rule was "always the `opencode-go/<slug>` twin,
-because the subscription is ZDR". Retired. Do not revive it, and do not treat a
-configured `opencode/<slug>` as a mistake to correct.
+**History:** "always the `opencode-go/<slug>` twin because the subscription is
+ZDR" (until 2026-10-02) and "always the `opencode/<slug>` twin because the setup
+is free-tier-only" (2026-10-02 until 2026-10-08) are both retired. Do not revive
+either, and do not treat a configured id in either namespace as a mistake to
+correct — the preferences file is the arbiter.
 
-Configured (snapshot 2026-10-02): every role → `opencode/space-bunny-free`, except
-`document` → `opencode/muse-spark-1.3-contributor-free` (the `pdf` exception).
+Configured (snapshot 2026-10-08): every role, root included →
+`opencode-go/step-5-preview-free`. The `document` role was removed the same day
+(never used; no configured model has `pdf` input), so no role needs `pdf` any
+more — the old "`document` → muse-spark-contributor-free (the `pdf` exception)"
+line is history, not a rule.
 
 Check for a twin before writing any ID:
 ```
-opencode2 models | grep -i "<family>"     # both rows? take the opencode/ one
+opencode2 models | grep -i "<family>"     # both rows? then check model-preferences.md
 ```
 
 Known-bad data (2026-09-26): the tracker's `privacy` block (`training`,

@@ -27,7 +27,7 @@ agents-skills/
 │   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
 │   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
 │   ├── update-opencode-models/ ← live registry: opencode models, reload, free/paid prefixes
-│   ├── vision-agents/       ← 2 locked-down vision subagents (creative / document) + escalation rule
+│   ├── vision-agents/       ← locked-down vision subagent (creative) + escalation rule
 │   └── ui-review/           ← Playwright screenshot loop + vision analysis
 └── .githooks/pre-commit     ← CodeGraph index sync before every commit (fails open)
 ```

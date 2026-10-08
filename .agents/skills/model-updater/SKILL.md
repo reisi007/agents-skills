@@ -1,6 +1,6 @@
 ---
 name: Model Updater
-description: TRIGGER when the user wants to review or update their OpenCode models, asks "which models should I update", "model recommendations", "check my models against the price trackers", or mentions a model updater. Cross-references the user's configured models with the live ocgo/cc price trackers (current prices + changelog) and recommends which models to UPDATE vs KEEP, with a reason grounded in the changelog.
+description: TRIGGER when the user wants to review or update their OpenCode models, asks "which models should I update", "model recommendations", "check my models against the price trackers", or mentions a model updater — INCLUDING when the user directly names the target model ("switch everything to X", "set all models to X", "alle Modelle auf X stellen"): the vision/pdf gate and the namespace rule apply to the user's pick too, not only to my own recommendations. Cross-references the user's configured models with the live ocgo/cc price trackers (current prices + changelog) and recommends which models to UPDATE vs KEEP, with a reason grounded in the changelog.
 ---
 
 # Model Updater
@@ -37,21 +37,35 @@ text-only configured model is **REPLACE**, full stop; price, context, and tier
 do not compensate. Ban list: `curl -sL $RAW/data/latest.json | jq -r
 '.models[] | select((.capabilities.input | index("image")) | not) | .id'`.
 `capabilities` is an **object** — `.capabilities | index("image")` is always
-`null`. Vision ≠ PDF: `image` and `pdf` are independent; only `document` needs both.
+`null`. Vision ≠ PDF: `image` and `pdf` are independent; no configured role
+needs `pdf` since the `document` role was removed 2026-10-08.
 
-## Namespace rule — the free-tier `opencode/` twin always wins
+## Namespace rule — `model-preferences.md` decides, never the slug
 
-**Standing user decision (2026-10-02).** The registry lists many models under
-*both* namespaces, usually at identical price — verify in the tracker, never infer
-from the slug. **Configure `opencode/<slug>` — never the `opencode-go/<slug>`
-twin, even when the paid one is ZDR and the free one is not.** The setup is
-deliberately free-tier-only, so the paid namespace adds nothing; the accepted
-trade is **no zero-data-retention guarantee — do not re-raise ZDR** to move a role
-back. Applies to **every** role. A `-free` slug suffix says nothing about
-namespace, price, or privacy. **Exception: capability beats namespace**
-(`document` needs `pdf`). A configured `opencode-go/<slug>` is a **REPLACE**
-(namespace-only, same family) unless `model-preferences.md` says otherwise; the
-retired `opencode-go-first` rule must not be revived (see `references/notes.md`).
+**Read `namespaceRule` in `~/.config/opencode/model-preferences.md` first** —
+that is the standing user decision and it outranks every default below. The
+registry lists many models under *both* namespaces, usually at identical price —
+verify in the tracker, never infer from the slug.
+
+- **Standing decision 2026-10-02 (retired 2026-10-08):** "configure
+  `opencode/<slug>`, never the `opencode-go/<slug>` twin" — the setup was
+  deliberately free-tier-only, so the paid namespace added nothing. Accepted
+  trade: **no zero-data-retention guarantee — do not re-raise ZDR** to move a
+  role back. Applies to **every** role.
+- **Standing decision since 2026-10-08:** `namespaceRule:
+  opencode-go-free-single` — one `$0` model family,
+  `opencode-go/step-5-preview-free`, on *every* role including the fan-out
+  ones, and its `opencode/` twin is **deliberately unused**. A configured
+  `opencode-go/<slug>` is then *not* a REPLACE; "fixing" it into the `opencode/`
+  twin is the mistake. `opencode-go/` no longer implies paid, and no paid model
+  is configured at all.
+
+A `-free` slug suffix says nothing about namespace, price, or privacy. A
+configured id only counts as a namespace **REPLACE** when the preferences
+file's rule says so — and never in the face of the vision gate above:
+**capability beats namespace.** The retired `opencode-go-first` rule
+(2026-09-26..2026-10-02, argued from ZDR) must not be revived (see
+`references/notes.md`).
 
 ### Tracker privacy flags are currently unusable
 
@@ -73,11 +87,11 @@ Drop both once the data is fixed.
    (default `null`), `notes`, `namespaceRule` (default `opencode-free-tier` —
    filter *before* scoring, never justify with ZDR), `variants` (default `none` —
    never propose `variant`; delete a configured line), `privacyDataCaveat`
-   (when set, ignore `privacy.training` / `privacy.retentionDays`). Per-role
+   (when set, ignore `privacy.training` / `privacy.retentionDays`).
+   `namespaceRule` is the standing decision and wins over any default in the
+   namespace section above; read it before scoring. Per-role
    rules rank *among* vision-capable candidates only; otherwise fall back to
    global preferences:
-   - `document`: needs `image` **and** `pdf` — keep it on a PDF-capable model
-     even when a cheaper vision-only model wins every other role.
    - `vision` / `vision-creative`: strongest visual reader wins, not the cheapest.
    - `free`: follows the namespace rule; must be free **and** vision-capable
      (check explicitly — the vision-capable free subset is small; authoritative

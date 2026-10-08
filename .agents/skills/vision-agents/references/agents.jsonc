@@ -1,26 +1,16 @@
 // Copy into ~/.config/opencode/opencode.jsonc "agent": { ... }
-// These two share the same lockdown: read-only, no edit/shell/subagent/webfetch/websearch
+// Lockdown: read-only, no edit/shell/subagent/webfetch/websearch
 // Model is intentionally NOT pinned here — set it in opencode.jsonc and let the
 // model-updater skill choose/refresh it (adds // updated: YYYY-MM-DD).
-// Requires "image" in capabilities.input; `document` additionally requires "pdf".
-// There is deliberately no technical vision agent: every configured model is
+// Requires "image" in capabilities.input. There is deliberately no document/PDF
+// agent: the `document` role was removed 2026-10-08 (never used; the only
+// configured model has no `pdf` input) — see SKILL.md "PDFs — no path".
+// There is also no technical vision agent: every configured model is
 // vision-capable, so the main agent reads screenshots/EXIF/image categories itself.
 {
   "vision-creative": {
     "mode": "subagent",
     "description": "Vision-capable agent for creative and intent-sensitive image tasks: design and aesthetic review, mood and meaning of images, judging whether visuals convey the intended message, and second-opinion reads of complex or fine-grained visual details. Use when creative judgement, intention, or a hard visual call matters (max 10 images at a time).",
-    "permission": {
-      "read": "allow",
-      "edit": "deny",
-      "bash": "deny",
-      "subagent": "deny",
-      "webfetch": "deny",
-      "websearch": "deny"
-    }
-  },
-  "document": {
-    "mode": "subagent",
-    "description": "Vision-capable agent for DOCUMENTS (PDFs, rendered pages, reports): reads them and describes their layout, readability and appearance. Needs a model with BOTH image and pdf input capability; use for analyzing the look of documents rather than photos.",
     "permission": {
       "read": "allow",
       "edit": "deny",
