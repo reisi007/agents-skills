@@ -129,6 +129,9 @@ For the full runbook see the `codegraph-project-setup` skill: `codegraph init`
 (index + gitignore), commit the gitignore, install the hook from that skill's
 `templates/pre-commit.sh`, `git config core.hooksPath .githooks`, then verify
 (`codegraph status`, `git hook run pre-commit` → `codegraph: index synced`).
+**Exception — `agents-skills` itself:** markdown only (skills, rules, docs), so
+no index and no hook there; the hook was removed 2026-10-08. Do not run this
+runbook against the skills repo.
 
 Status commands: `codegraph status | sync | index | explore | upgrade`.
 
@@ -183,7 +186,7 @@ setup if the source moved under you:
 | `.agents/rules/*` (changed content) | update the inlined copies in the global `~/.config/opencode/AGENTS.md` in the same change — the §2a `instructions` mechanism is recorded as non-functional on v2.0.22, so it is not the delivery path |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
 | `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
-| `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) |
+| `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) — **`.githooks/` no longer exists in this repo** (markdown-only, hook removed 2026-10-08): nothing to re-run, and do not re-create it |
 | none of the above | nothing to do |
 
 Then `touch ~/.config/opencode/opencode.jsonc` so the daemon picks the change up

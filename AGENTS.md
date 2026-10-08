@@ -40,6 +40,14 @@ wiring, hooks) and re-apply setup locally. A new file under `.agents/rules/`
 without a matching `instructions` entry in the global config **silently does
 nothing** — that is the failure this check exists to catch.
 
+## Markdown-only — no CodeGraph here
+
+This repo holds skills and docs (markdown), no code. There is therefore **no
+`.codegraph/` index and no pre-commit hook**: the `codegraph sync` hook was
+removed 2026-10-08 because it warned on every commit while indexing nothing.
+CodeGraph remains a per-*code*-project tool (`codegraph-project-setup` skill).
+Do not re-add the hook or run `codegraph init` here.
+
 ## What does not belong here
 
 - Project-specific skills — those live in their project (`agent-config` ownership

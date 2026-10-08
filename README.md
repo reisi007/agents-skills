@@ -29,7 +29,6 @@ agents-skills/
 │   ├── update-opencode-models/ ← live registry: opencode models, reload, free/paid prefixes
 │   ├── vision-agents/       ← locked-down vision subagent (creative) + escalation rule
 │   └── ui-review/           ← Playwright screenshot loop + vision analysis
-└── .githooks/pre-commit     ← CodeGraph index sync before every commit (fails open)
 ```
 
 Always-on rules are inlined into the global `~/.config/opencode/AGENTS.md`,

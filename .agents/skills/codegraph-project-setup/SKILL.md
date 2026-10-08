@@ -14,6 +14,11 @@ CLI tools work immediately and the index stays fresh:
 4. `AGENTS.skills.md` → which state of the central skills repo this project consumes
 5. Skill registration → available in every project, not just the one holding it
 
+**Scope: code projects.** A markdown-only repo gains nothing from an index —
+the hook warns on every commit while indexing no symbols. `agents-skills` itself
+is exactly that case: no `.codegraph/`, no `.githooks/` (hook removed 2026-10-08,
+reasoning in its `AGENTS.md`). Do not bootstrap it there.
+
 ## 1. Why per-project init is required
 
 - CodeGraph is used via the **CLI** (`codegraph explore`, `codegraph status`,
