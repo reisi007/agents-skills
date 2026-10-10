@@ -6,9 +6,13 @@ must apply while working **in this repo**.
 
 ## Commit convention
 
-Amend + `--force-with-lease`, per `agent-config` §6. Exception: brand-new,
-self-contained work (e.g. a new skill) gets its own Conventional Commit — the
-history shows the pattern (`feat(skill): …`).
+**Separate Conventional Commits are the default** — one per self-contained
+change (`feat(skill): …`), as the history shows. Amend is the exception, and only
+for a commit that is still **unpushed**: a wording fix in the message, a file you
+forgot to add. Once a commit is pushed it is history — an amend changes its SHA
+and other projects record these SHAs as their `skills-marker` range, so a
+rewrite silently breaks their cursor. `git add -A` is never used: explicit paths
+plus `git show --stat` (always-on rules 4 and 5).
 
 ## Sprache
 

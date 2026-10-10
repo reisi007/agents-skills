@@ -21,7 +21,7 @@ The loop is built for feature-scale commissioned work; a mini clearly under the 
 6. **Redo → `git commit --amend`** (verifier gets `nach-verify: true`); amend only while HEAD is this task's unpushed verify commit with no foreign work in the tree, else a new commit.
 7. **Push and watch CI until green** — the only exception: the user explicitly requested manual verification — then **do not push, but keep watching CI if there is one**.
 
-A repo's own documented branch policy overrides rules 4–7 where it says so — e.g. the `agent-config` skill §6 (amend + `--force-with-lease` in a single-user repo).
+A repo's own documented branch policy can override rules 4–7 where it says so. `agents-skills` (§6 of `agent-config`) does **not**: separate commits are the default there as well, amend only for an unpushed HEAD.
 8. **Verification runs are sequential, never parallel.**
 9. **`AGENTS.todo.md` is a log, not an order** ("Log, kein Auftrag"): logging decisions is mandatory, working entries off needs an explicit order; its **length** is not a commission — **a TODO entry triggers no verify run**, commission first, then rule 0. Verified-completed entries are removed, history lives in the commits.
 

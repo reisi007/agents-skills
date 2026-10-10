@@ -149,20 +149,23 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 
 ## 6. Commit convention (agents-skills repo)
 
-Own-repo, single-developer workflow: changes are **amended into the latest
-commit and force-pushed**, not accumulated as separate commits (verbatim:
-`references/snippets.md` §4).
+**Separate Conventional Commits are the default** — one per self-contained change
+(`feat(skill): …`). Amend is the exception, and only while the commit is still
+unpushed:
 
-- Use `--force-with-lease` (not bare `--force`) — refuses to clobber remote
-  state you haven't seen.
-- This repo is private/single-user, so force-push is safe here. Do NOT apply
-  amend+force-push to shared/team repos.
-- Exception: brand-new, self-contained work the user explicitly wants as its
-  own commit may still get a fresh commit — default to amend unless asked.
-- **This section is the documented exception to the always-on `build-verify`
-  rules** (commit per task, push and watch CI): in `agents-skills` the amend +
-  `--force-with-lease` workflow wins. The `Verify:` footer and the `nach-verify`
-  flag still apply — they change the message, not the branch policy.
+- amend only your own not-yet-pushed HEAD — a message wording, a forgotten file,
+  a typo in what you just wrote;
+- once pushed, it is history: a new commit instead, because an amend changes the
+  SHA and other projects record those SHAs as their `skills-marker` range
+  (see the `skills-marker` skill);
+- if a force-push is ever unavoidable: `--force-with-lease`, never bare
+  `--force` — it refuses to clobber remote state you haven't seen. That this
+  repo is private/single-user is not the reason; the marker SHAs are;
+- never `git add -A`: explicit paths plus `git show --stat`.
+
+This section is **not** an exception to the always-on `build-verify` rules — the
+commit-per-task / push / watch-CI policy holds here unchanged. The `Verify:`
+footer and the `nach-verify` flag apply as in every other repo.
 
 ## 7. Ownership rules (which skills live where)
 

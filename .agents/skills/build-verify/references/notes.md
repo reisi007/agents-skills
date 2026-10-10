@@ -81,10 +81,12 @@ order:
   sharpest open boundary of the whole exception and exactly the case that
   produces the silent failure: rephrasing a rule is harmless, tightening a duty
   is not.
-- **The amend from the verify-redo path is omitted, the repo-specific one is
-  not.** The amend rule in `agent-config` §6 (`agents-skills` itself) is a
-  different one: it concerns that one repo's branch policy, not the flow's redo
-  path.
+- **The repo-specific amend rule is gone.** `agent-config` §6 used to document
+  amend + `--force-with-lease` as `agents-skills`' own style; since 2026-10-10
+  separate commits are the default there too (the owner's correction: an amended
+  SHA breaks the `skills-marker` ranges other projects record). No repo
+  overrides the flow's commit rules any more. Amend stays what it always was:
+  the flow's redo path (Rule 6) and a fix to your own unpushed HEAD.
 - **The test is not "is it easy" but "is it clearly under the bar."** Two rounds
   for a cheap task cost less than a feature with a silent defect.
 

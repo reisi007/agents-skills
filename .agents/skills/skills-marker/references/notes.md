@@ -90,10 +90,12 @@ Marker hält das erst als geprüft fest, wenn die Kopie nachgezogen ist.
 
 ## Fallstrick: der Marker-SHA verschwindet
 
-`agent-config` §6 amendet in diesem Repo und pusht mit `--force-with-lease`. Ein
-amendeter Commit bekommt eine **neue** SHA — der alte Marker-SHA existiert dann nicht
-mehr. Naiv angewendet heißt das `unknown revision` oder, schlimmer, „SHA weg, also
-jetzt auf HEAD setzen", womit alles als geprüft gilt, was nie geprüft wurde.
+`agent-config` §6 (agents-skills) hatte Amend + `--force-with-lease` als Stil — seit
+2026-10-10 sind **separate Commits der Default**, Amend nur für einen noch nicht
+gepushten eigenen HEAD. Solange das gilt, bleibt der Marker-SHA stabil.
+Verschwindet eine SHA trotzdem (`unknown revision`), war ein Force-Push oder ein
+Amend im Spiel — genau dann droht die Kurzschlusshandlung „SHA weg, also jetzt auf
+HEAD setzen", womit alles als geprüft gilt, was nie geprüft wurde.
 
 Diagnose und Ausweg:
 

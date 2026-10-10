@@ -42,9 +42,12 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 ## 4. Commit convention (agents-skills repo)
 
 ```sh
-cd ~/dev/agents-skills && git add -A \
-  && git commit --amend --no-edit \
-  && git push --force-with-lease
+cd ~/dev/agents-skills && git add <explicit path>... \
+  && git show --stat \
+  && git commit -F - \
+  && git push            # separate commits are the default
+                          # amend only an unpushed HEAD: git commit --amend --no-edit
+                          # a force-push, if ever unavoidable: --force-with-lease
 ```
 
 ## 5. After-pull drift check (what landed)
