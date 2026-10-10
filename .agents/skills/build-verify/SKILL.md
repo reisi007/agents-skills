@@ -27,7 +27,7 @@ given repo lives in that repo's `AGENTS.md`.**
 
 Diagram numbers are steps, `Step` headings are chapters: 0 = pull, 1+2 =
 commission/delegation, 3 = verify, 4 = commit, 5 = redo, 6 = push. **The order is
-not negotiable.**
+not negotiable** — and every subagent dispatch in it is a fresh session (Step 1).
 
 ## References — open each when the flow reaches it
 
@@ -64,6 +64,15 @@ check in a fresh session.
 **The verifier is never the implementer of the same task** — its fresh context is
 the whole point (contract in
 [`references/verifier-prompt.md`](references/verifier-prompt.md)).
+
+**Fresh session per round — implementer and verifier alike.** Every dispatch is a
+*new* subagent session with the full brief inside the prompt; a session is never
+continued across rounds or tasks. A continued context carries the code's own
+assumptions and the round's own defects into the next round, grows with every
+round, and slowly turns the "independent" check into a co-check. Continuing a
+session is only admissible for a **fix round inside the same task** that the
+session itself just implemented — and even then the orchestrator decides
+consciously.
 
 ## Step 2 — the verify run
 
