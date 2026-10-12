@@ -13,24 +13,53 @@ Open when briefing the verifier (flow Step 2: the verify run).
   documented `git stash` with `stash pop` at the end. A violation is reported
   immediately and completely — including which statement can no longer be made
   afterwards.
-- Full run: diff review, all commands from the repo's `AGENTS.md`,
-  architecture/security review; findings as `file:line` plus severity
-  (`critical`/`high`/`medium`/`low`). `critical`/`high` block `APPROVED` and
-  become their own fix tasks. A verdict without a complete findings report is
-  not accepted.
+- **It checks the substance, not the gates.** The verifier reviews the diff
+  against the commission, the architecture/security posture, the storage/cost
+  math, and the blast radius; a gate the implementer reported green **with
+  quoted output** is trusted and **not re-run** (see "Gates" below).
+- Findings as `file:line` plus severity (`critical`/`high`/`medium`/`low`).
+  `critical`/`high` block `APPROVED` and become their own fix tasks. A verdict
+  without a complete findings report is not accepted.
 - Every run is explicitly flagged. Without a reference to the previous round, a
   redo run cannot tell whether a finding was fixed or merely moved — so on
   `nach-verify: true` the verifier reports per prior-round finding: fixed,
   still open, or new, with the evidence for each, plus a check that no fix
   merely moved the finding.
 
+## Gates — the verifier's default is not to run them
+
+The mechanical gates are not the verifier's job: a second run only reproduces
+what was already reproduced. Its value lies in what a gate **cannot** check —
+does the diff fulfil the commission, do the invariants hold, does the
+storage/cost math, how far does the blast radius reach.
+
+- **Green with quoted output is trusted.** Reported that way, the gates are not
+  re-run: they are deterministic, and where the repo has CI, CI runs them on the
+  **pushed** artefact — a more independent system than a verifier subagent, on
+  what actually persists.
+
+Four cases where a second run — narrowed where that suffices — has real value:
+
+1. **No CI for this repo or artefact** (or the change is never pushed): then no
+   independent gate run exists.
+2. **The change touches the gates themselves** — tests, `conftest`, lint/format
+   config: a "green" report is then circular (whoever edits the tests reports
+   that the tests pass).
+3. **The report does not cover the changed surface** — e.g. only the touched
+   test files ran while the change sits in shared code: then at least the
+   relevant subset.
+4. **No output quoted**: that is a claim, not evidence — the verifier demands
+   the output instead of standing in for it.
+
 ## Template — first run (`nach-verify: false`)
 
 ```
 Project: <path>   Task: <what>
 nach-verify: false
+Gates reported: <command — result, with the quoted output>
 
-Check: <commands from this repo's AGENTS.md>
+Check: the diff against the commission; the gates only under one of the four
+exceptions above.
 Deliver: verdict APPROVED | CHANGES REQUIRED, findings with file:line + severity.
 Assert nothing you cannot evidence.
 ```
@@ -41,8 +70,10 @@ Assert nothing you cannot evidence.
 Project: <path>   Task: <what>
 nach-verify: true
 Previous round: <last verdict + finding list>
+Gates reported: <command — result, with the quoted output>
 
-Check: <commands from this repo's AGENTS.md>
+Check: the diff against the commission; the gates only under one of the four
+exceptions above.
 Deliver: verdict APPROVED | CHANGES REQUIRED, findings with file:line + severity,
 plus one status per prior finding — fixed / open / new — with the evidence you
 base it on, and a check that no fix merely moved the finding.

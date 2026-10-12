@@ -35,6 +35,37 @@ taken there — rules stated here apply only through their counterpart there.
 - **Verification runs sequential, never parallel** (Rule 8). CPU oversubscription
   produces a green light with no meaning.
 
+## Gates: why the verifier does not repeat them
+
+A verify run checks **the thing, not the gates**. Running the mechanical gates a
+second time buys no second opinion:
+
+- **They are deterministic machinery.** `ruff` / `pytest` return what they
+  already returned; a second run reproduces the first. The verifier's value lies
+  where a gate is blind — does the diff fulfil the commission, do the invariants
+  hold, does the storage/cost math, how far does the blast radius reach.
+- **CI is the better independent run.** Where the repo has CI, it runs the gates
+  on the **pushed** artefact — a system independent of the implementing agent, on
+  what actually persists. A verifier re-running locally is a weaker copy of
+  that, paid for out of the context it would otherwise spend on the substance.
+
+Two failure shapes the default must not swallow:
+
+- **Circularity — the change touches the gates.** Whoever edits the tests,
+  `conftest`, or the lint/format config and then reports "green" has checked
+  their own edit with itself. That evidence is no evidence; the verifier runs the
+  gate.
+- **No CI, no push.** With no CI for the repo or artefact (or a change that is
+  never pushed), the independent gate run does not exist at all — the verifier
+  is the only one who can supply it.
+
+The other two exceptions sharpen the same point: a report that does not cover
+the changed surface (only the touched test files ran while the change sits in
+shared code) buys a narrowed second run, and a report without quoted output is a
+claim, not evidence — the verifier demands the output rather than standing in
+for it. All four live with the contract in
+[`verifier-prompt.md`](verifier-prompt.md).
+
 ## Kleinheits-Ausnahme
 
 Not every change needs the loop: on a typo it costs two subagent rounds. The
@@ -146,6 +177,7 @@ and Step 4 (push) directly.
 
 | Trap | What actually happens | Instead |
 |---|---|---|
+| Verifier re-runs the full gate suite | reproduces a green that was already quoted; the context it spends is missing for the substance | trust the quoted green; re-run only under the four exceptions in [`verifier-prompt.md`](verifier-prompt.md) |
 | First verify run without a mode flag | the verifier checks the tree as if after a fix and reports "fits" — with no reference to the findings | pass the `nach-verify:` flag on **every** run |
 | `git checkout <file>` during mutation testing | destroys the implementer's uncommitted work; no way back exists then | commit beforehand (Step 3, commit), a copy, or a documented `git stash` |
 | `git add -A` in a shared tree | pulls in a **concurrently running** agent's work: evidenced by a commit with 14 files / 408 lines from `features/` that were not its own — content correct, message wrong, history misleading from then on | always explicit paths; `git show --stat` before the commit |

@@ -15,7 +15,7 @@ The loop is built for feature-scale commissioned work; a mini clearly under the 
 0. **Beyond trivia, load the skill before the first change.** Triggers: failing any `Kleinheits-Ausnahme` criterion below — size, kind (code/logic/test/build/dependency/schema), a config key whose reader changes in this task, any new self-standing behavioral rule or changed duty/threshold/exception.
 1. **Pull before the first change** (`git status --porcelain`; dirty tree → ask, never autostash; else `git pull --rebase`).
 2. **The orchestrator writes no code** — delegate to a subagent, except trivia below. When in doubt, delegate.
-3. **Verification by a *different* subagent** than the implementer (except trivia, where the orchestrator checks itself); never destroy uncommitted work with `git checkout` / `git restore` / `git reset`.
+3. **Verification by a *different* subagent** than the implementer (except trivia, where the orchestrator checks itself); it checks the **substance**, not the mechanical gates: reported green **with quoted output**, the gates are not re-run (the four exceptions live in the skill). Never destroy uncommitted work with `git checkout` / `git restore` / `git reset`.
 4. **Commit after EVERY verify run, whatever the verdict** (`CHANGES REQUIRED` too). **One commit per task**, explicit paths only — never `git add -A`.
 5. **Conventional Commits** with a `Verify:` footer logging the rounds; `git show --stat` before committing.
 6. **Redo → `git commit --amend`** (verifier gets `nach-verify: true`); amend only while HEAD is this task's unpushed verify commit with no foreign work in the tree, else a new commit.

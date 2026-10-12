@@ -31,7 +31,7 @@ not negotiable** — and every subagent dispatch in it is a fresh session (Step 
 
 ## References — open each when the flow reaches it
 
-- Briefing the verifier (Step 2) → [`references/verifier-prompt.md`](references/verifier-prompt.md): contract plus first-run and redo templates.
+- Briefing the verifier (Step 2) → [`references/verifier-prompt.md`](references/verifier-prompt.md): contract (incl. the gates rule), plus first-run and redo templates.
 - Redo commit after `CHANGES REQUIRED` (Step 3/5) → [`references/amend.md`](references/amend.md): amend-vs-new-commit table plus reflog recovery.
 - Why-questions, traps, measured evidence → [`references/notes.md`](references/notes.md).
 
@@ -50,7 +50,7 @@ git pull --rebase               # only on a clean tree
 |---|---|---|
 | **Orchestrator** | main agent | **read** `AGENTS.md` / `AGENTS.todo.md`; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
 | **Implementer** | subagent | write code/tests, target files + full specification |
-| **Verifier** | **different** subagent | check, measure, report findings — **not** fix |
+| **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
 
 **Kleinheit check:** if all four criteria from the always-on rule's
 `Kleinheits-Ausnahme` section hold, the orchestrator makes the change itself —
@@ -79,6 +79,8 @@ consciously.
 A separate subagent verifies. First run passes `nach-verify: false`, a redo run
 `nach-verify: true` — see
 [`references/verifier-prompt.md`](references/verifier-prompt.md) for the briefing.
+**It checks the substance, not the gates**: reported green *with quoted output*,
+the gates are not re-run — the four exceptions are in the reference.
 
 ## Step 3 — commit after every verify run, whatever the verdict says
 
