@@ -35,6 +35,18 @@ taken there — rules stated here apply only through their counterpart there.
 - **Verification runs sequential, never parallel** (Rule 8). CPU oversubscription
   produces a green light with no meaning.
 
+## Why the milestone review is optional and not per-feature
+
+Per-feature verify exists because a fresh context catches what the author's
+context cannot. Coherence across features is a different failure class: single
+tasks each pass their own gates while the accumulated set contradicts itself —
+a flag renamed in one feature still read under its old name in another, an
+end-to-end path no single task walked, a regression only visible against the
+feature before. No per-round check sees that by construction, and running it per
+feature would pay a whole-loop cost for a signal only the set carries. Hence:
+once at a release or every N features, as its own fresh session — per-feature
+verify stays mandatory either way.
+
 ## Gates: why the verifier does not repeat them
 
 A verify run checks **the thing, not the gates**. Running the mechanical gates a

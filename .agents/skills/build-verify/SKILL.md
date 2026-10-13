@@ -1,6 +1,6 @@
 ---
 name: Build Verify Flow
-description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — at the START of any such task, not only when the user says "verify". NOT for research, questions, reading, or throwaway experiments. This is the flow the always-on rule (the `build-verify` rule file, Rule 0) points to for everything beyond the Kleinheits-Ausnahme. Covers: pull before changing, the Kleinheits-Check, delegation to an implementer subagent, the verify run with an independent verifier and its `nach-verify` flag, commit after EVERY verify round regardless of the verdict, Conventional Commits with a verify-round footer, amend on redo, one commit per task, push plus CI watch. Also TRIGGER when deciding whether a change is small enough to skip the loop, when a commit message should be written, when deciding between `git commit --amend` and a new commit, when a verifier must be told whether it is a redo, when a verdict was CHANGES REQUIRED, or when a repo''s AGENTS.md duplicates this flow.'
+description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — at the START of any such task, not only when the user says "verify". NOT for research, questions, reading, or throwaway experiments. This is the flow the always-on rule (the `build-verify` rule file, Rule 0) points to for everything beyond the Kleinheits-Ausnahme. Covers: pull before changing, the Kleinheits-Check, delegation to an implementer subagent, the verify run with an independent verifier and its `nach-verify` flag, commit after EVERY verify round regardless of the verdict, Conventional Commits with a verify-round footer, amend on redo, one commit per task, push plus CI watch. Also TRIGGER when deciding whether a change is small enough to skip the loop, when a commit message should be written, when deciding between `git commit --amend` and a new commit, when a verifier must be told whether it is a redo, when a verdict was CHANGES REQUIRED, or when a repo''s AGENTS.md duplicates this flow. Optionally covers a milestone review at releases / every N features (cross-feature coherence, E2E, regression scan) — never a per-feature duty.'
 ---
 
 # Build Verify — pull, delegate, verify, commit, amend, push
@@ -23,11 +23,14 @@ given repo lives in that repo's `AGENTS.md`.**
 4  commit — ALWAYS, whatever the verdict says        one commit per task
 5  on CHANGES REQUIRED: fix → verify run with nach-verify: true → git commit --amend
 6  push + watch CI until green — unless the user requested manual verification
++  optional, releases / every N features: milestone reviewer (cross-feature
+   coherence, E2E, regression scan) — never replaces per-feature verify
 ```
 
 Diagram numbers are steps, `Step` headings are chapters: 0 = pull, 1+2 =
 commission/delegation, 3 = verify, 4 = commit, 5 = redo, 6 = push. **The order is
 not negotiable** — and every subagent dispatch in it is a fresh session (Step 1).
+The `+` line is optional and sits outside that order.
 
 ## References — open each when the flow reaches it
 
@@ -51,6 +54,7 @@ git pull --rebase               # only on a clean tree
 | **Orchestrator** | main agent | **read** `AGENTS.md` / `AGENTS.todo.md`; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
 | **Implementer** | subagent | write code/tests, target files + full specification |
 | **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
+| **Milestone reviewer** | separate subagent (**optional**) | cross-feature coherence, E2E, regression scan at releases / every N features; **not per feature** |
 
 **Kleinheit check:** if all four criteria from the always-on rule's
 `Kleinheits-Ausnahme` section hold, the orchestrator makes the change itself —
@@ -61,26 +65,23 @@ Otherwise: delegate, with target files and a full specification. No
 `~/.config/opencode/opencode.jsonc`): no pull/commit/CI — reload via `touch`,
 check in a fresh session.
 
-**The verifier is never the implementer of the same task** — its fresh context is
-the whole point (contract in
+**The verifier is never the implementer of the same task** — fresh context is the
+whole point (contract in
 [`references/verifier-prompt.md`](references/verifier-prompt.md)).
 
 **Fresh session per round — implementer and verifier alike.** Every dispatch is a
 *new* subagent session with the full brief inside the prompt; a session is never
-continued across rounds or tasks. A continued context carries the code's own
-assumptions and the round's own defects into the next round, grows with every
-round, and slowly turns the "independent" check into a co-check. Continuing a
-session is only admissible for a **fix round inside the same task** that the
-session itself just implemented — and even then the orchestrator decides
-consciously.
+continued across rounds or tasks. A continued context carries the round's own
+defects into the next round, grows with every round, and slowly turns the
+"independent" check into a co-check. Continuing a session is only admissible for
+a **fix round inside the same task** that the session itself just implemented —
+and even then the orchestrator decides consciously.
 
 ## Step 2 — the verify run
 
 A separate subagent verifies. First run passes `nach-verify: false`, a redo run
-`nach-verify: true` — see
-[`references/verifier-prompt.md`](references/verifier-prompt.md) for the briefing.
-**It checks the substance, not the gates**: reported green *with quoted output*,
-the gates are not re-run — the four exceptions are in the reference.
+`nach-verify: true` — briefing and contract:
+[`references/verifier-prompt.md`](references/verifier-prompt.md).
 
 ## Step 3 — commit after every verify run, whatever the verdict says
 
@@ -110,3 +111,12 @@ gh run watch <run-id> --exit-status # until green or red
 
 Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes
 **priority over all new work**.
+
+## Optional — milestone review (releases / every N features)
+
+Not part of the per-feature loop. **The loop above stays mandatory and unchanged;
+this never replaces a per-feature verify run.**
+
+- **Trigger:** a release, or every N features (N set per project, e.g. in `AGENTS.md`).
+- **Scope:** coherence across the accumulated features — does the set hang together, do cross-feature paths work end-to-end (E2E), did anything regress (regression scan).
+- **Dispatch:** a fresh session with a separate subagent and the full brief in the prompt — same pattern as Step 1. Findings come back as their own fix tasks, each through the full loop.
