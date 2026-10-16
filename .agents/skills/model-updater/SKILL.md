@@ -52,13 +52,20 @@ verify in the tracker, never infer from the slug.
   deliberately free-tier-only, so the paid namespace added nothing. Accepted
   trade: **no zero-data-retention guarantee — do not re-raise ZDR** to move a
   role back. Applies to **every** role.
-- **Standing decision since 2026-10-08:** `namespaceRule:
+- **Standing decision 2026-10-08 (retired 2026-10-16):** `namespaceRule:
   opencode-go-free-single` — one `$0` model family,
   `opencode-go/step-5-preview-free`, on *every* role including the fan-out
-  ones, and its `opencode/` twin is **deliberately unused**. A configured
-  `opencode-go/<slug>` is then *not* a REPLACE; "fixing" it into the `opencode/`
-  twin is the mistake. `opencode-go/` no longer implies paid, and no paid model
-  is configured at all.
+  ones. **Retired:** the provider removed that model 2026-10-15
+  (`free_removed`; available only 2026-10-08..2026-10-15).
+- **Standing decision since 2026-10-16:** `namespaceRule: opencode-go-mixed` —
+  everything runs on `opencode-go/`, mixed paid + free: main agents on the paid
+  `deepseek-v4.1-flash`, `vision-creative` on the paid `glm-5.3-flash`, and the
+  fan-out/background roles (`free`, `nonsensitive`, `title`, `summary`) on the $0
+  `longcat-2.5-preview-free`. The subscription is **used** again (credits).
+  `opencode/` free twins are deliberately unused: `deepseek-v4.1-flash-free` is $0
+  but only 200k ctx (below `minUsableContext`), and `glm-5.3-flash` has no free
+  twin. A configured `opencode-go/<slug>` is *not* a REPLACE on namespace
+  grounds; "fixing" it into an `opencode/` twin is the mistake.
 
 A `-free` slug suffix says nothing about namespace, price, or privacy. A
 configured id only counts as a namespace **REPLACE** when the preferences

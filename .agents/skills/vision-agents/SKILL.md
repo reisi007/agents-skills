@@ -29,12 +29,11 @@ lists them independently). A model can be vision-capable and still unable to rea
 a PDF — never assume "it can see images, so it can read the PDF".
 
 The `document` role existed for exactly that gap and was **removed 2026-10-08**
-(user decision, never used): the only configured model,
-`opencode-go/step-5-preview-free`, has no `pdf` input (`[text,image,video]`), so
-this setup has **no PDF-reading path**. Do not route a PDF to `vision-creative`
-and do not re-add the role: a PDF path needs a pdf-capable model configured
-first, and that is a new user decision (history in
-[`references/notes.md`](references/notes.md)).
+(user decision, never used). Since 2026-10-16 `vision-creative` runs on
+`opencode-go/glm-5.3-flash`, which **does** carry `pdf` — but there is still no
+`document` role and none is to be re-added. Do not route a PDF to
+`vision-creative` on your own: a PDF path is a new user decision, not a restore
+(history in [`references/notes.md`](references/notes.md)).
 
 ## Escalate, don't squint
 

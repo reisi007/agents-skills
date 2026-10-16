@@ -1,6 +1,6 @@
 ---
 name: Update OpenCode Models
-description: TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the opencode models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check for a twin and the capability gate first). Namespace default since 2026-10-08: one $0 model family on `opencode-go/` (`opencode-go/step-5-preview-free`), whose `opencode/` twin is deliberately unused — follow `model-preferences.md`, never infer from the slug. Reference for listing, refreshing, and diagnosing the live OpenCode model registry.
+description: TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the opencode models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check for a twin and the capability gate first). Namespace default since 2026-10-16: everything on `opencode-go/`, mixed paid + free (`deepseek-v4.1-flash` / `glm-5.3-flash` paid, `longcat-2.5-preview-free` $0) — follow `model-preferences.md`, never infer from the slug. Reference for listing, refreshing, and diagnosing the live OpenCode model registry.
 ---
 
 # Update OpenCode Models — live registry, not config advice
@@ -40,36 +40,41 @@ family name and look at every row that comes back.
 ## Which namespace belongs on which role
 
 **Rule: follow `~/.config/opencode/model-preferences.md` — never the slug, and
-never a stale snapshot of this file.** Current standing decision (2026-10-08):
-**every role runs on `opencode-go/step-5-preview-free`**, a single `$0` model
-family (it is listed in the tracker's `freeModels[]`). Its `opencode/` twin
-exists at the same price and is **deliberately unused** — do not "fix" the
-configured `opencode-go/<slug>` into `opencode/<slug>`.
+never a stale snapshot of this file.** Current standing decision (2026-10-16):
+everything runs on `opencode-go/`, mixed paid + free — main agents on the paid
+`deepseek-v4.1-flash`, `vision-creative` on the paid `glm-5.3-flash`,
+fan-out/background on the $0 `longcat-2.5-preview-free`. The previous
+single-$0-model decision (2026-10-08, `opencode-go/step-5-preview-free`) is
+**dead**: the provider removed that model 2026-10-15 (`free_removed`; available
+only 2026-10-08..2026-10-15). Do not "fix" a configured `opencode-go/<slug>`
+into an `opencode/<slug>` twin.
 
 - The **`opencode/`** provider namespace is the free tier → use it whenever it
-  exists **and** the preferences say so.
-- The **`opencode-go/`** namespace is the subscription one → normally only when
-  a hard capability need forces it; since 2026-10-08 it is also the home of the
-  single free model the whole setup uses, so the namespace alone says nothing
-  about price. Check the registry, not the prefix.
+  exists **and** the preferences say so. Since 2026-10-16 the config does **not**
+  use it: the free twin of the main-agent model is only 200k ctx.
+- The **`opencode-go/`** namespace is the subscription one → since 2026-10-16 it
+  carries both the paid main-agent/`vision-creative` models and the $0
+  `longcat-2.5-preview-free`, so the namespace alone says nothing about price.
+  Check the registry, not the prefix.
 
 Price is frequently identical (`effectiveInput: 0` either way). The reason for
-the current single-family setup is the user decision of 2026-10-08, **not** ZDR
-and not rename durability. A slug
-ending in `-free` says nothing about namespace, price, or privacy; check the registry
-instead of inferring.
+the 2026-10-16 split is the user decision of that day (speed + context bars),
+**not** ZDR and not rename durability. A slug ending in `-free` says nothing
+about namespace, price, or privacy; check the registry instead of inferring.
 
 **History:** "always the `opencode-go/<slug>` twin because the subscription is
-ZDR" (until 2026-10-02) and "always the `opencode/<slug>` twin because the setup
-is free-tier-only" (2026-10-02 until 2026-10-08) are both retired. Do not revive
-either, and do not treat a configured id in either namespace as a mistake to
-correct — the preferences file is the arbiter.
+ZDR" (until 2026-10-02), "always the `opencode/<slug>` twin because the setup is
+free-tier-only" (2026-10-02 until 2026-10-08), and "one $0 model family for every
+role" (2026-10-08 until 2026-10-16) are all retired. Do not revive them, and do
+not treat a configured id in either namespace as a mistake to correct — the
+preferences file is the arbiter.
 
-Configured (snapshot 2026-10-08): every role, root included →
-`opencode-go/step-5-preview-free`. The `document` role was removed the same day
-(never used; no configured model has `pdf` input), so no role needs `pdf` any
-more — the old "`document` → muse-spark-contributor-free (the `pdf` exception)"
-line is history, not a rule.
+Configured (snapshot 2026-10-16): main agents + `vision-creative` on paid
+`opencode-go/` models, fan-out/background on `$0`
+`opencode-go/longcat-2.5-preview-free`. The `document` role was removed
+2026-10-08 (never used); no role *needs* `pdf`, though `glm-5.3-flash`
+(`vision-creative`) does carry it. The old "`document` →
+muse-spark-contributor-free (the `pdf` exception)" line is history, not a rule.
 
 Check for a twin before writing any ID:
 ```

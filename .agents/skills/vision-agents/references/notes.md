@@ -9,15 +9,18 @@ There used to be two roles: `vision-creative` and `document`. `document` covered
 PDFs, rendered pages and reports — layout, readability, appearance — and needed a
 model with **both** `image` and `pdf` in `capabilities.input`, because those are
 independent capabilities: a model can see images and still be unable to read a
-PDF. It was removed 2026-10-08 by user decision ("never used"), at the same time
-the whole setup moved to the single $0 model `opencode-go/step-5-preview-free`
-(input `[text,image,video]`, no `pdf`).
+PDF. It was removed 2026-10-08 by user decision ("never used"). The setup then
+moved to the single $0 model `opencode-go/step-5-preview-free` (input
+`[text,image,video]`, no `pdf`) — **that model was removed 2026-10-15**
+(`free_removed`). Since 2026-10-16 `vision-creative` runs on
+`opencode-go/glm-5.3-flash`, which *does* carry `pdf`.
 
 Consequences, both deliberate:
 
-- There is **no PDF-reading path** in this setup. A PDF is neither a
-  `vision-creative` question nor a main-agent question. If one is ever needed, a
-  pdf-capable model must be configured first — a new decision, not a restore.
+- There is **no `document` role** in this setup, even though
+  `opencode-go/glm-5.3-flash` (vision-creative) is now pdf-capable. A PDF is
+  still not automatically a `vision-creative` question. If a PDF path is ever
+  needed, that is a new decision, not a restore of `document`.
 - Do not "fix" a future PDF request by re-adding the role or by routing it to
   `vision-creative`; both are recorded as wrong.
 
