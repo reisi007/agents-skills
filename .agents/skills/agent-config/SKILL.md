@@ -158,7 +158,9 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
   always-on text that must be in every session (CodeGraph block, Arbeitsregeln)
   is inlined in the global `~/.config/opencode/AGENTS.md`. codegraph is declared
   once as a **global MCP server** (§3) — no per-project MCP entry for it.
-  Bootstrap work then loads `codegraph-project-setup` and `permissions` **by
+  Create the one own slash command `~/.config/opencode/commands/update-models.md`
+  (§1) — the `commands/` directory is created by nothing else. Bootstrap work
+  then loads `codegraph-project-setup` and `permissions` **by
   exact ID** (both are hidden, §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
   AGENTS.todo.md) — load it **by exact ID** (hidden), as above. Do NOT create
