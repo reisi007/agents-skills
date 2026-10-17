@@ -42,6 +42,9 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 },
 ```
 
+Merge into the existing `mcp.servers` map — servers already there (e.g. `rea`)
+stay untouched.
+
 ## 4. Commit convention (agents-skills repo)
 
 ```sh
