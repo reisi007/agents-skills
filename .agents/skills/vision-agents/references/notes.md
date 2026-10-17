@@ -29,7 +29,7 @@ Consequences, both deliberate:
 There used to be three roles; `vision-technical` (screenshot reading,
 EXIF-relevant visual details, image categorisation) was removed once image
 input became a hard requirement for the root `model` and every
-`agent.<role>.model` (`models` → "Hard requirements"). Those reads are
+`agents.<role>.model` (`models` → "Hard requirements"). Those reads are
 the main agent's own job now — done inline, never delegated. What remains is
 **role separation, not capability separation**: read-only specialists kept for
 judgement the main agent should not trust itself on alone.

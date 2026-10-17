@@ -10,6 +10,8 @@ metadata:
 Generic, reusable reference for an OpenCode `opencode.jsonc` `permissions` array. Replace `<user>` with the actual username.
 
 > For OpenCode permission semantics (rule shape, wildcards, `last-match-wins`, `external_directory` vs `read`/`edit`, `shell` resource handling), load the built-in `opencode` skill — do not duplicate it here.
+>
+> **V2 naming:** the global config key and the per-agent key are both `permissions` (an ordered array of `{ "action", "resource", "effect" }`); use `shell` and `subagent` as actions. The V1 forms `permission` (map), the actions `bash`/`task`, and `write`/`patch` are **deprecated** — see the built-in `opencode` skill for the full semantics.
 
 ## 1. Policy template (categories)
 

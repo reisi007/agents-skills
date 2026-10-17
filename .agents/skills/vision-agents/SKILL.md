@@ -6,7 +6,7 @@ description: 'TRIGGER when a visual judgement is subjective, domain-specific, or
 # Vision Agents — creative, plus the escalation rule
 
 **Premise: every configured model is vision-capable.** Image input is a *hard
-requirement* for the root `model` and for every `agent.<role>.model` — see
+requirement* for the root `model` and for every `agents.<role>.model` — see
 `models` → "Hard requirements". So the main agent reads images itself.
 There is no capability gap to bridge.
 
@@ -20,7 +20,7 @@ split larger batches.
 |---|---|---|
 | `vision-creative` | creative judgement | Design/aesthetic review, mood & meaning, whether visuals convey intent, and complex fine-grained detail reads. |
 
-> Model is not pinned in this skill — set `agent.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `models` skill choose/refresh it. Per-role prefs: `vision-creative` = image + video, strongest vision model wins.
+> Model is not pinned in this skill — set `agents.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `models` skill choose/refresh it. Per-role prefs: `vision-creative` = image + video, strongest vision model wins.
 
 ## PDFs — no path
 
@@ -67,11 +67,18 @@ it holds the strongest vision model. A PDF is **not** a vision question (see
 The agent's permission fence (see `references/agents.jsonc`):
 
 ```jsonc
-"permission": { "read": "allow", "edit": "deny", "bash": "deny", "subagent": "deny", "webfetch": "deny", "websearch": "deny" }
+"permissions": [
+  { "action": "read",     "resource": "*", "effect": "allow" },
+  { "action": "edit",     "resource": "*", "effect": "deny"  },
+  { "action": "shell",    "resource": "*", "effect": "deny"  },
+  { "action": "subagent", "resource": "*", "effect": "deny"  },
+  { "action": "webfetch", "resource": "*", "effect": "deny"  },
+  { "action": "websearch","resource": "*", "effect": "deny"  }
+]
 ```
 
 - `read: allow` — can read image files from disk via the `read` tool.
-- `edit/bash/subagent/webfetch/websearch: deny` — cannot mutate, run commands, delegate, or fetch remotely.
+- `edit/shell/subagent/webfetch/websearch: deny` — cannot mutate, run commands, delegate, or fetch remotely.
 - `mode: subagent` — always run via delegation, never as main agent.
 - No `external_directory` overrides — inherits global username isolation (`/Users/<user>` only).
 
@@ -91,11 +98,11 @@ Do **not** use them for code, text-only, or file-writing tasks.
 
 ## Apply / port
 
-Copy the `agent` block from `references/agents.jsonc` into `~/.config/opencode/opencode.jsonc` under `agent` and add a `model` per role:
+Copy the `agents` block from `references/agents.jsonc` into `~/.config/opencode/opencode.jsonc` under `agents` and add a `model` per role:
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
-"agent": {
+"agents": {
   "vision-creative": { "model": "opencode-go/<chosen>", /* ... */ }
 }
 ```
@@ -106,5 +113,5 @@ and verify with `opencode service status`.
 
 ## Reference files
 
-- `references/agents.jsonc` — copy-paste `agent` definition for the agent.
+- `references/agents.jsonc` — copy-paste `agents` definition for the agent.
 - `references/notes.md` — why the roles exist in this shape (history, rationale).
