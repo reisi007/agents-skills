@@ -99,7 +99,7 @@ opencode models | grep -iE "free"        # opencode/<new-slug>-free now present
 
 If the model is still absent after `reload`, restart the service
 (`opencode service restart`) and check `service status`. If it is absent after a
-restart too, the provider has not published it — check the ocgo-price-tracker
+restart too, the provider has not published it — check the ocgo-pricing tracker
 `freeModels[]` to confirm it still exists upstream.
 
 ## Rules

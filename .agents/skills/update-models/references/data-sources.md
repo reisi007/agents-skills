@@ -5,10 +5,10 @@ Both trackers commit `data/latest.json` and `CHANGELOG.json` to `main` and serve
 machine-readable source. They are tiny (~30–50 KB) and structured — far cheaper than
 rendering the HTML site.
 
-## ocgo-price-tracker (OpenCode Go) — `opencode-go/<slug>` IDs
+## ocgo-pricing (OpenCode Go + Default) — `opencode-go/<slug>` and `opencode/<slug>` IDs
 
 ```
-RAW=https://raw.githubusercontent.com/all-the-rest/ocgo-price-tracker/main
+RAW=https://ocgo-pricing.all-the.rest
 
 # Current snapshot, slimmed to what the skill needs:
 curl -sL $RAW/data/latest.json | jq '{
@@ -109,10 +109,10 @@ values by eye — no tooling required.
 
 - `raw.githubusercontent.com` is unauthenticated and rate-limited (~60 req/h). For
   repeated/automated pulls use `gh api` instead, e.g.
-  `gh api repos/all-the-rest/ocgo-price-tracker/contents/data/latest.json --jq '.content' | base64 -d`.
-- The site also serves `/data/latest.json` (e.g. `https://ocgo-pricing.all-the.rest/data/latest.json`)
-  if you prefer the live build over git `main`.
+  `curl -sL https://ocgo-pricing.all-the.rest/data/latest.json`.
+- The git repo also commits `data/latest.json` to `main`; use the GitHub raw URL
+  if you prefer the git build over the live site.
 - GitHub Releases are created per changelog entry (tag = entry `id`); `releases.atom`
   is the RSS feed if you want change notifications rather than polling.
 - `src/data/changelog.json` is bundled into the site's JS and is **not** a standalone
-  endpoint — always use the repo's root `CHANGELOG.json` for raw access.
+  endpoint — always use `https://ocgo-pricing.all-the.rest/CHANGELOG.json` for raw access.
