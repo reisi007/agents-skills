@@ -1,6 +1,6 @@
 ---
 name: Permissions
-description: TRIGGER when editing, reviewing, or bootstrapping OpenCode permissions in opencode.jsonc, setting up username isolation, secrets/macos privacy denies, .env handling, or external_directory rules. Reference for this machine's security policy and permission ordering (last-match-wins).
+description: 'TRIGGER when editing, reviewing, or bootstrapping OpenCode permissions in opencode.jsonc, setting up username isolation, secrets/macos privacy denies, .env handling, or external_directory rules (last-match-wins ordering).'
 ---
 
 # Permissions — portable security policy

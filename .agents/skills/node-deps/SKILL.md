@@ -1,6 +1,6 @@
 ---
 name: Node Dependency Policy
-description: TRIGGER when a Node/pnpm project pins dependency versions (exact versions in package.json without ^/~ range, minimumReleaseAgeExclude entries in pnpm-workspace.yaml, a packageManager version pin), when a dependency update, security fix or audit finding is due, or when the user asks how dependencies should be managed. Reference for the no-pins rule: ranges in package.json, updates exclusively via pnpm into the lockfile, never as pins.
+description: 'TRIGGER when a Node/pnpm project pins dependency versions (exact versions in package.json, minimumReleaseAgeExclude in pnpm-workspace.yaml, a packageManager pin), when a dependency update, security fix or audit finding is due, or when the user asks how dependencies should be managed (no pins: ranges + pnpm lockfile).'
 ---
 
 # Node Dependency Policy — no pins, updates via pnpm into the lockfile

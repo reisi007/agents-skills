@@ -1,6 +1,6 @@
 ---
 name: Docker Test Image
-description: 'TRIGGER when a repo bakes a container image for its E2E/CI job (Dockerfile.e2e, Test-Image, E2E-Image, CI-Image), when deciding what may go into that image, when the Playwright browser version in the image is read from package.json or pnpm-lock.yaml, when a base-image and e2e-image chain is wired (base-image, Image-Rebuild, Rebuild-Trigger), or when a base reference is pinned (Digest-Pinning, image pin, OCI base.name label, --platform). NOT for the prod base image (php-fpm/supervisor/healthcheck) and not for generic path filters. Covers: the environment-only invariant, the version from the lockfile, digest pass-through resolved at build time, the --platform and UndefinedVar traps, what the image does NOT buy (bit-reproducibility, freshness), and the checklist before the first push.'
+description: 'TRIGGER when a repo bakes a container image for its E2E/CI job (Dockerfile.e2e, Test-Image, E2E-Image, CI-Image), when deciding what may go into that image, when the Playwright browser version is read from package.json or pnpm-lock.yaml, when a base-image and e2e-image chain is wired (base-image, Image-Rebuild, Rebuild-Trigger), or when a base reference is pinned (Digest-Pinning, image pin, OCI base.name label, --platform). NOT for the prod base image (php-fpm/supervisor/healthcheck) or generic path filters.'
 ---
 
 # Docker Test Image — an image that bakes only the environment

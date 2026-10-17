@@ -1,6 +1,6 @@
 ---
 name: GHCR Visibility
-description: 'TRIGGER when a job-level `container:` pull fails, when `unauthorized` appears on a manifest, when a job dies with exit 125 before any step runs, when a container package needs to be made public, when fork PRs cannot pull an image, or when a `packages` scope appears not to help. Covers package visibility and pull authorisation on a container registry: the private-package failure, the too-late login, the PATCH-404 trap, and the fork-PR consequence.'
+description: 'TRIGGER when a job-level `container:` pull fails, when `unauthorized` appears on a manifest, when a job dies with exit 125 before any step runs, when a container package needs to be made public, when fork PRs cannot pull an image, or when a `packages` scope appears not to help.'
 ---
 
 # GHCR Visibility — package visibility and pull authorisation

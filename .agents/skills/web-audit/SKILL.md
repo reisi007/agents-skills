@@ -1,6 +1,6 @@
 ---
 name: Web Audit
-description: Audit a live website end-to-end — SEO, image quality, performance, content — and ship a self-contained HTML/text archive; the mandatory part is the false-positive audit of your own rules, which gates publication. TRIGGER when analyzing/auditing a website (SEO, image quality, performance, content defects, Core Web Vitals), and when a previous analysis turned out to be wrong or its numbers are disputed.
+description: 'Audit a live website end-to-end (SEO, image quality, performance, content) and ship a self-contained HTML/text archive; the false-positive audit of your own rules is mandatory and gates publication. TRIGGER when analyzing/auditing a website (SEO, image quality, performance, content defects, Core Web Vitals) or when a previous analysis turned out to be wrong.'
 ---
 
 # Web Audit — audit the site, then audit yourself

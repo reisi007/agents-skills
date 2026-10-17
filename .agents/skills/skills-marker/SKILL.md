@@ -1,6 +1,6 @@
 ---
 name: Skills Marker
-description: 'TRIGGER when a git pull landed in the agents-skills repo, when asking which state of the skills a project consumes (Marker, Stand: welche Skills wurden angewendet?), when a skill changed and a project must be checked against it, or when scaffolding a new project. AGENTS.skills.md is the per-project marker: which commit was checked, which skills were applied, which not and why — worked as the concrete range <marker-sha>..HEAD. Also TRIGGER on drift between skills repo and project, on a new or extended skill version, on deciding whether a skill change applies to this repo at all, and when advancing a marker.'
+description: 'TRIGGER when a git pull landed in the agents-skills repo, when asking which state of the skills a project consumes (Marker, Stand: welche Skills wurden angewendet?), when a skill changed and a project must be checked against it, when scaffolding a new project, on drift between skills repo and project, on a new or extended skill version, on deciding whether a skill change applies to this repo at all, or when advancing a marker. AGENTS.skills.md is the per-project marker (which commit was checked, which skills applied, the range <marker-sha>..HEAD).'
 ---
 
 # Skills-Marker — welcher Stand der Skills in diesem Projekt angekommen ist

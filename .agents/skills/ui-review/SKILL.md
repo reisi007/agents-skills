@@ -1,6 +1,6 @@
 ---
 name: UI Review
-description: Generate Playwright screenshots of every page (empty/filled states), analyze them yourself against a checklist, and drive repeatable UI improvements. TRIGGER on UI review/improvement/screenshot requests or when the user wants to check the visual state of a web app.
+description: 'TRIGGER on UI review/improvement/screenshot requests or when the user wants to check the visual state of a web app: Playwright screenshots of every page (empty/filled states), analyzed against a checklist.'
 ---
 
 # UI Review — repeatable visual QA loop

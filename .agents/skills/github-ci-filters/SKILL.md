@@ -1,6 +1,6 @@
 ---
 name: GitHub CI Filters
-description: TRIGGER when adding, changing, or reviewing GitHub Actions path filters (`paths` / `paths-ignore`), when a docs-only commit triggers the full CI pipeline, or when a path-filtered workflow leaves a PR stuck on a pending check. Reference for the doc-as-input precondition, why `paths-ignore` is the safe direction, filtering both `push` and `pull_request`, the branch-protection pending-check trap, and verifying with `git diff --name-only`.
+description: 'TRIGGER when adding, changing, or reviewing GitHub Actions path filters (`paths` / `paths-ignore`, both `push` and `pull_request`), when a docs-only commit triggers the full CI pipeline, or when a path-filtered workflow leaves a PR stuck on a pending check (branch-protection trap).'
 ---
 
 # GitHub CI Filters — keep docs-only commits out of the pipeline

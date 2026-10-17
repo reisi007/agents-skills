@@ -1,6 +1,6 @@
 ---
 name: Update OpenCode Models
-description: TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the opencode models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check for a twin and the capability gate first). Namespace default since 2026-10-16: everything on `opencode-go/`, mixed paid + free (`deepseek-v4.1-flash` / `glm-5.3-flash` paid, `longcat-2.5-preview-free` $0) — follow `model-preferences.md`, never infer from the slug. Reference for listing, refreshing, and diagnosing the live OpenCode model registry.
+description: 'TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check twin + capability gate first). Namespace default since 2026-10-16: everything on `opencode-go/`, mixed paid + free (`deepseek-v4.1-flash`/`glm-5.3-flash` paid, `longcat-2.5-preview-free` $0) — follow `model-preferences.md`, never infer from the slug.'
 ---
 
 # Update OpenCode Models — live registry, not config advice

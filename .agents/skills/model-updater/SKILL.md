@@ -1,6 +1,6 @@
 ---
 name: Model Updater
-description: TRIGGER when the user wants to review or update their OpenCode models, asks "which models should I update", "model recommendations", "check my models against the price trackers", or mentions a model updater — INCLUDING when the user directly names the target model ("switch everything to X", "set all models to X", "alle Modelle auf X stellen"): the vision/pdf gate and the namespace rule apply to the user's pick too, not only to my own recommendations. Cross-references the user's configured models with the live ocgo/cc price trackers (current prices + changelog) and recommends which models to UPDATE vs KEEP, with a reason grounded in the changelog.
+description: 'TRIGGER when the user wants to review or update their OpenCode models ("which models should I update", "model recommendations", "check my models against the price trackers", or mentions a model updater) — INCLUDING when the user directly names the target model ("switch everything to X", "set all models to X", "alle Modelle auf X stellen"): the vision/pdf gate and the namespace rule apply to the user''s pick too. Cross-references the configured models with the live ocgo/cc price trackers (prices + changelog) and recommends UPDATE vs KEEP.'
 ---
 
 # Model Updater

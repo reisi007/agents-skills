@@ -1,6 +1,6 @@
 ---
 name: Vision Agents
-description: TRIGGER when a visual judgement is subjective, domain-specific, or too fine-grained to trust your own first read — design/aesthetic/intent review — or when you want a second, stronger opinion on complex image details. Routine screenshots, EXIF-relevant visual details and image categorisation need NO skill, because every configured model is vision-capable and reads them itself. Reference for the locked-down vision subagent (vision-creative) and the escalate-don't-squint rule.
+description: 'TRIGGER when a visual judgement is subjective, domain-specific, or too fine-grained to trust your own first read — design/aesthetic/intent review — or when you want a stronger second opinion on complex image details. Routine screenshots, EXIF-relevant visual details and image categorisation need NO skill (every configured model is vision-capable). Reference for the locked-down vision-creative subagent and the escalate-don''t-squint rule.'
 ---
 
 # Vision Agents — creative, plus the escalation rule
