@@ -112,6 +112,13 @@ gh run watch <run-id> --exit-status # until green or red
 Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes
 **priority over all new work**.
 
+**When CI itself is the problem** (all four are hidden skills — load by exact ID):
+container-image pull fails (`unauthorized`, job dies with exit 125 before any step)
+→ `ghcr-visibility`; the E2E/test image itself (what may be baked in, base-image pin,
+browser version from the lockfile) → `docker-test-image`; a slow/flaky Playwright
+suite, `--workers=1`, sharding → `playwright-parallel`; path filters / docs-only
+commits triggering CI → `github-ci-filters`.
+
 ## Optional — milestone review (releases / every N features)
 
 Not part of the per-feature loop. **The loop above stays mandatory and unchanged;

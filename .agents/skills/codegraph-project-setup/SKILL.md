@@ -1,6 +1,8 @@
 ---
 name: CodeGraph Project Setup
 description: 'TRIGGER when scaffolding a new project/repo, or when starting work in a repository without a `.codegraph/` directory: bootstrap CodeGraph (index + git hook) plus the standard conventions (AGENTS.md, build-agent rules).'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # CodeGraph Project Setup — new-project bootstrap runbook

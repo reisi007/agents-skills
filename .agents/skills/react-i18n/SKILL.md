@@ -1,6 +1,8 @@
 ---
 name: React i18n
 description: 'TRIGGER on i18n/l10n/internationalization requests for a German React+Vite UI with Lingui (macros, extract/compile gate, no module-scope t), on "im Hintergrund ausführen" UI strings, on untranslated text findings, or when a new React project needs UI-string setup.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # React i18n — Lingui UI strings (UI German, code English)

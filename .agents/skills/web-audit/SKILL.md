@@ -1,6 +1,8 @@
 ---
 name: Web Audit
 description: 'Audit a live website end-to-end (SEO, image quality, performance, content) and ship a self-contained HTML/text archive; the false-positive audit of your own rules is mandatory and gates publication. TRIGGER when analyzing/auditing a website (SEO, image quality, performance, content defects, Core Web Vitals) or when a previous analysis turned out to be wrong.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Web Audit — audit the site, then audit yourself

@@ -1,6 +1,8 @@
 ---
 name: Tailscale Serve
 description: 'TRIGGER when a locally started dev server (Vite/Hono/anything on localhost:PORT) must be reachable from another device on the tailnet, when the user asks for a "Tailscale link"/tailnet URL, or when tailscale fails with "Failed to connect to local tailscaled … /var/run/tailscale/tailscaled.sock: no such file or directory", "Serve is not enabled on your tailnet", ERR_SSL_PROTOCOL_ERROR, HTTP 502 on the MagicDNS URL, or Vite''s "Blocked request. This host … is not allowed".'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Tailscale Serve — a local dev server on the tailnet

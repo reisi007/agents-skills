@@ -22,6 +22,7 @@ machine/project online.
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
 | `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui, reverse-engineer-anything) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
+| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Each of the 11 hidden skills (§7) has such a command (`/<id>`). |
 
 ## 2. Skills repo registration (the `skills` array)
 
@@ -153,10 +154,12 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
   (§2) **and the `instructions` array** (§2a) in the global `opencode.jsonc` —
   both entries are required (or symlink `~/.config/opencode/skills` → repo
   dir for the `skills` side). codegraph is declared once as a **global MCP
-  server** (§3) — no per-project MCP entry for it.
+  server** (§3) — no per-project MCP entry for it. Bootstrap work then loads
+  `codegraph-project-setup` and `permissions` **by exact ID** (both are hidden,
+  §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
-  AGENTS.todo.md). Do NOT create new skills in the project — add them to
-  agents-skills instead.
+  AGENTS.todo.md) — load it **by exact ID** (hidden), as above. Do NOT create
+  new skills in the project — add them to agents-skills instead.
 
 ## 6. Commit convention (agents-skills repo)
 
@@ -186,6 +189,27 @@ footer and the `nach-verify` flag apply as in every other repo.
 | Always-on rules (`build-verify`) | `agents-skills/.agents/rules/` only, wired via the global `instructions` array (§2a) |
 | Official/third-party packs installed by tools (daisyui, find-skills, stripe-*, …) | where the installer put them (`~/.agents/skills`, project `.agents/skills`, …) — not in agents-skills |
 | Project-specific skills (nx-*, blog-beitrag, testimonial, …) | their project — not in agents-skills |
+
+### Hidden skills — not advertised, loaded by exact ID
+
+11 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
+in the model's advertised list, but stay registered and load by exact ID via the
+`skill` tool, `@<id>` in a prompt, or the `/` command of the same name
+(`~/.config/opencode/commands/<id>.md`, §1). They are reachable from here:
+
+| ID | Trigger (one line) | Command |
+|---|---|---|
+| `docker-test-image` | E2E/CI test image bakes the environment only; browser version from the lockfile | `/docker-test-image` |
+| `ghcr-visibility` | container `:` pull `unauthorized` / job dies exit 125 / package visibility | `/ghcr-visibility` |
+| `laravel` | Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint) | `/laravel` |
+| `node-deps` | pnpm dependency policy: no pins, ranges + lockfile | `/node-deps` |
+| `playwright-parallel` | Playwright E2E parallelism: named locks, workers, shards instead of serial | `/playwright-parallel` |
+| `react-i18n` | German React+Vite UI with Lingui; extract/compile gate | `/react-i18n` |
+| `skills-marker` | per-project skills cursor `AGENTS.skills.md` (which commit was checked) | `/skills-marker` |
+| `tailscale-serve` | expose a local dev server on the tailnet via `tailscale serve` | `/tailscale-serve` |
+| `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive | `/web-audit` |
+| `codegraph-project-setup` | bootstrap CodeGraph (index + git hook) + project conventions | `/codegraph-project-setup` |
+| `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory | `/permissions` |
 
 ## 8. After pull: setup drift check
 

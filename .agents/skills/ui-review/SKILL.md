@@ -20,6 +20,9 @@ down the page). Sections keep every region at readable resolution. Apps that
 scroll in an inner overflow container (100vh layout with `<main …overflow-auto>`)
 are handled by scrolling that container — see `references/harness.md`.
 
+> For a **full live-site audit** (SEO, image quality, performance, content) rather
+> than an in-app visual pass, load the hidden `web-audit` skill by exact ID.
+
 The screenshot set is **intentionally separate from the normal E2E suite**: it is
 not a functional test. It never asserts behavior — it only *captures pixels* so a
 human or you can judge the design. Nothing here gates CI.
@@ -33,7 +36,7 @@ human or you can judge the design. Nothing here gates CI.
 - If the harness is missing, scaffold it first — see
   `references/harness.md` and the copyable templates in `references/templates/`.
 - No vision plugin needed: every configured model reads images (see the
-  `model-updater` skill's hard requirement).
+  `models` skill's hard requirement).
 
 ## Step 1 — Capture
 

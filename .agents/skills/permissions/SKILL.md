@@ -1,6 +1,8 @@
 ---
 name: Permissions
 description: 'TRIGGER when editing, reviewing, or bootstrapping OpenCode permissions in opencode.jsonc, setting up username isolation, secrets/macos privacy denies, .env handling, or external_directory rules (last-match-wins ordering).'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Permissions — portable security policy
@@ -68,8 +70,8 @@ code ~/.config/opencode/opencode.jsonc
 # copy ordered block from references/permissions.jsonc into "permissions": [ ... ]
 # trigger daemon reload (watches global dir):
 touch ~/.config/opencode/opencode.jsonc
-opencode2 service status
-opencode2 api get /api/health
+opencode service status
+opencode api get /api/health
 ```
 
 Validation after change:

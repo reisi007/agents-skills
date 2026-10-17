@@ -1,6 +1,8 @@
 ---
 name: Playwright Parallel
 description: 'TRIGGER when a Playwright E2E suite is slower or more fragile than it should be — CI pins --workers=1, workers: 1, a serial suite, flaky tests that only fail in CI, a matrix with shards where some entries are serial, copied projects entries as a parallelisation hack, or duplicated serial runs of the same spec. Also when diagnosing 429/403 throttling, when a declared lock appears to do nothing, or when deciding how many workers a runner may have.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Playwright parallel — named locks instead of serial runs

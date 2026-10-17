@@ -1,6 +1,8 @@
 ---
 name: GHCR Visibility
 description: 'TRIGGER when a job-level `container:` pull fails, when `unauthorized` appears on a manifest, when a job dies with exit 125 before any step runs, when a container package needs to be made public, when fork PRs cannot pull an image, or when a `packages` scope appears not to help.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # GHCR Visibility — package visibility and pull authorisation

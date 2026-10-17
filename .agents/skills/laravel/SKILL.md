@@ -1,6 +1,8 @@
 ---
 name: Laravel
 description: 'TRIGGER when working in a Laravel PHP backend (Laravel 11+, PHP 8.4+, JWT-cookie auth, FormRequest validation, PHPUnit Feature/Unit suites, paratest, Pint) — or when starting one.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Laravel — backend conventions
