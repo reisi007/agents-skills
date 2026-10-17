@@ -78,7 +78,7 @@ the normal case, not the exception: currently `build-verify.md` and `ask.md`
 - Adding another always-on rule (e.g. a third one after `ask.md`): new file in
   `.agents/rules/` + one more entry in the array. Nothing else to wire — and
   the new file stays invisible until that entry is there.
-- **Reloading:** like any config change, the running `opencode2` service caches
+- **Reloading:** like any config change, the running `opencode` service caches
   resolved config — `touch ~/.config/opencode/opencode.jsonc` or restart the
   session (see §3 for the same gotcha on MCP). Once the feature works, verify
   the wiring **once** after setup: in a fresh session, ask the agent to repeat
@@ -112,15 +112,26 @@ gets it automatically — no per-project MCP entry needed (verbatim:
   index at/above the queried path). Without an index, use Read/Grep instead
   or run `codegraph init` in the project — see the `codegraph-project-setup`
   skill.
-- **Activation gotcha:** the running `opencode2` service caches resolved
+- **Context cost of the server's own playbook (measured 2026-10-17):** codegraph
+  ships its agent guidance inside the MCP `initialize` response
+  (`instructions`, `dist/mcp/server-instructions.js`: 6,833 B for
+  `SERVER_INSTRUCTIONS`, 1,173 B for the `NO_ROOT_INDEX` variant) — roughly 6 KB
+  in **every** session's system prompt, whether or not the project has an index.
+  `codegraph serve --help` exposes only `--path/--mcp/--no-watch` and there is no
+  env var, so it cannot be shortened from the config side; the upstream request is
+  `colbymchenry/codegraph#765` (comment 2026-10-17). Patching the versioned
+  install (`~/.codegraph/versions/<v>/…`) would be lost silently on the next
+  update, and a wrapper in front of `codegraph serve --mcp` was considered and
+  **rejected** (User-Entscheidung 2026-10-17).
+- **Activation gotcha:** the running `opencode` service caches resolved
   configs. After changing the global `opencode.jsonc` or a project's
   `opencode.json`, trigger a reload with `touch
   ~/.config/opencode/opencode.jsonc` (the daemon watches the global dir) or
-  restart the session — otherwise `opencode2 mcp list` keeps reporting the
+  restart the session — otherwise `opencode mcp list` keeps reporting the
   old state.
 - Adding another MCP server: global ones go into the global
   `opencode.jsonc`; project-specific ones via
-  `opencode2 mcp add <name> -- <command…>` in the project. Remote servers
+  `opencode mcp add <name> -- <command…>` in the project. Remote servers
   use `--url` instead of a command.
 
 ## 4. CodeGraph per project (quick reference)
