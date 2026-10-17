@@ -12,7 +12,7 @@ for a commit that is still **unpushed**: a wording fix in the message, a file yo
 forgot to add. Once a commit is pushed it is history — an amend changes its SHA
 and other projects record these SHAs as their `skills-marker` range, so a
 rewrite silently breaks their cursor. `git add -A` is never used: explicit paths
-plus `git show --stat` (always-on rules 4 and 5).
+plus `git show --stat` (build/verify rules 4 and 5).
 
 ## Sprache
 
@@ -23,7 +23,7 @@ und werden **nicht** übersetzt.
 
 ## Token-Disziplin
 
-Dateien in diesem Repo landen im Kontext eines Modells — `rules/` als always-on, weil sie auf diesem Setup in die globale `AGENTS.md` inlined sind, sonst bei Bedarf wie ein Skill gelesen, `SKILL.md` erst bei passendem Trigger. Deshalb gilt eine Größenordnung als **Ziel, keine Mauer** — länger ist erlaubt, wenn der Inhalt es trägt und der Überlauf benannt ist:
+Dateien in diesem Repo landen im Kontext eines Modells — `rules/` nur, wo ihr Text wirklich geliefert wird (inlined in eine `AGENTS.md`, global oder im Projekt), sonst bei Bedarf wie ein Skill gelesen, `SKILL.md` erst bei passendem Trigger. Deshalb gilt eine Größenordnung als **Ziel, keine Mauer** — länger ist erlaubt, wenn der Inhalt es trägt und der Überlauf benannt ist:
 
 | Ort | Ziel | wenn es darüber wächst |
 |---|---|---|
@@ -39,10 +39,11 @@ umformuliert.
 
 A `git pull` here can change what the local machine needs — the repo is the source
 of truth, the machine is a copy that rots. After pulling, run the drift check from
-`agent-config` §8 (rules dir vs. global `instructions`, skills registration, MCP
-wiring, hooks) and re-apply setup locally. A new file under `.agents/rules/`
-without a matching `instructions` entry in the global config **silently does
-nothing** — that is the failure this check exists to catch.
+`agent-config` §8 (rule files vs. the text inlined into `AGENTS.md`, skills
+registration, MCP wiring, hooks) and re-apply setup locally. The failure this
+check exists to catch: a rule file whose changed **duty** was not re-inlined into
+an `AGENTS.md` — the global config's `instructions` array is empty, so it delivers
+nothing — and a new skill that does not resolve.
 
 ## Markdown-only — no CodeGraph here
 
@@ -55,5 +56,5 @@ Do not re-add the hook or run `codegraph init` here.
 ## What does not belong here
 
 - Project-specific skills — those live in their project (`agent-config` ownership
-  table). Only own, portable skills and always-on rules live here.
+  table). Only own, portable skills and rule files live here.
 - Third-party packs installed by tools — those stay where the installer put them.

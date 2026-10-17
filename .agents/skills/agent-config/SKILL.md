@@ -40,60 +40,62 @@ can consume the same dir.
   leftover project copy (low → high: builtin → compat → global → project →
   `skills` array).
 
-## 2a. Always-on rules (the `instructions` array) — NOT the same as a skill
+## 2a. Always-on rules — the `instructions` array is empty on this setup
 
 A skill is **trigger-based**: its `description` has to match before its body is
 read. That is the right mechanism for detail that is only needed sometimes, and
-the wrong one for a rule that must hold in *every* session (the build/verify
-flow: pull first, never implement in the orchestrator, always verify with a
-second subagent, commit after every verify round). A rule that lives only in a
-skill is a rule that gets skipped exactly when it is inconvenient.
+the wrong one for a rule that must hold in *every* session (e.g. the question
+rule: every question to the user goes through the `question` tool). A rule that
+lives only in a skill is a rule that gets skipped exactly when it is
+inconvenient.
 
 For those, the config has a second key — `instructions`, "Additional instruction
-files or patterns to include". **One entry per rule file**, and several entries are
-the normal case, not the exception: currently `build-verify.md` and `ask.md`
-(verbatim: `references/snippets.md` §2).
+files or patterns to include". **On this setup that key is empty:**
+`"instructions": []` in the global `opencode.jsonc`, with the comment that
+`build-verify` was removed 2026-10-07 on user order (on-demand per
+project/session only). **Nothing is delivered through it** (verbatim:
+`references/snippets.md` §2).
 
-> **Note (installed opencode v2.0.22 — verified, not assumed):** the
-> `instructions` key parses but does not deliver the file into the system
-> prompt — a listed rule file demonstrably never reaches it, while `AGENTS.md`
-> files do. Interim path: the always-on rules are inlined into the global
-> `~/.config/opencode/AGENTS.md` (with provenance line). Keep the
-> `instructions` entries in place so they work when the feature does.
+**What is actually always-on is rule text inlined into an `AGENTS.md`.** The
+global `~/.config/opencode/AGENTS.md` carries the CodeGraph block and three
+Arbeitsregeln (question tool, command policy, TODO policy). The question rule
+there is the **short form** of the duty; `ask.md` in `.agents/rules/` is its
+source and carries the reasoning. The `build-verify` minimum is **not** in it —
+that flow reaches a session on demand through the **`build-verify` skill**, whose
+`description` is the trigger.
 
-- **`build-verify.md` and `ask.md` are the two registered rules.** A rule file without
-  an entry **silently contributes nothing** — an unregistered, misspelled or wrong path
-  looks exactly like a working setup until it is tested.
-
-- **Path forms** (resolution, not delivery on v2.0.22): absolute and `~/`
-  paths; relative paths and globs resolve against the project (an absolute
-  glob works too — it is globbed with `cwd = dirname`). Remote `https://`
-  URLs are fetched with a 5 s timeout.
-- Intended delivery (not the path on v2.0.22 — see note above): the file's
-  content is injected as `Instructions from: <path>` into the system prompt,
-  alongside every `AGENTS.md` — **not** read on demand, so it costs context in
-  every session. Keep it short: one screen, no examples, no history.
-- That is the split: `.agents/rules/` = always in context, short and absolute;
-  `.agents/skills/` = on demand, with the reasoning, tables and evidence. The
+- **The inline may be a short form — not a transcript.** The global `AGENTS.md`
+  states the question duty in one line; the reasoning lives in `ask.md`. Judge
+  drift by the **duty**, not by wording: a text diff against the source is **not**
+  drift, and the short form must not be re-expanded to match the source.
+- **Rule file = the versioned source, not the delivery path.** `.agents/rules/`
+  holds the short, absolute minimum — one screen, no examples, no history;
+  `.agents/skills/` carries the detail with reasoning, tables and evidence. The
   rule file points at the skill; it does not duplicate it.
-- Adding another always-on rule (e.g. a third one after `ask.md`): new file in
-  `.agents/rules/` + one more entry in the array. Nothing else to wire — and
-  the new file stays invisible until that entry is there.
+- **Projects point at the rule file; they do not restate the flow.** A project's
+  `AGENTS.md` defers to the skill and names `.agents/rules/build-verify.md` as the
+  kernel, keeping only repo-specific commands — there is no copy of the rule text
+  to keep in sync.
+- **Adding an always-on rule** means inlining its text into an `AGENTS.md` (global
+  or project): keep the source file in `.agents/rules/` and inline the text,
+  because the file alone delivers nothing. A rule that is neither inlined nor
+  covered by a skill's trigger **silently contributes nothing** — the failure to
+  check for after a pull (§8).
+- **`instructions` path forms** (should the key ever be used again): absolute and
+  `~/` paths; relative paths and globs resolve against the project (an absolute
+  glob works too — it is globbed with `cwd = dirname`). Remote `https://` URLs are
+  fetched with a 5 s timeout. Intended delivery: the file's content is injected as
+  `Instructions from: <path>` into the system prompt, alongside every `AGENTS.md`
+  — **not** read on demand, so it costs context in every session.
 - **Reloading:** like any config change, the running `opencode` service caches
   resolved config — `touch ~/.config/opencode/opencode.jsonc` or restart the
-  session (see §3 for the same gotcha on MCP). Once the feature works, verify
-  the wiring **once** after setup: in a fresh session, ask the agent to repeat
-  the rule file's first heading without reading the file — if it can, the entry
-  resolved. On v2.0.22 verify the inlined copy in the global `AGENTS.md` the
-  same way instead. A path that does not exist **silently contributes nothing**,
-  so a wrong path looks exactly like a working setup until you test it.
-- **Do not put an always-on rule into the global `AGENTS.md` just because it is
-  easier** — that file is not in this repo and not versioned with it. The
-  `instructions` path keeps the rule in `agents-skills`, versioned and
-  reviewable, which is the whole point of the repo. Interim exception on
-  v2.0.22: the inlined copies there ARE the delivery path (see note above) —
-  updated in the same change as the rule file, never instead of the
-  `instructions` entries.
+  session (see §3 for the same gotcha on MCP). Verify **once** after setup: in a
+  fresh session the inlined text appears as `Instructions from: <path>` — the way
+  the global `AGENTS.md` itself shows up in this session.
+- **Do not scatter an always-on rule into an unversioned `AGENTS.md` as its only
+  home** — the global `AGENTS.md` is not in this repo and not versioned with it.
+  Keep the source file in `agents-skills`, versioned and reviewable, and inline
+  its text; that is the whole point of the repo.
 
 ## 3. MCP servers
 
@@ -151,12 +153,13 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 
 - **New machine:** install codegraph CLI (`npm i -g @colbymchenry/codegraph`),
   clone `git@github.com:reisi007/agents-skills.git`, wire the `skills` array
-  (§2) **and the `instructions` array** (§2a) in the global `opencode.jsonc` —
-  both entries are required (or symlink `~/.config/opencode/skills` → repo
-  dir for the `skills` side). codegraph is declared once as a **global MCP
-  server** (§3) — no per-project MCP entry for it. Bootstrap work then loads
-  `codegraph-project-setup` and `permissions` **by exact ID** (both are hidden,
-  §7).
+  (§2) in the global `opencode.jsonc` (or symlink `~/.config/opencode/skills` →
+  repo dir). The `instructions` array stays empty on this setup (§2a); the
+  always-on text that must be in every session (CodeGraph block, Arbeitsregeln)
+  is inlined in the global `~/.config/opencode/AGENTS.md`. codegraph is declared
+  once as a **global MCP server** (§3) — no per-project MCP entry for it.
+  Bootstrap work then loads `codegraph-project-setup` and `permissions` **by
+  exact ID** (both are hidden, §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
   AGENTS.todo.md) — load it **by exact ID** (hidden), as above. Do NOT create
   new skills in the project — add them to agents-skills instead.
@@ -177,7 +180,7 @@ unpushed:
   repo is private/single-user is not the reason; the marker SHAs are;
 - never `git add -A`: explicit paths plus `git show --stat`.
 
-This section is **not** an exception to the always-on `build-verify` rules — the
+This section is **not** an exception to the `build-verify` flow's rules — the
 commit-per-task / push / watch-CI policy holds here unchanged. The `Verify:`
 footer and the `nach-verify` flag apply as in every other repo.
 
@@ -186,7 +189,7 @@ footer and the `nach-verify` flag apply as in every other repo.
 | Skills | Location |
 |---|---|
 | Own skills (`ui-review`, `codegraph-project-setup`, `agent-config`, …) | `agents-skills/.agents/skills/` only |
-| Always-on rules (`build-verify`) | `agents-skills/.agents/rules/` only, wired via the global `instructions` array (§2a) |
+| Always-on rule files (`ask`, `build-verify`) | `agents-skills/.agents/rules/` only — always-on only where their text is inlined into an `AGENTS.md` (§2a) |
 | Official/third-party packs installed by tools (daisyui, find-skills, stripe-*, …) | where the installer put them (`~/.agents/skills`, project `.agents/skills`, …) — not in agents-skills |
 | Project-specific skills (nx-*, blog-beitrag, testimonial, …) | their project — not in agents-skills |
 
@@ -221,8 +224,8 @@ setup if the source moved under you:
 
 | Changed path | Setup step to re-check |
 |---|---|
-| `.agents/rules/*` (new or changed) | global `opencode.jsonc` `instructions` array covers every rule file (§2a) — a new rule file without an entry **silently contributes nothing** |
-| `.agents/rules/*` (changed content) | update the inlined copies in the global `~/.config/opencode/AGENTS.md` in the same change — the §2a `instructions` mechanism is recorded as non-functional on v2.0.22, so it is not the delivery path |
+| `.agents/rules/*` (new) | nothing is auto-wired: the rule reaches a session only if its text is inlined into an `AGENTS.md` (global or project) or a skill trigger covers it — the `instructions` array is empty (§2a), so an inlined-nowhere rule **silently contributes nothing** |
+| `.agents/rules/*` (changed content) | re-inline **only when the duty changed**, in the inline's own short form. The question rule (from `ask.md`) sits in the global `~/.config/opencode/AGENTS.md` as a deliberate short form, **not** a verbatim copy: a wording diff against `ask.md` is **not** drift, and re-expanding the short form to match the source is the mistake this row prevents. `build-verify.md` has no inline — it loads via the skill |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
 | `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
 | `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) — **`.githooks/` no longer exists in this repo** (markdown-only, hook removed 2026-10-08): nothing to re-run, and do not re-create it |

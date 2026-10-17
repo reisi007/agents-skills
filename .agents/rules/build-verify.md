@@ -1,6 +1,6 @@
-# Build/Verify flow — always on
+# Build/Verify flow — the non-negotiable minimum
 
-Loaded into **every** session via the `instructions` key of the global OpenCode config. Minimum only — project commands live in that repo's `AGENTS.md`; the full loop lives in the **`build-verify`** skill.
+The non-negotiable minimum, and the rule file projects point at in their own `AGENTS.md`. It is **not** delivered via the global config's `instructions` key — that array is empty on this setup; the way into a session is the **`build-verify`** skill's description, where the full loop lives. Minimum only — project commands live in that repo's `AGENTS.md`.
 
 ## Scope — this flow is a commit flow
 

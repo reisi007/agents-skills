@@ -5,10 +5,12 @@ description: 'TRIGGER when a user-commissioned change in a git repo is about to 
 
 # Build Verify — pull, delegate, verify, commit, amend, push
 
-The sequence to work by. The non-negotiable minimum is the always-on
-`build-verify` rule file, wired via the `instructions`
-key of the global config — so it is in context in **every** session, and its
-**Rule 0** points here for everything beyond the Kleinheits-Ausnahme. The flow
+The sequence to work by. The trigger is this skill's **description** — a
+user-commissioned change in a git repo. The non-negotiable minimum lives in the
+`build-verify` rule file, which projects point at from their own `AGENTS.md`; it is
+**not** wired into a session via the global config's `instructions` key (that
+array is empty on this setup). Its **Rule 0** points here for everything beyond
+the Kleinheits-Ausnahme. The flow
 starts on user **commission** and covers everything to be committed; research,
 questions, and throwaway experiments are excluded. **What counts as green in a
 given repo lives in that repo's `AGENTS.md`.**
@@ -56,7 +58,7 @@ git pull --rebase               # only on a clean tree
 | **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
 | **Milestone reviewer** | separate subagent (**optional**) | cross-feature coherence, E2E, regression scan at releases / every N features; **not per feature** |
 
-**Kleinheit check:** if all four criteria from the always-on rule's
+**Kleinheit check:** if all four criteria from the rule file's
 `Kleinheits-Ausnahme` section hold, the orchestrator makes the change itself —
 Conventional Commit, push + CI, footer `Verify: none (Kleinheits-Ausnahme, 0
 rounds)`, self-checked with the repo `AGENTS.md`'s sub-minute commands.

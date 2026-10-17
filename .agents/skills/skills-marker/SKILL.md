@@ -112,17 +112,20 @@ Geltungsbereich mitliefert: steht dort „in jedem Projekt" oder „in CI-Workfl
 ist die Antwort sofort klar — und im Zweifel gewinnt **ja** mit offener Position,
 nicht **nein**.
 
-**Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und
-eingebettete Always-on-Regeln bekommen je eine Tabellenzeile wie jeder Skill.
+**Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und in eine
+`AGENTS.md` eingebettete Regeln bekommen je eine Tabellenzeile wie jeder Skill.
 
 ## 5. Nach einem `git pull` im Skills-Repo
 
 1. **Marker lesen** → `<marker-sha>`. Fehlt die Datei, ist das Projekt nicht gescaffoldet
    — `codegraph-project-setup`, Schritt 2.5.
 2. **Range bilden** (Kommandos aus §3) → Liste der betroffenen Skills.
-3. **Regel-Drift prüfen:** `.agents/rules/*` gegen die eingebetteten Kopien in
-   der globalen `~/.config/opencode/AGENTS.md` diffen — eine neuere Regeldatei
-   ist Drift, bis die Kopie nachgezogen ist (`agent-config` §8).
+3. **Regel-Drift prüfen:** die eingebetteten Regeln in der globalen
+   `~/.config/opencode/AGENTS.md` gegen ihre Quelle in `.agents/rules/*` prüfen
+   (aktuell die Frage-Regel aus `ask.md`) — Drift ist eine geänderte **Pflicht**,
+   kein abweichender Wortlaut: die Einbettung ist bewusst Kurzform, ein Text-Diff
+   gegen die Quelle ist **kein** Drift. Nachziehen heißt sinngemäß einbetten, nicht
+   die Kurzform wörtlich aufblasen (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
 5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
 6. **Marker fortschreiben**: `agents-skills-consumed` auf
@@ -132,8 +135,8 @@ eingebettete Always-on-Regeln bekommen je eine Tabellenzeile wie jeder Skill.
 7. **Reload**, falls Regeln oder Skills betroffen sind:
    `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
-Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — neue
-Regel-Datei in den `instructions`-Array, MCP, neue Skill-Verdrahtung — steht in
+Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — geänderte
+Regel in die eingebettete Kopie, MCP, neue Skill-Verdrahtung — steht in
 `agent-config` §8 und wird hier nicht wiederholt. Die Trennung ist strikt:
 **`agent-config` §8 = Konfiguration (Sache der Maschine), `skills-marker` =
 Projekt-Anwendung (Sache des Projekts).** Beide laufen nach demselben Pull, sie treffen

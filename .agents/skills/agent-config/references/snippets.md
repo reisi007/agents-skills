@@ -9,21 +9,20 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
-"skills": {
-  "paths": [
-    "/Users/<user>/dev/agents-skills/.agents/skills"
-  ]
-},
+"skills": [
+  "/Users/<user>/dev/agents-skills/.agents/skills"
+],
 ```
 
-## 2. Always-on rules (`instructions` array)
+## 2. Always-on rules (`instructions` array — empty on this setup)
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
-"instructions": [
-  "/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md",
-  "/Users/<user>/dev/agents-skills/.agents/rules/ask.md"
-],
+// ALWAYS-ON RULES: files injected as `Instructions from: <path>` into every
+// session's system prompt. build-verify removed 2026-10-07 on user order
+// (on-demand per project/session only) — add new rule files here to make them
+// always-on. After changing this array: `touch` this file so the service reloads.
+"instructions": [],
 ```
 
 ## 3. CodeGraph global MCP server

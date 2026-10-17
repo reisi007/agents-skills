@@ -76,17 +76,21 @@ Playwright hat, schreibt in derselben Lage `trifft nicht zu` mit dem Grund
 
 Ändert sich eine Repo-Konvention — Sprache (Englisch für die Skills in diesem Repo),
 Größen-Disziplin (`SKILL.md` ~150 Zeilen, Überlauf nach `references/`) oder eine
-eingebettete Always-on-Regel (inlined in die globale `AGENTS.md`, weil `instructions`
-auf v2.0.22 nicht liefert) — bekommt sie eine Tabellenzeile wie jeder Skill:
+in eine `AGENTS.md` eingebettete Regel (weil der `instructions`-Array leer ist und
+nichts liefert) — bekommt sie eine Tabellenzeile wie jeder Skill:
 
 | Konvention | angewendet? | wo im Projekt | offene Position |
 |---|---|---|---|
-| `build-verify` (eingebettete Kopie) | ja | `~/.config/opencode/AGENTS.md` = Regelstand | |
+| `ask` (eingebettete Frage-Regel) | ja | `~/.config/opencode/AGENTS.md` = Kurzform der Pflicht (Quelle `ask.md`) | |
 | Sprache / Größen-Disziplin | nein | | Projekt hat eigene Doku-Konvention |
 
-Regel-Drift diagnostizieren: die Regeldatei mit dem eingebetteten Abschnitt in der
-globalen `AGENTS.md` vergleichen — ist die Datei neuer, ist die Kopie Drift, und der
-Marker hält das erst als geprüft fest, wenn die Kopie nachgezogen ist.
+Regel-Drift diagnostizieren: die eingebettete Regel mit ihrer Quelle in
+`.agents/rules/` vergleichen (aktuell die Frage-Regel aus `ask.md`) — Drift ist eine
+geänderte **Pflicht**, kein abweichender Wortlaut: die Einbettung ist bewusst
+Kurzform, ein Text-Diff gegen die Quelle ist **kein** Drift. Nachziehen heißt
+sinngemäß einbetten, nicht die Kurzform wörtlich aufblasen; der Marker hält das erst
+als geprüft fest, wenn die Pflicht in der Kopie steht. `build-verify` ist **nicht**
+eingebettet; sein Trigger ist die Skill-Description.
 
 ## Fallstrick: der Marker-SHA verschwindet
 

@@ -11,7 +11,7 @@ project.
 
 ```
 agents-skills/
-├── .agents/rules/            ← always in context (inlined into global `AGENTS.md`)
+├── .agents/rules/            ← rule files; always-on only where inlined into an `AGENTS.md`
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
 │   └── build-verify.md       ← build/verify flow: non-negotiable core rules
 ├── .agents/skills/          ← Agent Skills spec structure (portable for OpenCode, Claude Code, …)
@@ -34,9 +34,9 @@ agents-skills/
 │   └── web-audit/           ← full live-site audit (SEO, images, performance) → self-contained archive
 ```
 
-Always-on rules are inlined into the global `~/.config/opencode/AGENTS.md`,
-loaded in every session; the `instructions` entry stays in the config as the
-intended mechanism for when it works.
+Rules reach a session through `AGENTS.md` inlining, not the config's
+`instructions` key — that array is empty on this setup; `build-verify` loads on
+demand via its skill's description instead.
 
 ## Installation / registration (once per machine)
 
@@ -45,7 +45,7 @@ git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
 
 # ~/.config/opencode/opencode.jsonc
 "skills": ["/Users/<user>/dev/agents-skills/.agents/skills"],
-"instructions": ["/Users/<user>/dev/agents-skills/.agents/rules/build-verify.md"],
+"instructions": [],   // empty: always-on text is inlined into AGENTS.md (see below)
 ```
 
 Afterwards available in **every** OpenCode session. Details & MCP CodeGraph:
@@ -62,16 +62,17 @@ git add -A && git commit && git push
 
 No config change needed — the directory is already registered.
 
-For a rule that should **always** be in context (not only on a trigger):
-place the file in `.agents/rules/` and add the path to the `instructions` array
-of the global config. Details in skill `agent-config`.
+For a rule that should hold in **every** session (not only on a trigger): keep the
+file in `.agents/rules/` and inline its duty (short form) into an `AGENTS.md` (global or
+project) — on this setup the config's `instructions` array is empty and delivers
+nothing. Details in skill `agent-config`.
 
 ## Ownership rules
 
 | Skills | Location |
 |---|---|
 | Own skills | **here** (`agents-skills/.agents/skills/`) |
-| Always-loaded rules | **here** (`agents-skills/.agents/rules/`) |
+| Rule files (always-on source) | **here** (`agents-skills/.agents/rules/`) |
 | Official/third-party packs (daisyui, find-skills, stripe-*) | where the installer puts them |
 | Project-specific skills (nx-*, blog-beitrag, testimonial) | in the respective project |
 
