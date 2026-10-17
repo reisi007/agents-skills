@@ -22,7 +22,7 @@ machine/project online.
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
 | `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui, reverse-engineer-anything) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
-| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Currently holds only `models.md` (the model-update command): per the user rule 2026-10-17 that update is the **only** own command — rare flows go through `/skills` (§7) instead. |
+| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Currently holds only `update-models.md` (the model-update command): per the user rule 2026-10-17 that update is the **only** own command — rare flows go through `/skills` (§7) instead. |
 
 ## 2. Skills repo registration (the `skills` array)
 

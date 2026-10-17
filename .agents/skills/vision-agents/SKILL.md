@@ -7,7 +7,7 @@ description: 'TRIGGER when a visual judgement is subjective, domain-specific, or
 
 **Premise: every configured model is vision-capable.** Image input is a *hard
 requirement* for the root `model` and for every `agents.<role>.model` — see
-`models` → "Hard requirements". So the main agent reads images itself.
+`update-models` → "Hard requirements". So the main agent reads images itself.
 There is no capability gap to bridge.
 
 (`vision-technical` was removed for exactly that reason — history in [`references/notes.md`](references/notes.md). So was `document`: removed 2026-10-08, because no configured model has `pdf` input and the role had never been used — same file.)
@@ -20,7 +20,7 @@ split larger batches.
 |---|---|---|
 | `vision-creative` | creative judgement | Design/aesthetic review, mood & meaning, whether visuals convey intent, and complex fine-grained detail reads. |
 
-> Model is not pinned in this skill — set `agents.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `models` skill choose/refresh it. Per-role prefs: `vision-creative` = image + video, strongest vision model wins.
+> Model is not pinned in this skill — set `agents.<role>.model` in `~/.config/opencode/opencode.jsonc` and let the `update-models` skill choose/refresh it. Per-role prefs: `vision-creative` = image + video, strongest vision model wins.
 
 ## PDFs — no path
 
@@ -107,7 +107,7 @@ Copy the `agents` block from `references/agents.jsonc` into `~/.config/opencode/
 }
 ```
 
-Then run the `models` skill to pick the concrete models (it adds
+Then run the `update-models` skill to pick the concrete models (it adds
 `// updated: YYYY-MM-DD` which it uses to detect staleness), `touch ~/.config/opencode/opencode.jsonc`
 and verify with `opencode service status`.
 

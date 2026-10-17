@@ -1,6 +1,6 @@
 # Registry — live OpenCode model list
 
-Detail for the registry half of the `models` skill. Everything here is about what
+Detail for the registry half of the `update-models` skill. Everything here is about what
 `opencode models` actually reports; UPDATE/KEEP advice lives in `pricing.md` and the
 obligations in `SKILL.md`.
 

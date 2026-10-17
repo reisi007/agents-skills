@@ -29,14 +29,14 @@ Consequences, both deliberate:
 There used to be three roles; `vision-technical` (screenshot reading,
 EXIF-relevant visual details, image categorisation) was removed once image
 input became a hard requirement for the root `model` and every
-`agents.<role>.model` (`models` → "Hard requirements"). Those reads are
+`agents.<role>.model` (`update-models` → "Hard requirements"). Those reads are
 the main agent's own job now — done inline, never delegated. What remains is
 **role separation, not capability separation**: read-only specialists kept for
 judgement the main agent should not trust itself on alone.
 
 ## Why the model is not pinned here
 
-Model choice rots fast; the `models` skill exists to re-rank candidates
+Model choice rots fast; the `update-models` skill exists to re-rank candidates
 against live price/capability trackers and stamps `// updated: YYYY-MM-DD` for
 staleness detection. Pinning a model ID in this skill would fork that process
 and drift. Per-role prefs it applies on top of the vision-capable gate:

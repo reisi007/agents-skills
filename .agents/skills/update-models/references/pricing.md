@@ -1,6 +1,6 @@
 # Pricing — trackers, procedure, preferences
 
-Detail for the advisor half of the `models` skill: the price-tracker data sources,
+Detail for the advisor half of the `update-models` skill: the price-tracker data sources,
 the full UPDATE/KEEP procedure, and the preferences-file schema. Obligations live in
 `SKILL.md`; raw endpoints and `jq` snippets in `data-sources.md`.
 
@@ -61,7 +61,7 @@ all gates apply. Cross-check CC for shared families.
 ```markdown
 # Model Preferences (global)
 
-Used by the `models` skill to recommend model updates.
+Used by the `update-models` skill to recommend model updates.
 
 - minUsableContext: 400000        # at least 400k usable context window
 - preferFree: false               # prefer $0 models when quality is comparable

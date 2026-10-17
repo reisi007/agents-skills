@@ -22,7 +22,7 @@ agents-skills/
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
 │   ├── laravel/             ← Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint)
-│   ├── models/              ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
+│   ├── update-models/       ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
 │   ├── node-deps/           ← pnpm dependency policy: no pins, ranges + lockfile
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards

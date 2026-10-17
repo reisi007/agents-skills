@@ -36,7 +36,7 @@ human or you can judge the design. Nothing here gates CI.
 - If the harness is missing, scaffold it first — see
   `references/harness.md` and the copyable templates in `references/templates/`.
 - No vision plugin needed: every configured model reads images (see the
-  `models` skill's hard requirement).
+  `update-models` skill's hard requirement).
 
 ## Step 1 — Capture
 
