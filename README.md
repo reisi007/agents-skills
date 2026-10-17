@@ -21,12 +21,11 @@ agents-skills/
 │   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
-│   ├── model-updater/       ← model recommendations against ocgo/cc price tracker (UPDATE/KEEP)
+│   ├── models/              ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
 │   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
 │   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
-│   ├── update-opencode-models/ ← live registry: opencode models, reload, free/paid prefixes
 │   ├── vision-agents/       ← locked-down vision subagent (creative) + escalation rule
 │   └── ui-review/           ← Playwright screenshot loop + vision analysis
 ```
