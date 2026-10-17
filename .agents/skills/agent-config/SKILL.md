@@ -22,7 +22,7 @@ machine/project online.
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
 | `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui, reverse-engineer-anything) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
-| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Each of the 11 hidden skills (§7) has such a command (`/<id>`). |
+| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Currently holds only `models.md` (the model-update command): per the user rule 2026-10-17 that update is the **only** own command — rare flows go through `/skills` (§7) instead. |
 
 ## 2. Skills repo registration (the `skills` array)
 
@@ -193,23 +193,24 @@ footer and the `nach-verify` flag apply as in every other repo.
 ### Hidden skills — not advertised, loaded by exact ID
 
 11 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
-in the model's advertised list, but stay registered and load by exact ID via the
-`skill` tool, `@<id>` in a prompt, or the `/` command of the same name
-(`~/.config/opencode/commands/<id>.md`, §1). They are reachable from here:
+in the model's advertised list, but stay registered and load by exact ID — pick
+them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
+the exact ID. They are no longer exposed as `/<id>` slash commands (§1). Reachable
+from here:
 
-| ID | Trigger (one line) | Command |
-|---|---|---|
-| `docker-test-image` | E2E/CI test image bakes the environment only; browser version from the lockfile | `/docker-test-image` |
-| `ghcr-visibility` | job-level `container:` pull fails `unauthorized` / job dies exit 125 / package visibility | `/ghcr-visibility` |
-| `laravel` | Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint) | `/laravel` |
-| `node-deps` | pnpm dependency policy: no pins, ranges + lockfile | `/node-deps` |
-| `playwright-parallel` | Playwright E2E parallelism: named locks, workers, shards instead of serial | `/playwright-parallel` |
-| `react-i18n` | German React+Vite UI with Lingui; extract/compile gate | `/react-i18n` |
-| `skills-marker` | per-project skills cursor `AGENTS.skills.md` (which commit was checked) | `/skills-marker` |
-| `tailscale-serve` | expose a local dev server on the tailnet via `tailscale serve` | `/tailscale-serve` |
-| `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive | `/web-audit` |
-| `codegraph-project-setup` | bootstrap CodeGraph (index + git hook) + project conventions | `/codegraph-project-setup` |
-| `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory | `/permissions` |
+| ID | Trigger (one line) |
+|---|---|
+| `docker-test-image` | E2E/CI test image bakes the environment only; browser version from the lockfile |
+| `ghcr-visibility` | job-level `container:` pull fails `unauthorized` / job dies exit 125 / package visibility |
+| `laravel` | Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint) |
+| `node-deps` | pnpm dependency policy: no pins, ranges + lockfile |
+| `playwright-parallel` | Playwright E2E parallelism: named locks, workers, shards instead of serial |
+| `react-i18n` | German React+Vite UI with Lingui; extract/compile gate |
+| `skills-marker` | per-project skills cursor `AGENTS.skills.md` (which commit was checked) |
+| `tailscale-serve` | expose a local dev server on the tailnet via `tailscale serve` |
+| `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive |
+| `codegraph-project-setup` | bootstrap CodeGraph (index + git hook) + project conventions |
+| `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory |
 
 ## 8. After pull: setup drift check
 
