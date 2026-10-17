@@ -18,10 +18,11 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
-// ALWAYS-ON RULES: files injected as `Instructions from: <path>` into every
-// session's system prompt. build-verify removed 2026-10-07 on user order
-// (on-demand per project/session only) — add new rule files here to make them
-// always-on. After changing this array: `touch` this file so the service reloads.
+// ALWAYS-ON RULES: files injected as `Instructions from: <path>`
+// into every session's system prompt. See agents-skills/.agents/skills/agent-config
+// §2a. build-verify removed 2026-10-07 on user order (on-demand per
+// project/session only) — add new rule files here to make them always-on.
+// After changing this array: `touch` this file so the opencode service reloads.
 "instructions": [],
 ```
 
@@ -30,10 +31,13 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 ```jsonc
 // ~/.config/opencode/opencode.jsonc
 "mcp": {
-  "codegraph": {
-    "type": "local",
-    "command": ["codegraph", "serve", "--mcp"],
-    "enabled": true
+  "servers": {
+    "codegraph": {
+      "type": "local",
+      "command": ["codegraph", "serve", "--mcp"],
+      "disabled": false,
+      "codemode": false
+    }
   }
 },
 ```

@@ -66,6 +66,10 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
    `geprüft am:` auf heute, Abschnitte ersetzen.
-6. Falls Regeln oder Skills betroffen waren: eingebettete Regel-Kopien in der
-   globalen `~/.config/opencode/AGENTS.md` nachziehen (Drift!), dann
-   `touch ~/.config/opencode/opencode.jsonc`.
+6. Falls Regeln oder Skills betroffen waren: die eingebetteten Regeln in der
+   globalen `~/.config/opencode/AGENTS.md` gegen ihre Quelle in `.agents/rules/*`
+   prüfen und bei geänderter **Pflicht** sinngemäß nachziehen. Drift ist eine
+   geänderte Pflicht, kein abweichender Wortlaut — die Einbettung ist die Kurzform
+   der Pflicht, kein wörtliches Abbild, und ein Text-Diff gegen die Quelle ist
+   **kein** Drift. Dann `touch ~/.config/opencode/opencode.jsonc` (Reload fürs
+   `skills`-Array; das `instructions`-Array ist leer und liefert nichts).
