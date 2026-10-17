@@ -89,8 +89,7 @@ Regel-Drift diagnostizieren: die eingebettete Regel mit ihrer Quelle in
 geänderte **Pflicht**, kein abweichender Wortlaut: die Einbettung ist bewusst
 Kurzform, ein Text-Diff gegen die Quelle ist **kein** Drift. Nachziehen heißt
 sinngemäß einbetten, nicht die Kurzform wörtlich aufblasen; der Marker hält das erst
-als geprüft fest, wenn die Pflicht in der Kopie steht. `build-verify` ist **nicht**
-eingebettet; sein Trigger ist die Skill-Description.
+als geprüft fest, wenn die Pflicht in der Kopie steht.
 
 ## Fallstrick: der Marker-SHA verschwindet
 

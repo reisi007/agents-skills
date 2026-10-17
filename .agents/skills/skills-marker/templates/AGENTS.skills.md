@@ -5,7 +5,7 @@
 
   Diese Datei wird bei jedem `git pull` im Skills-Repo FORTGESCHRIEBEN, nicht
   abgearbeitet — sie ist ein Cursor, kein Archiv und kein Auftrag (dieselbe
-  Unterscheidung wie `AGENTS.todo.md` im `build-verify`-Flow).
+  Unterscheidung wie `AGENTS.todo.md`).
   Format und Ablauf: Skill `skills-marker` im Skills-Repo.
   Die HTML-Kommentare sind Arbeitsanleitung und fallen beim ersten Fortschreiben weg.
 -->

@@ -11,8 +11,7 @@ metadata:
 den Commit des Skills-Repos, **bis zu dem** es geprüft hat, und wann. Alles andere ist
 eine Zeile in der Tabelle darunter. Die Datei ist ein **Cursor, kein Archiv und kein
 Auftrag**: sie wird **nicht abgearbeitet**, sondern bei jedem `git pull` im Skills-Repo
-fortgeschrieben — dieselbe Unterscheidung, die der `build-verify`-Flow für
-`AGENTS.todo.md` trifft.
+fortgeschrieben — dieselbe Unterscheidung, die für `AGENTS.todo.md` gilt.
 
 Der Nutzen: aus „lies den Diff und rate, was davon dieses Projekt betrifft" wird eine
 konkrete Liste. `git log <marker-sha>..HEAD` benennt jeden geänderten oder neuen Skill,
@@ -82,7 +81,7 @@ bilden (Fälle und Begründung: `references/notes.md`).
 | Trifft nicht zu | `angewendet: nein` \| kurzer Grund: „betrifft CI-Image, Repo hat keins" |
 
 Die zweite Zeile ist der wichtigste Fall: Neues, das hier nicht umgesetzt ist,
-wandert als **Log, kein Auftrag** nach `AGENTS.todo.md` (`build-verify`) —
+wandert als **Log, kein Auftrag** nach `AGENTS.todo.md` —
 nie stillschweigend übersprungen, nie als erledigt markiert.
 
 Erst wenn für **jeden** Skill aus der Range eine dieser drei Zeilen steht, wird der

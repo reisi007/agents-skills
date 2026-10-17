@@ -51,18 +51,16 @@ inconvenient.
 
 For those, the config has a second key — `instructions`, "Additional instruction
 files or patterns to include". **On this setup that key is empty:**
-`"instructions": []` in the global `opencode.jsonc`, with the comment that
-`build-verify` was removed 2026-10-07 on user order (on-demand per
-project/session only). **Nothing is delivered through it** (verbatim:
-`references/snippets.md` §2).
+`"instructions": []` in the global `opencode.jsonc`. **Nothing is delivered
+through it** (verbatim: `references/snippets.md` §2).
 
 **What is actually always-on is rule text inlined into an `AGENTS.md`.** The
 global `~/.config/opencode/AGENTS.md` carries the CodeGraph block and three
 Arbeitsregeln (question tool, command policy, TODO policy). The question rule
 there is the **short form** of the duty; `ask.md` in `.agents/rules/` is its
-source and carries the reasoning. The `build-verify` minimum is **not** in it —
-that flow reaches a session on demand through the **`build-verify` skill**, whose
-`description` is the trigger.
+source and carries the reasoning. The build/verify minimum is **not** in it —
+that flow reaches a session on demand through a skill, whose `description` is
+the trigger.
 
 - **The inline may be a short form — not a transcript.** The global `AGENTS.md`
   states the question duty in one line; the reasoning lives in `ask.md`. Judge
@@ -182,7 +180,7 @@ unpushed:
   repo is private/single-user is not the reason; the marker SHAs are;
 - never `git add -A`: explicit paths plus `git show --stat`.
 
-This section is **not** an exception to the `build-verify` flow's rules — the
+This section is **not** an exception to the build/verify flow's rules — the
 commit-per-task / push / watch-CI policy holds here unchanged. The `Verify:`
 footer and the `nach-verify` flag apply as in every other repo.
 
@@ -191,7 +189,7 @@ footer and the `nach-verify` flag apply as in every other repo.
 | Skills | Location |
 |---|---|
 | Own skills (`ui-review`, `codegraph-project-setup`, `agent-config`, …) | `agents-skills/.agents/skills/` only |
-| Always-on rule files (`ask`, `build-verify`) | `agents-skills/.agents/rules/` only — always-on only where their text is inlined into an `AGENTS.md` (§2a) |
+| Rule files (`ask`, `build-verify`) | `agents-skills/.agents/rules/` only — always-on only where their text is inlined into an `AGENTS.md` (§2a) |
 | Official/third-party packs installed by tools (daisyui, find-skills, stripe-*, …) | where the installer put them (`~/.agents/skills`, project `.agents/skills`, …) — not in agents-skills |
 | Project-specific skills (nx-*, blog-beitrag, testimonial, …) | their project — not in agents-skills |
 
@@ -227,7 +225,7 @@ setup if the source moved under you:
 | Changed path | Setup step to re-check |
 |---|---|
 | `.agents/rules/*` (new) | nothing is auto-wired: the rule reaches a session only if its text is inlined into an `AGENTS.md` (global or project) or a skill trigger covers it — the `instructions` array is empty (§2a), so an inlined-nowhere rule **silently contributes nothing** |
-| `.agents/rules/*` (changed content) | re-inline **only when the duty changed**, in the inline's own short form. The question rule (from `ask.md`) sits in the global `~/.config/opencode/AGENTS.md` as a deliberate short form, **not** a verbatim copy: a wording diff against `ask.md` is **not** drift, and re-expanding the short form to match the source is the mistake this row prevents. `build-verify.md` has no inline — it loads via the skill |
+| `.agents/rules/*` (changed content) | re-inline **only when the duty changed**, in the inline's own short form. The question rule (from `ask.md`) sits in the global `~/.config/opencode/AGENTS.md` as a deliberate short form, **not** a verbatim copy: a wording diff against `ask.md` is **not** drift, and re-expanding the short form to match the source is the mistake this row prevents. `build-verify.md` has no inline copy |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
 | `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
 | `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) — **`.githooks/` no longer exists in this repo** (markdown-only, hook removed 2026-10-08): nothing to re-run, and do not re-create it |

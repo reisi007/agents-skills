@@ -12,7 +12,7 @@ for a commit that is still **unpushed**: a wording fix in the message, a file yo
 forgot to add. Once a commit is pushed it is history — an amend changes its SHA
 and other projects record these SHAs as their `skills-marker` range, so a
 rewrite silently breaks their cursor. `git add -A` is never used: explicit paths
-plus `git show --stat` (build/verify rules 4 and 5).
+plus `git show --stat`.
 
 ## Sprache
 

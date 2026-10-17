@@ -35,8 +35,7 @@ agents-skills/
 ```
 
 Rules reach a session through `AGENTS.md` inlining, not the config's
-`instructions` key — that array is empty on this setup; `build-verify` loads on
-demand via its skill's description instead.
+`instructions` key — that array is empty on this setup.
 
 ## Installation / registration (once per machine)
 
@@ -80,7 +79,6 @@ nothing. Details in skill `agent-config`.
 
 - `codegraph-project-setup` — CodeGraph index + hook for new projects
 - `agent-config` — global agent configuration (single source of truth)
-- `build-verify` — build/verify flow: pull, delegate, verify, commit, amend, push
 
 ## License
 

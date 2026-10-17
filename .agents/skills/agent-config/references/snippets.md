@@ -20,8 +20,7 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 // ~/.config/opencode/opencode.jsonc
 // ALWAYS-ON RULES: files injected as `Instructions from: <path>`
 // into every session's system prompt. See agents-skills/.agents/skills/agent-config
-// §2a. build-verify removed 2026-10-07 on user order (on-demand per
-// project/session only) — add new rule files here to make them always-on.
+// §2a. Add new rule files here to make them always-on.
 // After changing this array: `touch` this file so the opencode service reloads.
 "instructions": [],
 ```
