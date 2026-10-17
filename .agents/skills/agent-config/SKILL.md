@@ -1,6 +1,6 @@
 ---
 name: Agent Config
-description: TRIGGER when setting up a new machine/agent, wiring the global OpenCode configuration (opencode.jsonc, MCP servers, skills array), registering the central skills repo (agents-skills), or answering "how is my agent configured" / "where do my skills live" / "how do I add an MCP server". Reference for the single source of truth of this developer's agent tooling.
+description: 'TRIGGER when setting up a new machine/agent, wiring the global OpenCode config (opencode.jsonc, MCP servers, skills array), registering the central skills repo (agents-skills), or answering "how is my agent configured" / "where do my skills live" / "how do I add an MCP server".'
 ---
 
 # Agent Config — global setup, single source of truth
@@ -21,7 +21,7 @@ machine/project online.
 | `~/.config/opencode/opencode.jsonc` | Global OpenCode config: permissions, agents, MCP servers, `skills` array |
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
-| `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, blog-beitrag, testimonial symlinks) — NOT for own skills |
+| `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui, reverse-engineer-anything) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
 
 ## 2. Skills repo registration (the `skills` array)
 
