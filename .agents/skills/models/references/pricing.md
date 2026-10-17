@@ -24,26 +24,26 @@ CC-only alternatives. Pull the **last ~15–30 changelog entries**.
 2. **Preferences** — `~/.config/opencode/model-preferences.md`; if missing, **create it**
    from the schema below and say so. `minUsableContext` (default `400000`), `preferFree`
    (default `false`), `maxEffectiveInputPerMTok` (default `null`), `notes`,
-   `namespaceRule` (default `opencode-free-tier` — filter *before* scoring, never justify
-   with ZDR), `variants` (default `none` — never propose `variant`; delete a configured
-   line), `privacyDataCaveat` (when set, ignore `privacy.training` /
-   `privacy.retentionDays`). `namespaceRule` is the standing decision and wins over any
-   default in the namespace rule in `SKILL.md`; read it before scoring. Per-role rules
-   rank *among* vision-capable candidates only; otherwise fall back to global
-   preferences:
+   `namespaceRule` (current standing rule `opencode-go-mixed` since 2026-10-16; the
+   earlier default `opencode-free-tier` is retired — history in `notes.md`. Filter
+   *before* scoring, never justify with ZDR), `variants` (default `none` — never propose
+   `variant`; delete a configured line), `privacyDataCaveat` (when set, ignore
+   `privacy.training` / `privacy.retentionDays`). `namespaceRule` is the standing
+   decision and wins over any default in the namespace rule in `SKILL.md`; read it
+   before scoring. Per-role rules rank *among* vision-capable candidates only;
+   otherwise fall back to global preferences:
    - `vision` / `vision-creative`: strongest visual reader wins, not the cheapest.
-   - `free`: follows the namespace rule; must be free **and** vision-capable (check
-     explicitly — the vision-capable free subset is small; authoritative list is
-     `freeModels[]`). Never for sensitive tasks.
-   - `nonsensitive`: image required; cheapest effective $/token wins, context bar may
-     relax. Never for sensitive tasks.
 
 ## Procedure (full)
 
 For each configured model: **0. Capability gate first.** No `image` → **REPLACE**
-("text-only"), propose it nowhere. **0b. Namespace gate next.** `opencode-go/<slug>`
-with an `opencode/` twin → **REPLACE** with the twin; hard capability needs override;
-filter candidates the same way. **0c. Privacy gate.** Caveat set → ignore
+("text-only"), propose it nowhere. **0b. Namespace gate next.** Apply the
+`namespaceRule` in `~/.config/opencode/model-preferences.md` — that file is the
+arbiter, not the slug; with the current rule (`opencode-go-mixed`) a configured
+`opencode-go/<slug>` is **not** a REPLACE on namespace grounds, even where the
+registry carries an `opencode/` twin. The twin only justifies a REPLACE while
+`namespaceRule` still carries the free-tier namespace rule. Hard capability needs
+override; filter candidates the same way. **0c. Privacy gate.** Caveat set → ignore
 `privacy.training` / `privacy.retentionDays`. **1. Locate.** Match `id` (not `name`) in
 `latest.json` (`models` + `freeModels`). **2. Availability.** Absent + `model_removed`
 naming it → discontinued: **REPLACE** (same `provider`, highest available version, cite

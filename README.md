@@ -21,13 +21,17 @@ agents-skills/
 │   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
+│   ├── laravel/             ← Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint)
 │   ├── models/              ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
+│   ├── node-deps/           ← pnpm dependency policy: no pins, ranges + lockfile
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
+│   ├── react-i18n/          ← German React+Vite UI with Lingui; extract/compile gate
 │   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
 │   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
 │   ├── vision-agents/       ← locked-down vision subagent (creative) + escalation rule
-│   └── ui-review/           ← Playwright screenshot loop + vision analysis
+│   ├── ui-review/           ← Playwright screenshot loop + vision analysis
+│   └── web-audit/           ← full live-site audit (SEO, images, performance) → self-contained archive
 ```
 
 Always-on rules are inlined into the global `~/.config/opencode/AGENTS.md`,

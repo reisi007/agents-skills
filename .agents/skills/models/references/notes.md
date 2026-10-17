@@ -1,4 +1,4 @@
-# Model Updater — notes (why the rules exist)
+# Models — notes (why the rules exist)
 
 Justifications, retired rules, and dated snapshots. Obligations live in
 `SKILL.md`; nothing here is needed to run the skill. Anything naming a concrete
@@ -18,10 +18,11 @@ why price, context window, and reasoning tier do not compensate.
 The old rule was "the `opencode-go/` twin always wins, because the subscription
 is ZDR". It is **retired**. Do not reinstate it, and do not treat a configured
 `opencode/<slug>` as an error. If a future conversation quotes ZDR as the
-reason for a namespace move, that reasoning is stale — the current rule is
-`opencode-free-tier` (see `model-preferences.md`). The standing justification,
-when asked: one model family, everything free, no namespace juggling — not
-rename durability, not ZDR.
+reason for a namespace move, that reasoning is stale. The rule that followed it,
+`opencode-free-tier` (free tier only, 2026-10-02 until 2026-10-16), is retired as
+well — the **current** rule is `opencode-go-mixed` (see `model-preferences.md`).
+The standing justification while it applied was: one model family, everything
+free, no namespace juggling — not rename durability, not ZDR.
 
 ## Tracker privacy data is known-wrong (caveat set 2026-09-26)
 

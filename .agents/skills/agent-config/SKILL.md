@@ -200,7 +200,7 @@ in the model's advertised list, but stay registered and load by exact ID via the
 | ID | Trigger (one line) | Command |
 |---|---|---|
 | `docker-test-image` | E2E/CI test image bakes the environment only; browser version from the lockfile | `/docker-test-image` |
-| `ghcr-visibility` | container `:` pull `unauthorized` / job dies exit 125 / package visibility | `/ghcr-visibility` |
+| `ghcr-visibility` | job-level `container:` pull fails `unauthorized` / job dies exit 125 / package visibility | `/ghcr-visibility` |
 | `laravel` | Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint) | `/laravel` |
 | `node-deps` | pnpm dependency policy: no pins, ranges + lockfile | `/node-deps` |
 | `playwright-parallel` | Playwright E2E parallelism: named locks, workers, shards instead of serial | `/playwright-parallel` |

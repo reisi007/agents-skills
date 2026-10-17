@@ -82,11 +82,12 @@ for (const [k, v] of Object.entries(m)) console.log(k + "\t" + v);
 ```
 
 Verified output shape on a real config (IDs omitted — the roles are what matter).
-Since 2026-10-08 every id sits on `opencode-go/` — one $0 model family, and the
-`opencode/` twin of it is deliberately unused, so it is **not** a REPLACE. An
-`opencode-go/<slug>` id only counts as a REPLACE while `model-preferences.md`
-still carries the free-tier namespace rule — it does not (see the namespace rule
-in SKILL.md).
+History (2026-10-08 until 2026-10-16): every id sat on `opencode-go/`, one $0 model
+family, and the `opencode/` twin of it was deliberately unused, so it was **not** a
+REPLACE. Current rule since 2026-10-16 is `opencode-go-mixed`: paid main agents plus
+the $0 background model, still all on `opencode-go/`. An `opencode-go/<slug>` id only
+counts as a REPLACE while `model-preferences.md` still carries the free-tier namespace
+rule — it does not (see the namespace rule in SKILL.md).
 
 ```
 default   opencode-go/<id>
@@ -95,8 +96,6 @@ general   opencode-go/<id>
 build     opencode-go/<id>
 …         (opencode-go/<id>)
 vision-creative  opencode-go/<id>
-free      opencode-go/<id>
-nonsensitive      opencode-go/<id>
 ```
 
 Then check every emitted model against the hard requirement

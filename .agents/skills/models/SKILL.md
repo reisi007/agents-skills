@@ -58,12 +58,12 @@ never infer from the slug.
 
 - **Current standing rule (since 2026-10-16): `opencode-go-mixed`** — everything runs
   on `opencode-go/`, mixed paid + free: main agents on the paid `deepseek-v4.1-flash`,
-  `vision-creative` on the paid `glm-5.3-flash`, the fan-out/background roles (`free`,
-  `nonsensitive`, `title`, `summary`) on the $0 `longcat-2.5-preview-free`. The
-  subscription is **used** again (credits). `opencode/` free twins are deliberately
-  unused (`deepseek-v4.1-flash-free` is $0 but only 200k ctx, below `minUsableContext`;
-  `glm-5.3-flash` has no free twin). A configured `opencode-go/<slug>` is *not* a
-  REPLACE on namespace grounds.
+  `vision-creative` on the paid `glm-5.3-flash`, and the background roles `title` and
+  `summary` on the $0 `longcat-2.5-preview-free` (the fan-out roles `free` and
+  `nonsensitive` no longer exist). The subscription is **used** again (credits).
+  `opencode/` free twins are deliberately unused (`deepseek-v4.1-flash-free` is $0 but
+  only 200k ctx, below `minUsableContext`; `glm-5.3-flash` has no free twin). A
+  configured `opencode-go/<slug>` is *not* a REPLACE on namespace grounds.
 - A `-free` slug suffix says nothing about namespace, price, or privacy. A configured
   id only counts as a namespace **REPLACE** when the preferences file's rule says so —
   and never in the face of the vision gate above: **capability beats namespace.**
@@ -107,7 +107,7 @@ Summary first ("2 updates, 2 keeps, 1 replacement needed"), then:
 | opencode-go/<cheap-vision> | default, build, … | KEEP     | caps [text,image]; cheapest vision-capable, ctx meets pref |
 | opencode-go/<text-only>  | default, …        | REPLACE  | input [text] → violates vision requirement, price irrelevant |
 | opencode-go/<oldver>     | general           | UPDATE → opencode-go/<newver> | <Family>-<newver> added 2026-08-14; meets ctx pref |
-| opencode/<x>-free        | nonsensitive      | REPLACE → opencode-go/<x>-free | namespace rule `opencode-go-mixed`; verify twin in tracker |
+| opencode/<x>-free        | build             | REPLACE → opencode-go/<x>-free | namespace rule `opencode-go-mixed`; verify twin in tracker |
 ```
 
 Then "Optional new candidates" — vision-capable only, one line each, every reason tied
