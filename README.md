@@ -37,6 +37,17 @@ agents-skills/
 Rules reach a session through `AGENTS.md` inlining, not the config's
 `instructions` key — that array is empty on this setup.
 
+## CI — skill budget
+
+CI pins the context cost of the **advertised** skills: `activeSkills` (5),
+`totalDescriptionChars` (2531) and `maxDescriptionChars` (918, the longest single
+description in characters). The descriptions of advertised skills sit in every
+session's system prompt, so that cost must not grow silently — hidden skills
+(`opencode/autoinvoke: false`) are not counted. Run it locally with
+`node scripts/skill-budget.mjs`. Raising a value is a deliberate change:
+`node scripts/skill-budget.mjs --update` writes the current numbers into
+`.github/skill-budget.json`, which the commit then has to justify.
+
 ## Installation / registration (once per machine)
 
 ```sh

@@ -1,0 +1,23 @@
+name: Skill budget
+
+# Run always, no `paths` filter: this repo is tiny, and a path-filtered check
+# that is (or becomes) required would stay pending on unrelated PRs — see the
+# `github-ci-filters` skill.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7   # major tag pin
+      - uses: actions/setup-node@v7   # major tag pin
+        with:
+          node-version: lts/*
+      - run: node scripts/skill-budget.mjs
