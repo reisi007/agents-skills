@@ -32,7 +32,6 @@ curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
 - Vision check (the hard requirement): `"image" in .capabilities.input`.
   `(.capabilities | index("image"))` is **always null** — it searches the object's
   values, not the input list, and silently reports every model as text-only.
-- `pdf` is a separate entry — vision-capable does not imply PDF-capable.
 - Text-only models in the current snapshot (never recommend these):
   `curl -sL $RAW/data/latest.json | jq -r '.models[] | select((.capabilities.input|index("image"))|not) | .id'`
 
@@ -54,13 +53,13 @@ curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
 Same `capabilities` object shape as OCG — the `"image" in .capabilities.input`
 check works identically here.
 
-## User's configured models (from global OpenCode config)
+## User's configured model (from global OpenCode config)
 
 `opencode.jsonc` is **JSONC**, so plain `jq` chokes on it. The global config uses
 **both** `//` and `/* … */` comments (41 block comments as of 2026-09-26) — a
 stripper that only handles `//` produces invalid JSON, so handle both plus
-trailing commas. This prints `role<TAB>modelID` for the root `model` plus every
-`agent.<role>.model`:
+trailing commas. Since 2026-10-18 the config carries **only the root `model`** —
+there is no `agent.<role>.model` — so this prints the single configured id:
 
 ```js
 // node strip-jsonc.js   (or paste as a single-quoted `node -e '…'`)
@@ -76,34 +75,25 @@ for (let i = 0; i < t.length;) {
   else { o += c; i++; }
 }
 const c = JSON.parse(o.replace(/,\s*([}\]])/g, "$1"));
-const m = { default: c.model };
-for (const [k, v] of Object.entries(c.agent || {})) if (v && v.model) m[k] = v.model;
-for (const [k, v] of Object.entries(m)) console.log(k + "\t" + v);
+console.log("default\t" + c.model);
 ```
 
-Verified output shape on a real config (IDs omitted — the roles are what matter).
-History (2026-10-08 until 2026-10-16): every id sat on `opencode-go/`, one $0 model
-family, and the `opencode/` twin of it was deliberately unused, so it was **not** a
-REPLACE. Current rule since 2026-10-16 is `opencode-go-mixed`: paid main agents plus
-the $0 background model, still all on `opencode-go/`. An `opencode-go/<slug>` id only
-counts as a REPLACE while `model-preferences.md` still carries the free-tier namespace
-rule — it does not (see the namespace rule in SKILL.md).
+Verified output shape on a real config (IDs omitted — the namespace is what matters).
+Current rule since 2026-10-18 is `opencode-go-only`: a single default model on
+`opencode-go/`; the earlier rules (`opencode-go-mixed` 2026-10-16..2026-10-18,
+one-$0-family 2026-10-08..2026-10-16) are retired. An `opencode-go/<slug>` id only
+counts as a REPLACE while `model-preferences.md` carries a free-tier namespace rule —
+it does not (see the namespace rule in SKILL.md).
 
 ```
 default   opencode-go/<id>
-plan      opencode-go/<id>
-general   opencode-go/<id>
-build     opencode-go/<id>
-…         (opencode-go/<id>)
-vision-creative  opencode-go/<id>
 ```
 
-Then check every emitted model against the hard requirement
-(`"image" in .capabilities.input`). No role needs `pdf` — the `document` role was
-removed 2026-10-08.
+Then check that model against the hard requirement
+(`"image" in .capabilities.input`).
 Alternatively,
-just **read the small file directly** and collect the `model` / `agent.<role>.model`
-values by eye — no tooling required.
+just **read the small file directly** and collect the root `model` value by eye —
+no tooling required.
 
 ## Notes
 

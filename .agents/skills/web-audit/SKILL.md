@@ -58,7 +58,7 @@ English; **the generated report follows the audience's language**.
   obvious chrome (logos, icons, avatars, tiny, vectors) unless a specific
   question applies. Reference run: 466 manifest images over the 658 downloaded
   files (192 excluded as chrome).
-- **~10 images per subagent, all batches in parallel** on a free model. One raw
+- **~10 images per subagent, all batches in parallel** on the default model. One raw
   TSV per batch — never a merged summary — then a parse step into
   `data/vision.json`; keep the prompts for replay. Reference run: 47 batches
   (`data/vision-batches.json`).

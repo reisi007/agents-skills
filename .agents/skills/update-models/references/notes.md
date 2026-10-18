@@ -7,11 +7,10 @@ model, price, or tracker state is a snapshot — re-check the trackers (see
 
 ## Why vision is non-negotiable
 
-The whole agent setup assumes every model reads images itself: the main model
-reads screenshots, EXIF-relevant details, and image categories directly, and
-the `vision-agents` skill has no technical shim subagent because of it. A
-text-only model anywhere in the chain silently breaks that assumption, which is
-why price, context window, and reasoning tier do not compensate.
+The whole agent setup assumes the configured model reads images itself: it reads
+screenshots, EXIF-relevant details, and image categories directly. A text-only
+model silently breaks that assumption, which is why price, context window, and
+reasoning tier do not compensate.
 
 ## Retired — `opencode-go-first` (until 2026-09-26)
 
@@ -20,9 +19,11 @@ is ZDR". It is **retired**. Do not reinstate it, and do not treat a configured
 `opencode/<slug>` as an error. If a future conversation quotes ZDR as the
 reason for a namespace move, that reasoning is stale. The rule that followed it,
 `opencode-free-tier` (free tier only, 2026-10-02 until 2026-10-16), is retired as
-well — the **current** rule is `opencode-go-mixed` (see `model-preferences.md`).
-The standing justification while it applied was: one model family, everything
-free, no namespace juggling — not rename durability, not ZDR.
+well — and so is `opencode-go-mixed` (2026-10-16..2026-10-18), which split the roles
+across three `opencode-go/` models. The **current** rule is `opencode-go-only`
+(see `model-preferences.md`): a single default model, no per-role overrides.
+The standing justification while the free rules applied was: one model family,
+everything free, no namespace juggling — not rename durability, not ZDR.
 
 ## Tracker privacy data is known-wrong (caveat set 2026-09-26)
 

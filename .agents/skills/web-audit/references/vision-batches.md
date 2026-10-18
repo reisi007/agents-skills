@@ -9,12 +9,12 @@
   manifest held **466 images across 47 batches** (`data/vision-batches.json`) out
   of the 658 downloaded files, so **192** were excluded and assessed statically
   only — which the report states.
-- **~10 images per batch** (`BATCH = 10` in the manifest script). Same ceiling as
-  the `vision-agents` skill's "max ~10 images per call" — a batch larger than that
-  loses detail, and a batch that fails costs the whole batch. Cross-reference that
-  skill for the escalation pattern when a call is too fine-grained to trust.
-- **All batches dispatched in parallel** on a free model. Cost is not the
-  constraint; the scatter (below) is.
+- **~10 images per batch** (`BATCH = 10` in the manifest script). A batch larger
+  than that loses detail, and a batch that fails costs the whole batch. When a
+  call is too fine-grained to trust, re-read the images yourself — the configured
+  model is vision-capable.
+- **All batches dispatched in parallel** on the default model. The scatter
+  (below) is the constraint, not cost.
 - **One raw file per batch**, never a merged summary: `data/vision-raw/b01.tsv`,
   `b02.tsv`, ….
 - **Prompt per batch** kept in `data/prompts/batch-NN.txt`, so any verdict can be

@@ -29,7 +29,6 @@ agents-skills/
 │   ├── react-i18n/          ← German React+Vite UI with Lingui; extract/compile gate
 │   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
 │   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
-│   ├── vision-agents/       ← locked-down vision subagent (creative) + escalation rule
 │   ├── ui-review/           ← Playwright screenshot loop + vision analysis
 │   └── web-audit/           ← full live-site audit (SEO, images, performance) → self-contained archive
 ```

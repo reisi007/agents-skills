@@ -8,7 +8,7 @@ the full UPDATE/KEEP procedure, and the preferences-file schema. Obligations liv
 
 Both trackers publish small, structured JSON — fetch the raw files (exact URLs + `jq`
 snippets in `data-sources.md`), never the rendered HTML site. **OCG** is authoritative
-for `opencode-go/<slug>` and `opencode/<slug>` IDs, which covers every configured model:
+for `opencode-go/<slug>` and `opencode/<slug>` IDs, which covers the configured model:
 `data/latest.json` is the snapshot (`models[]`, `freeModels[]`), `CHANGELOG.json` the
 typed events (`model_added`, `model_removed`, `price_changed`, `usage_changed`,
 `capabilities_changed`, `free_added/removed`, `text`) behind almost every reason. **CC**
@@ -17,29 +17,28 @@ CC-only alternatives. Pull the **last ~15–30 changelog entries**.
 
 ## Inputs
 
-1. **Configured models** — root `model` plus every `agent.<role>.model` from
-   `~/.config/opencode/opencode.jsonc` (`jq`/JSONC recipe in `data-sources.md`). Read
-   each `model` line's trailing `// updated: <date>` comment (staleness vs. changelog)
-   and its `agent.<role>.variant` — a role is `(model, variant)`, not `model` alone.
+1. **Configured model** — the root `model` from
+   `~/.config/opencode/opencode.jsonc` (there is no `agent.<role>.model` since
+   2026-10-18; `jq`/JSONC recipe in `data-sources.md`). Read
+   the `model` line's trailing `// updated: <date>` comment (staleness vs. changelog)
+   and its `variant` — the configured entry is `(model, variant)`, not `model` alone.
 2. **Preferences** — `~/.config/opencode/model-preferences.md`; if missing, **create it**
    from the schema below and say so. `minUsableContext` (default `400000`), `preferFree`
    (default `false`), `maxEffectiveInputPerMTok` (default `null`), `notes`,
-   `namespaceRule` (current standing rule `opencode-go-mixed` since 2026-10-16; the
-   earlier default `opencode-free-tier` is retired — history in `notes.md`. Filter
-   *before* scoring, never justify with ZDR), `variants` (default `none` — never propose
-   `variant`; delete a configured line), `privacyDataCaveat` (when set, ignore
-   `privacy.training` / `privacy.retentionDays`). `namespaceRule` is the standing
-   decision and wins over any default in the namespace rule in `SKILL.md`; read it
-   before scoring. Per-role rules rank *among* vision-capable candidates only;
-   otherwise fall back to global preferences:
-   - `vision` / `vision-creative`: strongest visual reader wins, not the cheapest.
+   `namespaceRule` (current standing rule `opencode-go-only` since 2026-10-18; the
+   earlier `opencode-go-mixed` and `opencode-free-tier` are retired — history in
+   `notes.md`. Filter *before* scoring, never justify with ZDR), `variants` (default
+   `none` — never propose `variant`; delete a configured line), `privacyDataCaveat`
+   (when set, ignore `privacy.training` / `privacy.retentionDays`). `namespaceRule` is
+   the standing decision and wins over any default in the namespace rule in `SKILL.md`;
+   read it before scoring. Per-role ranking is gone with the per-role models.
 
 ## Procedure (full)
 
-For each configured model: **0. Capability gate first.** No `image` → **REPLACE**
+For the one configured model (root `model`): **0. Capability gate first.** No `image` → **REPLACE**
 ("text-only"), propose it nowhere. **0b. Namespace gate next.** Apply the
 `namespaceRule` in `~/.config/opencode/model-preferences.md` — that file is the
-arbiter, not the slug; with the current rule (`opencode-go-mixed`) a configured
+arbiter, not the slug; with the current rule (`opencode-go-only`) a configured
 `opencode-go/<slug>` is **not** a REPLACE on namespace grounds, even where the
 registry carries an `opencode/` twin. The twin only justifies a REPLACE while
 `namespaceRule` still carries the free-tier namespace rule. Hard capability needs

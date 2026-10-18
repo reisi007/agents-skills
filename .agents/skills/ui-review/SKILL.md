@@ -7,7 +7,7 @@ description: 'TRIGGER on UI review/improvement/screenshot requests or when the u
 
 This skill turns a web app's visual state into a repeatable, reviewable artifact:
 Playwright captures screenshots of every page in both **filled** and **empty**
-states, you analyze them against a checklist (every configured model is
+states, you analyze them against a checklist (the configured model is
 vision-capable — no vision subagent needed), and the resulting findings drive
 targeted UI fixes.
 
@@ -35,7 +35,7 @@ human or you can judge the design. Nothing here gates CI.
   manifest-driven **spec**.
 - If the harness is missing, scaffold it first — see
   `references/harness.md` and the copyable templates in `references/templates/`.
-- No vision plugin needed: every configured model reads images (see the
+- No vision plugin needed: the configured model reads images (see the
   `update-models` skill's hard requirement).
 
 ## Step 1 — Capture
@@ -86,12 +86,12 @@ For each batch:
 - Run the checklist in `references/ui-review-checklist.md` against every image.
 - Report findings per image, referencing the file name.
 
-**Escalate the hard calls.** A finding you are not sure about — a hairline
+**Hard calls.** A finding you are not sure about — a hairline
 border, faint contrast, an 8px gap that may or may not be inconsistent, a
-downscaled full-page PNG whose suspect region is unreadable — goes to the
-`vision-creative` subagent with the image attached and one concrete question
-("is this gap consistent across these three cards?"). Do not guess, and do not
-pad the report with low-confidence findings. See the `vision-agents` skill.
+downscaled full-page PNG whose suspect region is unreadable — re-read the image
+yourself with one concrete question in mind ("is this gap consistent across
+these three cards?"). The configured model is vision-capable; do not guess, and
+do not pad the report with low-confidence findings.
 
 ## Step 3 — Findings report
 
@@ -117,8 +117,8 @@ separate verifier). After a change:
    Playwright's `--grep`/`-g` filter (each test is tagged `@screenshot` and
    named after the route) or a manifest edit.
 2. Compare **old vs new** screenshots (diff) for the affected routes yourself and
-   confirm the finding is resolved (or a NEW issue appeared) — escalate to
-   `vision-creative` if the difference is too fine-grained to call confidently.
+   confirm the finding is resolved (or a NEW issue appeared) — re-read the
+   images yourself if the difference is too fine-grained to call confidently.
 3. Re-verify the whole affected batch before closing the loop.
 
 ## Adding routes / states

@@ -94,8 +94,8 @@ reasoning in its `AGENTS.md`). Do not bootstrap it there.
     `general` subagent (never to `build`). Delegate independent tasks in
     parallel when sensible; a **separate** subagent verifies each
     implementation (verifier ≠ implementer); visual/layout/screenshot checks you
-    do yourself (every configured model is vision-capable) — escalate only
-    ambiguous or high-stakes visual calls to `vision-creative`.
+    do yourself (the configured model is vision-capable) — re-read
+    ambiguous or high-stakes images yourself; do not guess.
 
 - Create `AGENTS.todo.md` task board (temporary, header pattern: "Stand: <date>.
   Nur offene TODOs.").

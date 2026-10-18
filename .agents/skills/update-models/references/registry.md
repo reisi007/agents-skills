@@ -32,42 +32,39 @@ re-check with `opencode models | grep -i free`) are listed under **both** prefix
 Never conclude "no such model" from one prefix alone — grep the family name and look
 at every row that comes back.
 
-## Which namespace belongs on which role
+## Which namespace belongs in the config
 
 **Rule: follow `~/.config/opencode/model-preferences.md` — never the slug, and never a
-stale snapshot of this file.** Current standing decision (2026-10-16): everything runs
-on `opencode-go/`, mixed paid + free — main agents on the paid `deepseek-v4.1-flash`,
-`vision-creative` on the paid `glm-5.3-flash`, fan-out/background on the $0
-`longcat-2.5-preview-free`. The previous single-$0-model decision (2026-10-08,
-`opencode-go/step-5-preview-free`) is **dead**: the provider removed that model
-2026-10-15 (`free_removed`; available only 2026-10-08..2026-10-15). Do not "fix" a
-configured `opencode-go/<slug>` into an `opencode/<slug>` twin.
+stale snapshot of this file.** Current standing decision (2026-10-18): `opencode-go-only`
+— a single default model, the root `model`, on `opencode-go/`; there are no per-role
+overrides (`agents.<role>.model` was removed 2026-10-18). Do not "fix" a configured
+`opencode-go/<slug>` into an `opencode/<slug>` twin.
 
-- The **`opencode/`** provider namespace is the free tier → use it whenever it exists
-  **and** the preferences say so. Since 2026-10-16 the config does **not** use it: the
-  free twin of the main-agent model is only 200k ctx.
-- The **`opencode-go/`** namespace is the subscription one → since 2026-10-16 it
-  carries both the paid main-agent/`vision-creative` models and the $0
-  `longcat-2.5-preview-free`, so the namespace alone says nothing about price. Check
-  the registry, not the prefix.
+- The **`opencode/`** provider namespace is the free tier → allowed only when the
+  preferences say so. Since 2026-10-18 the config does **not** use it: the free twin of
+  the default model is only 200k ctx, below `minUsableContext`.
+- The **`opencode-go/`** namespace is the subscription one. Its price varies — free ids
+  have appeared under it too (e.g. `longcat-2.5-preview-free` once carried a
+  maintenance role) — so the namespace alone says nothing about price. Check the
+  registry, not the prefix.
 
 Price is frequently identical (`effectiveInput: 0` either way). The reason for the
-2026-10-16 split is the user decision of that day (speed + context bars), **not** ZDR
-and not rename durability. A slug ending in `-free` says nothing about namespace,
-price, or privacy; check the registry instead of inferring.
+current `opencode-go-only` decision is the user decision of 2026-10-18 (one paid default
+model, no per-role juggling), **not** ZDR and not rename durability. A slug ending in
+`-free` says nothing about namespace, price, or privacy; check the registry instead of
+inferring.
 
 **History:** "always the `opencode-go/<slug>` twin because the subscription is ZDR"
 (until 2026-10-02), "always the `opencode/<slug>` twin because the setup is
-free-tier-only" (2026-10-02 until 2026-10-08), and "one $0 model family for every
-role" (2026-10-08 until 2026-10-16) are all retired. Do not revive them, and do not
-treat a configured id in either namespace as a mistake to correct — the preferences
-file is the arbiter.
+free-tier-only" (2026-10-02 until 2026-10-08), "one $0 model family for every
+role" (2026-10-08 until 2026-10-16), and "`opencode-go-mixed`, three models split
+across the roles" (2026-10-16 until 2026-10-18) are all retired. Do not revive them,
+and do not treat a configured id in either namespace as a mistake to correct — the
+preferences file is the arbiter.
 
-Configured (snapshot 2026-10-16): main agents + `vision-creative` on paid `opencode-go/`
-models, fan-out/background on `$0` `opencode-go/longcat-2.5-preview-free`. The
-`document` role was removed 2026-10-08 (never used); no role *needs* `pdf`, though
-`glm-5.3-flash` (`vision-creative`) does carry it. The old "`document` →
-muse-spark-contributor-free (the `pdf` exception)" line is history, not a rule.
+Configured (snapshot 2026-10-18): a single root model on paid `opencode-go/`
+(`deepseek-v4.1-flash`); no `agents.<role>.model` anywhere. The single model carries
+`[text,image]` (image only).
 
 Check for a twin before writing any ID:
 
