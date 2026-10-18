@@ -19,7 +19,7 @@ curl -sL $RAW/data/latest.json | jq '{
 }'
 
 # Changelog — last 15 entries:
-curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
+curl -sL https://raw.githubusercontent.com/all-the-rest/ocgo-price-tracker/main/CHANGELOG.json | jq '.entries[:15]'
 ```
 
 ### `capabilities` is an object — check `.input`
@@ -53,13 +53,13 @@ curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
 Same `capabilities` object shape as OCG — the `"image" in .capabilities.input`
 check works identically here.
 
-## User's configured model (from global OpenCode config)
+## User's configured models (from global OpenCode config)
 
 `opencode.jsonc` is **JSONC**, so plain `jq` chokes on it. The global config uses
 **both** `//` and `/* … */` comments (41 block comments as of 2026-09-26) — a
 stripper that only handles `//` produces invalid JSON, so handle both plus
-trailing commas. Since 2026-10-18 the config carries **only the root `model`** —
-there is no `agent.<role>.model` — so this prints the single configured id:
+trailing commas. Since 2026-10-18 the config carries the root `model` **plus** one
+`agents.<role>.model` per role — this prints every configured id:
 
 ```js
 // node strip-jsonc.js   (or paste as a single-quoted `node -e '…'`)
@@ -76,33 +76,38 @@ for (let i = 0; i < t.length;) {
 }
 const c = JSON.parse(o.replace(/,\s*([}\]])/g, "$1"));
 console.log("default\t" + c.model);
+for (const [role, a] of Object.entries(c.agents || {})) if (a.model) console.log(role + "\t" + a.model);
 ```
 
 Verified output shape on a real config (IDs omitted — the namespace is what matters).
-Current rule since 2026-10-18 is `opencode-go-only`: a single default model on
-`opencode-go/`; the earlier rules (`opencode-go-mixed` 2026-10-16..2026-10-18,
-one-$0-family 2026-10-08..2026-10-16) are retired. An `opencode-go/<slug>` id only
-counts as a REPLACE while `model-preferences.md` carries a free-tier namespace rule —
-it does not (see the namespace rule in SKILL.md).
+Current rule since 2026-10-18 is `opencode-go-only`: root `model` plus per-role
+models for `plan`/`general`/`build`/`explore`, all on `opencode-go/`; the earlier
+rules (`opencode-go-mixed` 2026-10-16..2026-10-18, one-$0-family
+2026-10-08..2026-10-16, the same-day single-root phase) are retired. An
+`opencode-go/<slug>` id only counts as a REPLACE while `model-preferences.md`
+carries a free-tier namespace rule — it does not (see the namespace rule in
+SKILL.md).
 
 ```
 default   opencode-go/<id>
+plan      opencode-go/<id>
+general   opencode-go/<id>
+build     opencode-go/<id>
+explore   opencode-go/<id>
 ```
 
-Then check that model against the hard requirement
+Then check every model against the hard requirement
 (`"image" in .capabilities.input`).
 Alternatively,
-just **read the small file directly** and collect the root `model` value by eye —
-no tooling required.
+just **read the small file directly** and collect the root `model` plus each
+`agents.<role>.model` by eye — no tooling required.
 
 ## Notes
 
 - `raw.githubusercontent.com` is unauthenticated and rate-limited (~60 req/h). For
   repeated/automated pulls use `gh api` instead, e.g.
   `curl -sL https://ocgo-pricing.all-the.rest/data/latest.json`.
-- The git repo also commits `data/latest.json` to `main`; use the GitHub raw URL
-  if you prefer the git build over the live site.
 - GitHub Releases are created per changelog entry (tag = entry `id`); `releases.atom`
   is the RSS feed if you want change notifications rather than polling.
 - `src/data/changelog.json` is bundled into the site's JS and is **not** a standalone
-  endpoint — always use `https://ocgo-pricing.all-the.rest/CHANGELOG.json` for raw access.
+  endpoint — always use `https://raw.githubusercontent.com/all-the-rest/ocgo-price-tracker/main/CHANGELOG.json` for raw access.

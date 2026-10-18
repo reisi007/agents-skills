@@ -20,8 +20,12 @@ is ZDR". It is **retired**. Do not reinstate it, and do not treat a configured
 reason for a namespace move, that reasoning is stale. The rule that followed it,
 `opencode-free-tier` (free tier only, 2026-10-02 until 2026-10-16), is retired as
 well — and so is `opencode-go-mixed` (2026-10-16..2026-10-18), which split the roles
-across three `opencode-go/` models. The **current** rule is `opencode-go-only`
-(see `model-preferences.md`): a single default model, no per-role overrides.
+across three `opencode-go/` models. **Retired same-day (2026-10-18): the single-root
+phase** — briefly the config carried only the root `model` (per-role models deleted,
+`vision-agents` skill removed); per-role models are configured again. The **current**
+rule is `opencode-go-only` (see `model-preferences.md`): per-role models on
+`opencode-go/` for `plan`/`general`/`build`/`explore`, with the root `model` among the
+configured models — no `opencode/` ids.
 The standing justification while the free rules applied was: one model family,
 everything free, no namespace juggling — not rename durability, not ZDR.
 

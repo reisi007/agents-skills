@@ -36,12 +36,12 @@ at every row that comes back.
 
 **Rule: follow `~/.config/opencode/model-preferences.md` — never the slug, and never a
 stale snapshot of this file.** Current standing decision (2026-10-18): `opencode-go-only`
-— a single default model, the root `model`, on `opencode-go/`; there are no per-role
-overrides (`agents.<role>.model` was removed 2026-10-18). Do not "fix" a configured
-`opencode-go/<slug>` into an `opencode/<slug>` twin.
+— per-role models are configured again: the root `model` plus
+`agents.{plan,general,build,explore}.model`, all on `opencode-go/`. Do not "fix" a
+configured `opencode-go/<slug>` into an `opencode/<slug>` twin.
 
 - The **`opencode/`** provider namespace is the free tier → allowed only when the
-  preferences say so. Since 2026-10-18 the config does **not** use it: the free twin of
+  preferences say so. The config does **not** use it: the free twin of
   the default model is only 200k ctx, below `minUsableContext`.
 - The **`opencode-go/`** namespace is the subscription one. Its price varies — free ids
   have appeared under it too (e.g. `longcat-2.5-preview-free` once carried a
@@ -49,22 +49,24 @@ overrides (`agents.<role>.model` was removed 2026-10-18). Do not "fix" a configu
   registry, not the prefix.
 
 Price is frequently identical (`effectiveInput: 0` either way). The reason for the
-current `opencode-go-only` decision is the user decision of 2026-10-18 (one paid default
-model, no per-role juggling), **not** ZDR and not rename durability. A slug ending in
-`-free` says nothing about namespace, price, or privacy; check the registry instead of
-inferring.
+current `opencode-go-only` decision is the user decision of 2026-10-18 (one paid model
+family, per-role models on `opencode-go/`), **not** ZDR and not rename durability. A
+slug ending in `-free` says nothing about namespace, price, or privacy; check the
+registry instead of inferring.
 
 **History:** "always the `opencode-go/<slug>` twin because the subscription is ZDR"
 (until 2026-10-02), "always the `opencode/<slug>` twin because the setup is
 free-tier-only" (2026-10-02 until 2026-10-08), "one $0 model family for every
-role" (2026-10-08 until 2026-10-16), and "`opencode-go-mixed`, three models split
-across the roles" (2026-10-16 until 2026-10-18) are all retired. Do not revive them,
-and do not treat a configured id in either namespace as a mistake to correct — the
-preferences file is the arbiter.
+role" (2026-10-08 until 2026-10-16), "`opencode-go-mixed`, three models split
+across the roles" (2026-10-16 until 2026-10-18), and the same-day **single-root
+phase** (only the root `model`, no `agents.<role>.model`) are all retired. Do not
+revive them, and do not treat a configured id in either namespace as a mistake to
+correct — the preferences file is the arbiter.
 
-Configured (snapshot 2026-10-18): a single root model on paid `opencode-go/`
-(`deepseek-v4.1-flash`); no `agents.<role>.model` anywhere. The single model carries
-`[text,image]` (image only).
+Configured (snapshot 2026-10-18): the root `model` plus
+`agents.{plan,general,build,explore}.model`, all `opencode-go/deepseek-v4.1-flash`
+(paid). `title`/`summary` have no per-role model and inherit the root. The model
+carries `[text,image]` (image only).
 
 Check for a twin before writing any ID:
 

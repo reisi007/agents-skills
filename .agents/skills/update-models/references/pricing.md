@@ -8,7 +8,7 @@ the full UPDATE/KEEP procedure, and the preferences-file schema. Obligations liv
 
 Both trackers publish small, structured JSON — fetch the raw files (exact URLs + `jq`
 snippets in `data-sources.md`), never the rendered HTML site. **OCG** is authoritative
-for `opencode-go/<slug>` and `opencode/<slug>` IDs, which covers the configured model:
+for `opencode-go/<slug>` and `opencode/<slug>` IDs, which covers the configured models:
 `data/latest.json` is the snapshot (`models[]`, `freeModels[]`), `CHANGELOG.json` the
 typed events (`model_added`, `model_removed`, `price_changed`, `usage_changed`,
 `capabilities_changed`, `free_added/removed`, `text`) behind almost every reason. **CC**
@@ -17,11 +17,11 @@ CC-only alternatives. Pull the **last ~15–30 changelog entries**.
 
 ## Inputs
 
-1. **Configured model** — the root `model` from
-   `~/.config/opencode/opencode.jsonc` (there is no `agent.<role>.model` since
-   2026-10-18; `jq`/JSONC recipe in `data-sources.md`). Read
-   the `model` line's trailing `// updated: <date>` comment (staleness vs. changelog)
-   and its `variant` — the configured entry is `(model, variant)`, not `model` alone.
+1. **Configured models** — the root `model` plus each `agents.<role>.model`
+   (`plan`/`general`/`build`/`explore`) from `~/.config/opencode/opencode.jsonc`
+   (`jq`/JSONC recipe in `data-sources.md`). Read
+   each `model` line's trailing `// updated: <date>` comment (staleness vs. changelog)
+   and its `variant` — a configured entry is `(model, variant)`, not `model` alone.
 2. **Preferences** — `~/.config/opencode/model-preferences.md`; if missing, **create it**
    from the schema below and say so. `minUsableContext` (default `400000`), `preferFree`
    (default `false`), `maxEffectiveInputPerMTok` (default `null`), `notes`,
@@ -31,11 +31,12 @@ CC-only alternatives. Pull the **last ~15–30 changelog entries**.
    `none` — never propose `variant`; delete a configured line), `privacyDataCaveat`
    (when set, ignore `privacy.training` / `privacy.retentionDays`). `namespaceRule` is
    the standing decision and wins over any default in the namespace rule in `SKILL.md`;
-   read it before scoring. Per-role ranking is gone with the per-role models.
+   read it before scoring. Per-role models are configured again (2026-10-18), so score
+   the root `model` and every configured role separately.
 
 ## Procedure (full)
 
-For the one configured model (root `model`): **0. Capability gate first.** No `image` → **REPLACE**
+For every configured model (root `model` plus each `agents.<role>.model`): **0. Capability gate first.** No `image` → **REPLACE**
 ("text-only"), propose it nowhere. **0b. Namespace gate next.** Apply the
 `namespaceRule` in `~/.config/opencode/model-preferences.md` — that file is the
 arbiter, not the slug; with the current rule (`opencode-go-only`) a configured
