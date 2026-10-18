@@ -14,6 +14,7 @@ agents-skills/
 ├── .agents/rules/            ← rule files; always-on only where inlined into an `AGENTS.md`
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
 │   └── build-verify.md       ← build/verify flow: non-negotiable core rules
+├── .agents/commands/        ← versioned slash-command templates the agent copies into `~/.config/opencode/commands/`
 ├── .agents/skills/          ← Agent Skills spec structure (portable for OpenCode, Claude Code, …)
 │   ├── agent-config/        ← global setup: opencode.jsonc, MCP, skills registration
 │   ├── build-verify/        ← build/verify flow in detail: verifier, amend, commit schema
@@ -58,6 +59,11 @@ git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
 "instructions": [],   // empty: always-on text is inlined into AGENTS.md (see below)
 ```
 
+The own slash commands are versioned as templates under `.agents/commands/`; the
+**agent** copies their contents into `~/.config/opencode/commands/` — a manual
+copy, no symlink (skill `agent-config` §1/§5). A `git pull` that adds, changes or
+removes `.agents/commands/*` means the agent refreshes the machine copies (§8).
+
 Afterwards available in **every** OpenCode session. Details & MCP CodeGraph:
 see skill `agent-config`.
 
@@ -72,6 +78,12 @@ git add -A && git commit && git push
 
 No config change needed — the directory is already registered.
 
+Adding a **command** instead: create the template in `.agents/commands/<name>.md`
+(frontmatter `description`, body loads the skill by exact ID, `$ARGUMENTS` at the
+end), commit and push — then the **agent** copies it into
+`~/.config/opencode/commands/` (§8 drift check). Only on explicit request
+(user rule 2026-10-17).
+
 For a rule that should hold in **every** session (not only on a trigger): keep the
 file in `.agents/rules/` and inline its duty (short form) into an `AGENTS.md` (global or
 project) — on this setup the config's `instructions` array is empty and delivers
@@ -83,6 +95,7 @@ nothing. Details in skill `agent-config`.
 |---|---|
 | Own skills | **here** (`agents-skills/.agents/skills/`) |
 | Rule files (always-on source) | **here** (`agents-skills/.agents/rules/`) |
+| Own slash commands (source templates) | **here** (`agents-skills/.agents/commands/`) — the agent copies them into `~/.config/opencode/commands/` |
 | Official/third-party packs (daisyui, find-skills, stripe-*) | where the installer puts them |
 | Project-specific skills (nx-*, blog-beitrag, testimonial) | in the respective project |
 

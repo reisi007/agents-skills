@@ -11,8 +11,8 @@ machine/project online.
 
 > **Size note:** this file keeps decisions and wiring rules; verbatim config
 > lives in `references/snippets.md`. Still over the ~150-line target — the
-> overflow is the §2a/§8 wiring detail, which loses its force if shortened
-> further.
+> overflow is the §1 commands wiring and the §2a/§8 wiring detail, which lose
+> their force if shortened further.
 
 ## 1. Global config files
 
@@ -22,7 +22,7 @@ machine/project online.
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
 | `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui, reverse-engineer-anything) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
-| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). Currently holds only `update-models.md` (the model-update command): per the user rule 2026-10-17 that update is the **only** own command — rare flows go through `/skills` (§7) instead. |
+| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). The **versioned source/template** for own commands lives in the repo under `.agents/commands/`; the machine files are **created by the agent** from those templates (a copy of the file contents), **not** by the user and **not** via symlink. Two own commands: `update-models` and `security-review`. New commands still appear only on explicit request (user rule 2026-10-17) — rare flows go through `/skills` (§7) instead. |
 
 ## 2. Skills repo registration (the `skills` array)
 
@@ -152,12 +152,15 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
 - **New machine:** install codegraph CLI (`npm i -g @colbymchenry/codegraph`),
   clone `git@github.com:reisi007/agents-skills.git`, wire the `skills` array
   (§2) in the global `opencode.jsonc` (or symlink `~/.config/opencode/skills` →
-  repo dir). The `instructions` array stays empty on this setup (§2a); the
+  repo dir — that is the *skills* wiring only; commands are copied, not
+  symlinked). The `instructions` array stays empty on this setup (§2a); the
   always-on text that must be in every session (CodeGraph block, Arbeitsregeln)
   is inlined in the global `~/.config/opencode/AGENTS.md`. codegraph is declared
   once as a **global MCP server** (§3) — no per-project MCP entry for it.
-  Create the one own slash command `~/.config/opencode/commands/update-models.md`
-  (§1) — the `commands/` directory is created by nothing else. Bootstrap work
+  Create **both** own slash commands from the repo templates under
+  `.agents/commands/` into `~/.config/opencode/commands/` (§1): create the
+  directory, copy the template contents — the **agent** does this as part of the
+  bring-up, the user does not, and **not** via symlink. Bootstrap work
   then loads `codegraph-project-setup` and `permissions` **by
   exact ID** (both are hidden, §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
@@ -228,6 +231,7 @@ setup if the source moved under you:
 | `.agents/rules/*` (new) | nothing is auto-wired: the rule reaches a session only if its text is inlined into an `AGENTS.md` (global or project) or a skill trigger covers it — the `instructions` array is empty (§2a), so an inlined-nowhere rule **silently contributes nothing** |
 | `.agents/rules/*` (changed content) | re-inline **only when the duty changed**, in the inline's own short form. The question rule (from `ask.md`) sits in the global `~/.config/opencode/AGENTS.md` as a deliberate short form, **not** a verbatim copy: a wording diff against `ask.md` is **not** drift, and re-expanding the short form to match the source is the mistake this row prevents. `build-verify.md` has no inline copy |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
+| `.agents/commands/*` (new, changed or removed) | re-create the machine copies in `~/.config/opencode/commands/` by copying the file contents; for a **removed** template, delete the orphaned machine file instead. The **agent** does this, the user does not — compare contents, not existence |
 | `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
 | `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) — **`.githooks/` no longer exists in this repo** (markdown-only, hook removed 2026-10-08): nothing to re-run, and do not re-create it |
 | none of the above | nothing to do |

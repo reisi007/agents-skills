@@ -40,7 +40,7 @@ umformuliert.
 A `git pull` here can change what the local machine needs — the repo is the source
 of truth, the machine is a copy that rots. After pulling, run the drift check from
 `agent-config` §8 (rule files vs. the text inlined into `AGENTS.md`, skills
-registration, MCP wiring, hooks) and re-apply setup locally. The failure this
+registration, command templates, MCP wiring, hooks) and re-apply setup locally. The failure this
 check exists to catch: a rule file whose changed **duty** was not re-inlined into
 an `AGENTS.md` — the global config's `instructions` array is empty, so it delivers
 nothing — and a new skill that does not resolve.
