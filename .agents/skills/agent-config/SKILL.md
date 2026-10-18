@@ -195,7 +195,7 @@ footer and the `nach-verify` flag apply as in every other repo.
 
 ### Hidden skills — not advertised, loaded by exact ID
 
-11 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
+12 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
 in the model's advertised list, but stay registered and load by exact ID — pick
 them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
 the exact ID. They are no longer exposed as `/<id>` slash commands (§1). Reachable
@@ -209,6 +209,7 @@ from here:
 | `node-deps` | pnpm dependency policy: no pins, ranges + lockfile |
 | `playwright-parallel` | Playwright E2E parallelism: named locks, workers, shards instead of serial |
 | `react-i18n` | German React+Vite UI with Lingui; extract/compile gate |
+| `security-review` | commissioned security review: enumerate surfaces, prove findings, close all in waves |
 | `skills-marker` | per-project skills cursor `AGENTS.skills.md` (which commit was checked) |
 | `tailscale-serve` | expose a local dev server on the tailnet via `tailscale serve` |
 | `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive |

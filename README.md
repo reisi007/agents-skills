@@ -27,6 +27,7 @@ agents-skills/
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
 │   ├── react-i18n/          ← German React+Vite UI with Lingui; extract/compile gate
+│   ├── security-review/     ← commissioned security review: enumerate surfaces, prove findings, close all in waves
 │   ├── skills-marker/  ← skills state per project (AGENTS.skills.md): which commit checked, which skills applied
 │   ├── tailscale-serve/     ← expose local dev server to the tailnet via `tailscale serve`
 │   ├── ui-review/           ← Playwright screenshot loop + vision analysis
