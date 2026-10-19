@@ -1,6 +1,6 @@
 # UI Review — Findings Report
 
-Consolidate all vision-agent findings here. One row per finding; group by
+Consolidate all findings here. One row per finding; group by
 screenshot batch (filled → empty, desktop → mobile). A verdict is only
 APPROVED when no `critical` or `high` findings remain open.
 
