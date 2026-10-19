@@ -41,15 +41,16 @@ stale snapshot of this file.** Current standing decision (2026-10-18): `opencode
 configured `opencode-go/<slug>` into an `opencode/<slug>` twin.
 
 - The **`opencode/`** provider namespace is the free tier → allowed only when the
-  preferences say so. The config does **not** use it: the free twin of
-  the default model is only 200k ctx, below `minUsableContext`.
+  preferences say so. The config does **not** use it — by standing decision, not by
+  a capability gap: the free twin of the configured model has the same context and
+  the same price.
 - The **`opencode-go/`** namespace is the subscription one. Its price varies — free ids
   have appeared under it too (e.g. `longcat-2.5-preview-free` once carried a
   maintenance role) — so the namespace alone says nothing about price. Check the
   registry, not the prefix.
 
 Price is frequently identical (`effectiveInput: 0` either way). The reason for the
-current `opencode-go-only` decision is the user decision of 2026-10-18 (one paid model
+current `opencode-go-only` decision is the user decision of 2026-10-18 (one model
 family, per-role models on `opencode-go/`), **not** ZDR and not rename durability. A
 slug ending in `-free` says nothing about namespace, price, or privacy; check the
 registry instead of inferring.
@@ -63,10 +64,10 @@ phase** (only the root `model`, no `agents.<role>.model`) are all retired. Do no
 revive them, and do not treat a configured id in either namespace as a mistake to
 correct — the preferences file is the arbiter.
 
-Configured (snapshot 2026-10-18): the root `model` plus
-`agents.{plan,general,build,explore}.model`, all `opencode-go/deepseek-v4.1-flash`
-(paid). `title`/`summary` have no per-role model and inherit the root. The model
-carries `[text,image]` (image only).
+Configured (snapshot 2026-10-19): the root `model` plus
+`agents.{plan,general,build,explore}.model`, all `opencode-go/minimax-m3.1-flash-free`
+($0, 1M ctx, added 2026-10-19). `title`/`summary` have no per-role model and inherit
+the root. The model carries `[text,image,video]`.
 
 Check for a twin before writing any ID:
 

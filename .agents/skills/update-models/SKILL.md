@@ -59,8 +59,9 @@ never infer from the slug.
 - **Current standing rule (since 2026-10-18): `opencode-go-only`** — every configured
   model on `opencode-go/`: the root `model` plus per-role models for
   `plan`/`general`/`build`/`explore` (configured again 2026-10-18, same-day change).
-  `opencode/` free twins are deliberately unused (`deepseek-v4.1-flash-free` is $0
-  but only 200k ctx, below `minUsableContext`; `glm-5.3-flash-free` exists but is also only 200k ctx, below the bar). A
+  The reason is the **standing user decision**, not a capability or price gap: the
+  configured family's `opencode/` twin carries the same context and the same price
+  (a $0 family on both namespaces), and the rule still holds the move. A
   configured `opencode-go/<slug>` is *not* a REPLACE on namespace grounds.
 - **Retired 2026-10-18: the single-root phase** — briefly (same day) the config carried
   only the root `model` with no `agents.<role>.model`; per-role models are configured
