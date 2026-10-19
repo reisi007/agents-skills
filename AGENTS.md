@@ -4,26 +4,32 @@ Central skills repo (`reisi007/agents-skills`). Conventions live in `README.md`;
 global wiring is documented in the `agent-config` skill. This file holds only what
 must apply while working **in this repo**.
 
+**Rules only, no decisions:** This file contains rules only — instructions that
+apply to any work in this repo. Durable decisions, rationale, measurements and
+history do not belong here but in `README.md`/`.agents/rules/`; open work goes to
+`AGENTS.todo.md`, settled matters to git history.
+
 ## Commit convention
 
-**Separate Conventional Commits are the default** — one per self-contained
-change (`feat(skill): …`), as the history shows. Amend is the exception, and only
-for a commit that is still **unpushed**: a wording fix in the message, a file you
-forgot to add. Once a commit is pushed it is history — an amend changes its SHA
-and other projects record these SHAs as their `skills-marker` range, so a
-rewrite silently breaks their cursor. `git add -A` is never used: explicit paths
-plus `git show --stat`.
+One Conventional Commit per self-contained change (`feat(skill): …`) is the
+default; amend only while the commit is still **unpushed** (message wording, a
+forgotten file). `git add -A` is never used — explicit paths plus
+`git show --stat`.
 
 ## Sprache
 
-Dateien in diesem Repo sind **englisch** — Code, Kommentare, Doku, Skills, Regeln. Das gilt
-für die Skills **in diesem** Repo; fremde Packs (`~/.agents/skills`, projektlokale
-`.agents/skills` eines anderen Projekts) bleiben, wie ihre Autorinnen sie geschrieben haben,
-und werden **nicht** übersetzt.
+Dateien in diesem Repo sind **englisch** — Code, Kommentare, Doku, Skills, Regeln.
+Fremde Packs (`~/.agents/skills`, projektlokale `.agents/skills` eines anderen
+Projekts) bleiben, wie ihre Autorinnen sie geschrieben haben, und werden **nicht**
+übersetzt.
 
 ## Token-Disziplin
 
-Dateien in diesem Repo landen im Kontext eines Modells — `rules/` nur, wo ihr Text wirklich geliefert wird (inlined in eine `AGENTS.md`, global oder im Projekt), sonst bei Bedarf wie ein Skill gelesen, `SKILL.md` erst bei passendem Trigger. Deshalb gilt eine Größenordnung als **Ziel, keine Mauer** — länger ist erlaubt, wenn der Inhalt es trägt und der Überlauf benannt ist:
+Dateien in diesem Repo landen im Kontext eines Modells — `rules/` nur, wo ihr Text
+wirklich geliefert wird (inlined in eine `AGENTS.md`, global oder im Projekt), sonst
+bei Bedarf wie ein Skill gelesen, `SKILL.md` erst bei passendem Trigger. Die
+Größenordnung ist ein **Ziel, keine Mauer** — länger ist erlaubt, wenn der Inhalt es
+trägt und der Überlauf benannt ist:
 
 | Ort | Ziel | wenn es darüber wächst |
 |---|---|---|
@@ -31,27 +37,20 @@ Dateien in diesem Repo landen im Kontext eines Modells — `rules/` nur, wo ihr 
 | `SKILL.md` | **~150 Zeilen** | Details wandern nach `references/` |
 | `references/*.md` | ohne Ziel | Träger der Belege und Tabellen |
 
-Gemessen wird mit `wc -l`. Wer länger wird, lagert den Überlauf nach `references/` aus und benennt, was wohin wanderte — „es wurde länger" allein zählt nicht. Eine Regel, die nur noch einen Verweis wiederholt, ist löschbar:
-Was eine Entscheidung nicht ändert und was ein Link nicht schon sagt, gehört gestrichen, nicht
-umformuliert.
+Gemessen wird mit `wc -l`; Überlauf wandert nach `references/` und wird benannt
+(was wohin). Eine Regel, die nur noch einen Verweis wiederholt, ist löschbar.
 
 ## After pull: setup drift check
 
-A `git pull` here can change what the local machine needs — the repo is the source
-of truth, the machine is a copy that rots. After pulling, run the drift check from
-`agent-config` §8 (rule files vs. the text inlined into `AGENTS.md`, skills
-registration, command templates, MCP wiring, hooks) and re-apply setup locally. The failure this
-check exists to catch: a rule file whose changed **duty** was not re-inlined into
-an `AGENTS.md` — the global config's `instructions` array is empty, so it delivers
-nothing — and a new skill that does not resolve.
+After pulling, run the drift check from `agent-config` §8 (rule files vs. the text
+inlined into `AGENTS.md`, skills registration, command templates, MCP wiring, hooks)
+and re-apply setup locally.
 
 ## Markdown-only — no CodeGraph here
 
-This repo holds skills and docs (markdown), no code. There is therefore **no
-`.codegraph/` index and no pre-commit hook**: the `codegraph sync` hook was
-removed 2026-10-08 because it warned on every commit while indexing nothing.
+This repo holds skills and docs (markdown), no code: **no `.codegraph/` index and
+no pre-commit hook**. Do not re-add the hook or run `codegraph init` here.
 CodeGraph remains a per-*code*-project tool (`codegraph-project-setup` skill).
-Do not re-add the hook or run `codegraph init` here.
 
 ## What does not belong here
 

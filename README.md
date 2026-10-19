@@ -99,6 +99,25 @@ nothing. Details in skill `agent-config`.
 | Official/third-party packs (daisyui, find-skills, stripe-*) | where the installer puts them |
 | Project-specific skills (nx-*, blog-beitrag, testimonial) | in the respective project |
 
+## Repo decisions (rationale & history)
+
+Why the rules in `AGENTS.md` read the way they do — kept out of that file on purpose.
+
+- **Separate Conventional Commits; amend only unpushed.** Pushed commits are
+  history: an amend changes the SHA, and other projects record these SHAs as their
+  `skills-marker` range — a rewrite silently breaks their cursor.
+- **Token discipline is a target, not a wall.** Files here land in a model's
+  context, so size is measured with `wc -l`. Going over is allowed when the content
+  carries it and the overflow is named and moved to `references/`.
+- **After-pull setup drift check** exists because the repo is the source of truth
+  and the machine is a copy that rots. The failure it catches: a rule file whose
+  changed *duty* was not re-inlined into an `AGENTS.md` (the global config's
+  `instructions` array is empty, so it delivers nothing) and a new skill that does
+  not resolve.
+- **Markdown-only, no CodeGraph.** The `codegraph sync` hook was removed
+  2026-10-08 because it warned on every commit while indexing nothing. CodeGraph
+  stays a per-*code*-project tool.
+
 ## Related
 
 - `codegraph-project-setup` — CodeGraph index + hook for new projects
