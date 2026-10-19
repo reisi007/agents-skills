@@ -60,9 +60,9 @@ never infer from the slug.
   model on `opencode-go/`: the root `model` plus per-role models for
   `plan`/`general`/`build`/`explore` (configured again 2026-10-18, same-day change).
   The reason is the **standing user decision**, not a capability or price gap: the
-  configured family's `opencode/` twin carries the same context and the same price
-  (a $0 family on both namespaces), and the rule still holds the move. A
-  configured `opencode-go/<slug>` is *not* a REPLACE on namespace grounds.
+  configured model's `opencode/` twin carries the same context and the same price
+  (the configured model is $0 on both namespaces), and the rule still holds the
+  move. A configured `opencode-go/<slug>` is *not* a REPLACE on namespace grounds.
 - **Retired 2026-10-18: the single-root phase** — briefly (same day) the config carried
   only the root `model` with no `agents.<role>.model`; per-role models are configured
   again. Also **retired: `opencode-go-mixed`** (2026-10-16..2026-10-18) — three
