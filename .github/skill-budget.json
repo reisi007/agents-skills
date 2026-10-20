@@ -1,6 +1,6 @@
 {
   "note": "Ceilings for the context cost of the *advertised* skills of .agents/skills/, measured by scripts/skill-budget.mjs. CI fails when any metric grows above its value; shrinking is free (the script hints at lowering the baseline). Raising a value is a deliberate, reviewable `node scripts/skill-budget.mjs --update` commit that says why.",
-  "activeSkills": 5,
-  "totalDescriptionChars": 2531,
-  "maxDescriptionChars": 918
+  "activeSkills": 2,
+  "totalDescriptionChars": 633,
+  "maxDescriptionChars": 428
 }

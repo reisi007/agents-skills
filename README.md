@@ -42,8 +42,8 @@ Rules reach a session through `AGENTS.md` inlining, not the config's
 
 ## CI — skill budget
 
-CI pins the context cost of the **advertised** skills: `activeSkills` (5),
-`totalDescriptionChars` (2531) and `maxDescriptionChars` (918, the longest single
+CI pins the context cost of the **advertised** skills: `activeSkills` (2),
+`totalDescriptionChars` (633) and `maxDescriptionChars` (428, the longest single
 description in characters). The descriptions of advertised skills sit in every
 session's system prompt, so that cost must not grow silently — hidden skills
 (`opencode/autoinvoke: false`) are not counted. Run it locally with

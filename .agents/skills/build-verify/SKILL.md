@@ -1,6 +1,6 @@
 ---
 name: Build Verify Flow
-description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — at the START of any such task, not only when the user says "verify"/"build-verify" — and when deciding whether a change is small enough to skip the loop (Kleinheits-Check, Kleinheits-Ausnahme), writing a commit message, choosing --amend vs a new commit, telling a verifier it is a redo (nach-verify), after a CHANGES REQUIRED verdict, or when a repo''s AGENTS.md duplicates this flow. NOT for research, questions, reading, or throwaway experiments. Flow: pull before changing, delegate to an implementer subagent, verify with an independent verifier, commit after EVERY verify round regardless of the verdict, Conventional Commits with a verify-round footer, one commit per task, push + CI watch; optionally a milestone review at releases / every N features.'
+description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — from the START of any such task, not only on "verify" — including the Kleinheits-Check, the commit message, --amend vs. a new commit, a redo after CHANGES REQUIRED, and commissioned TODO work. NOT for research, questions, reading, or throwaway experiments. Flow: pull, delegate, verify independently, commit after every round, push + CI.'
 ---
 
 # Build Verify — pull, delegate, verify, commit, amend, push
@@ -114,13 +114,12 @@ gh run watch <run-id> --exit-status # until green or red
 Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes
 **priority over all new work**.
 
-**When CI itself is the problem** (three of these are hidden skills — load by exact ID;
-`github-ci-filters` is advertised normally):
+**When CI itself is the problem** (all four of these are hidden skills — load by exact ID):
 container-image pull fails (`unauthorized`, job dies with exit 125 before any step)
 → `ghcr-visibility` (hidden); the E2E/test image itself (what may be baked in, base-image pin,
 browser version from the lockfile) → `docker-test-image` (hidden); a slow/flaky Playwright
 suite, `--workers=1`, sharding → `playwright-parallel` (hidden); path filters / docs-only
-commits triggering CI → `github-ci-filters`.
+commits triggering CI → `github-ci-filters` (hidden).
 
 ## Optional — milestone review (releases / every N features)
 

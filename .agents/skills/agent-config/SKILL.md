@@ -1,6 +1,8 @@
 ---
 name: Agent Config
 description: 'TRIGGER when setting up a new machine/agent, wiring the global OpenCode config (opencode.jsonc, MCP servers, skills array), registering the central skills repo (agents-skills), or answering "how is my agent configured" / "where do my skills live" / "how do I add an MCP server".'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Agent Config — global setup, single source of truth
@@ -198,7 +200,7 @@ footer and the `nach-verify` flag apply as in every other repo.
 
 ### Hidden skills — not advertised, loaded by exact ID
 
-14 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
+17 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
 in the model's advertised list, but stay registered and load by exact ID — pick
 them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
 the exact ID. They are no longer exposed as `/<id>` slash commands (§1). Reachable
@@ -220,6 +222,9 @@ from here:
 | `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive |
 | `codegraph-project-setup` | bootstrap CodeGraph (index + git hook) + project conventions |
 | `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory |
+| `update-models` | stale model list, or a model ID about to be written into `opencode.jsonc` (twin + capability gate, price trackers) |
+| `github-ci-filters` | GitHub Actions `paths`/`paths-ignore` filters; docs-only commits triggering CI |
+| `agent-config` | global OpenCode config: `opencode.jsonc`, MCP servers, `skills` array, permissions |
 
 ## 8. After pull: setup drift check
 

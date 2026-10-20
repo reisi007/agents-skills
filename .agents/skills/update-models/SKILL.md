@@ -1,6 +1,8 @@
 ---
 name: Update Models
 description: 'TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check twin + capability gate first); AND when the user wants to review or update their configured models ("which models should I update", "model recommendations", "check my models against the price trackers", "set all models to X", "alle Modelle auf X stellen") — the vision gate and the namespace rule apply to the user''s pick too. Cross-references the configured models with the live ocgo/cc price trackers (prices + changelog), recommends UPDATE vs KEEP, and fixes the namespace from `model-preferences.md`, never from the slug.'
+metadata:
+  opencode/autoinvoke: false
 ---
 
 # Update Models — live registry and UPDATE/KEEP advice
