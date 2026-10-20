@@ -20,6 +20,7 @@ agents-skills/
 │   ├── build-verify/        ← build/verify flow in detail: verifier, amend, commit schema
 │   ├── codegraph-project-setup/  ← bootstrap: codegraph init + pre-commit hook + AGENTS.md
 │   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
+│   ├── generated-docs/      ← documentation generated from a source of truth, checked for drift
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
 │   ├── laravel/             ← Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint)

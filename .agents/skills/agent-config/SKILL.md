@@ -198,7 +198,7 @@ footer and the `nach-verify` flag apply as in every other repo.
 
 ### Hidden skills — not advertised, loaded by exact ID
 
-13 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
+14 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
 in the model's advertised list, but stay registered and load by exact ID — pick
 them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
 the exact ID. They are no longer exposed as `/<id>` slash commands (§1). Reachable
@@ -207,6 +207,7 @@ from here:
 | ID | Trigger (one line) |
 |---|---|
 | `docker-test-image` | E2E/CI test image bakes the environment only; browser version from the lockfile |
+| `generated-docs` | documentation generated from a source of truth and checked for drift |
 | `ghcr-visibility` | job-level `container:` pull fails `unauthorized` / job dies exit 125 / package visibility |
 | `laravel` | Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint) |
 | `node-deps` | pnpm dependency policy: no pins, ranges + lockfile |

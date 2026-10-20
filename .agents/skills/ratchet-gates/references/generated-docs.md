@@ -4,6 +4,12 @@ Everything derived is generated. Nothing derived is maintained in parallel.
 A derived artifact that is written by hand and by a generator is two sources
 of truth, and the reader cannot tell which one is current.
 
+> **Scope.** This file holds the **generic** mechanism for derived artifacts.
+> The prose case — README files and other documentation, hand-written text
+> around generated blocks, claim lists about things that do not exist — is
+> covered by the `generated-docs` skill. The mechanism below still applies to
+> every derived artifact, including documents.
+
 ## The anatomy of a generated file
 
 ```
@@ -58,9 +64,7 @@ generator that fails this test is not ready to be gated.
 ## The drift gate is a diff
 
 The check regenerates into a **temporary file** and diffs it against the
-committed one. It does not regenerate in place: overwriting the committed file
-turns the check into "the next commit carries the change", which is silent
-review and hides the drift until it lands.
+committed one.
 
 The diff output must be readable — the gate prints the changed lines, so a
 reviewer sees what the source moved to. "the generated file differs from the
@@ -69,6 +73,18 @@ source" is a report; "line 42: 12 → 11" is a diagnosis.
 Order of operations: fix the source, regenerate, commit the regenerated file
 **in the same commit**. A generated file that is out of date in the tree makes
 every later diff harder to read.
+
+### Three ways a gate lies while staying green
+
+- **The check regenerates in place.** The tree is now clean, the diff is empty,
+  the gate is green — and the drift lands in the next commit. The check must
+  not mutate the tree.
+- **The check compares the file with itself** — the working copy against the
+  file it just overwrote. Compare against the committed version.
+- **The check finds nothing and calls it a success.** A generator whose input
+  changed shape writes an empty result, the diff against the empty result is
+  empty, and the gate is green. A check must fail when the **expected**
+  entries are missing, not when the count happens to be zero.
 
 ## The second source of truth
 
@@ -84,35 +100,18 @@ Three ways out:
 |---|---|
 | The list lives in the source and the generator reads it | none — this is the default |
 | The list lives in a separate source file that the generator merges in | one more file, still one truth per fact |
-| The generator preserves a delimited block in the output | the block is a second truth with extra steps: it must still be diffed against its own source |
+| The generator preserves a delimited block in the output | a second truth with extra steps: it is compared against nothing |
 
-Prefer the first. The third is a trap: a preserved block looks like it
-belongs to the generated file, so the next person edits it and the drift
-gate does not notice — the block is not compared against anything.
+Prefer the first. The third is a trap: a block that is **preserved**, not
+regenerated, looks like it belongs to the generated file, so the next person
+edits it and the drift gate does not notice — the block is not compared
+against anything.
 
 **Exemptions are data.** A list of allowed exceptions belongs in the source
 (the generator applies it), and it is reviewed like code: the exemptions
 themselves can go stale, and a stale exemption hides a violation forever.
 
-## Numbers in prose
+## The document case
 
-A sentence like "the project has 42 modules, 90 % of them tested" is a
-hand-maintained copy of a generated number. It drifts silently, because prose
-is not diffed against a source by anything.
-
-Two clean options:
-
-- **Generate the sentence.** The prose file is generated too, with the same
-  marker and the same command. The generator writes the number from the
-  source; nobody types it.
-- **Replace the number with a reference.** Point at the generated table
-  instead of repeating its content: "the inventory is in
-  `<generated file>`". The prose stays true because it carries no number.
-
-What not to do: a number in prose with no marker and no reference. It is a
-claim nobody maintains, and it will be wrong in exactly the place a reader
-trusts.
-
-The same applies to headings, badges and captions that encode a number
-("87 % coverage", "12 open findings"): they are artifacts. Either they are
-generated or they are dropped.
+Numbers in prose, generated blocks inside hand-written files, and documents
+that describe things which do not exist are in the `generated-docs` skill.

@@ -1,6 +1,6 @@
 ---
 name: Ratchet Gates
-description: 'TRIGGER when adding or repairing quality gates in a codebase that already violates them — "add a gate for this class of defect", "make this check ratchet instead of permanently red", "baseline that may only move one way", "split fast and slow checks", "generate the docs from the data", "what is not covered by our checks", "deny by default for access decisions", "one place that decides permissions". NOT for writing the feature itself, for a single bug fix, for dependency or CVE work, or for a green-field codebase without legacy violations.'
+description: 'TRIGGER when adding or repairing quality gates in a codebase that already violates them — "add a gate for this class of defect", "make this check ratchet instead of permanently red", "baseline that may only move one way", "split fast and slow checks", "derived artifacts that must not be hand-maintained", "what is not covered by our checks", "deny by default for access decisions", "one place that decides permissions". NOT for writing the feature itself, for a single bug fix, for dependency or CVE work, or for a green-field codebase without legacy violations.'
 metadata:
   opencode/autoinvoke: false
 ---
@@ -89,8 +89,9 @@ Everything derived is generated, never maintained in parallel.
   regeneration, usually silently.
 - A generated file that embeds a hand-maintained list has a **second source of
   truth**. The list belongs in the source.
-- Counts in prose (a README sentence, a table caption) are artifacts too and
-  are generated — or replaced by a reference to the generated table.
+- The prose case (README files, hand-written documents, counts in prose, claim
+  lists about features that do not exist) is detailed in the `generated-docs`
+  skill.
 
 ## Fail-closed decisions
 
@@ -157,5 +158,6 @@ A list that names only what exists is marketing.
 - `references/check-tiers.md` — fast/slow split, the selection trap and its
   floor, the documented gap between the tiers.
 - `references/generated-docs.md` — source of truth, the do-not-edit marker,
-  deterministic generators, the drift gate by diff, second sources of truth,
-  numbers in prose.
+  deterministic generators, the drift gate by diff, second sources of truth.
+  The **prose case** (README files, hand-written documents, counts in prose,
+  claims about things that do not exist) lives in the `generated-docs` skill.
