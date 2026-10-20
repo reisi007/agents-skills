@@ -86,10 +86,9 @@ in the rule file), because nobody independent re-reads trivia; K2 through
 K4 carry the risk, not the size.
 
 The four criteria live in `../../../rules/build-verify.md` — a project's `AGENTS.md`
-points at it, but it is **not** delivered into a session by itself (the global
-`instructions` array is empty) — here only their derivation, so the two don't
-drift apart. "K1" through "K4" mean those four criteria in the rule file's
-order:
+points at it, but it is **not** delivered into a session by itself (no config
+key delivers it) — here only their derivation, so the two don't drift apart.
+"K1" through "K4" mean those four criteria in the rule file's order:
 
 - **K1 is deliberately wide, K2 through K4 are the real boundaries.** A change
   at the K1 size is reviewable without a second agent

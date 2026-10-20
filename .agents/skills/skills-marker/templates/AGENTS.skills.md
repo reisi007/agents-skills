@@ -72,4 +72,5 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    geänderte Pflicht, kein abweichender Wortlaut — die Einbettung ist die Kurzform
    der Pflicht, kein wörtliches Abbild, und ein Text-Diff gegen die Quelle ist
    **kein** Drift. Dann `touch ~/.config/opencode/opencode.jsonc` (Reload der
-   globalen Config; das `instructions`-Array ist leer und liefert nichts).
+   globalen Config; Always-on-Text liefert nur die Einbettung in eine
+   `AGENTS.md`).

@@ -1,6 +1,6 @@
 ---
 name: Build Verify Flow
-description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — from the START of any such task, not only on "verify" — including the Kleinheits-Check, the commit message, --amend vs. a new commit, a redo after CHANGES REQUIRED, and commissioned TODO work. NOT for research, questions, reading, or throwaway experiments. Flow: pull, delegate, verify independently, commit after every round, push + CI.'
+description: 'TRIGGER when a user-commissioned change in a git repo is about to be committed or pushed — from the START of any such task, not only on "verify" — including the Kleinheits-Check, commit message, --amend vs. a new commit, a redo after CHANGES REQUIRED, commissioned TODO work, a repo AGENTS.md duplicating this flow, and a milestone review. NOT for research, questions, reading, or throwaway experiments. Flow: pull, delegate, verify independently, commit after every round, push + CI.'
 ---
 
 # Build Verify — pull, delegate, verify, commit, amend, push
@@ -8,12 +8,11 @@ description: 'TRIGGER when a user-commissioned change in a git repo is about to 
 The sequence to work by. The trigger is this skill's **description** — a
 user-commissioned change in a git repo. The non-negotiable minimum lives in the
 `build-verify` rule file, which projects point at from their own `AGENTS.md`; it is
-**not** wired into a session via the global config's `instructions` key (that
-array is empty on this setup). Its **Rule 0** points here for everything beyond
-the Kleinheits-Ausnahme. The flow
-starts on user **commission** and covers everything to be committed; research,
-questions, and throwaway experiments are excluded. **What counts as green in a
-given repo lives in that repo's `AGENTS.md`.**
+**not** wired into a session via a config key (the global config carries none).
+Its **Rule 0** points here for everything beyond the Kleinheits-Ausnahme. The
+flow starts on user **commission** and covers everything to be committed;
+research, questions, and throwaway experiments are excluded. **What counts as
+green in a given repo lives in that repo's `AGENTS.md`.**
 
 ## The flow at a glance
 

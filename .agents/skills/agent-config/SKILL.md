@@ -42,7 +42,7 @@ can consume the same dir.
   leftover project copy (low → high: builtin → compat → global → project →
   `skills` array).
 
-## 2a. Always-on rules — the `instructions` array is empty on this setup
+## 2a. Always-on rules — inlined into an `AGENTS.md`
 
 A skill is **trigger-based**: its `description` has to match before its body is
 read. That is the right mechanism for detail that is only needed sometimes, and
@@ -51,18 +51,18 @@ rule: every question to the user goes through the `question` tool). A rule that
 lives only in a skill is a rule that gets skipped exactly when it is
 inconvenient.
 
-For those, the config has a second key — `instructions`, "Additional instruction
-files or patterns to include". **On this setup that key is empty:**
-`"instructions": []` in the global `opencode.jsonc`. **Nothing is delivered
-through it** (verbatim: `references/snippets.md` §2).
+For those there is no config key in use: the global `opencode.jsonc` carries
+**no `instructions` key**. The only way into a session is text **inlined into
+an `AGENTS.md`** (global or project) — a rule file that is never inlined
+delivers nothing (verbatim: `references/snippets.md` §2).
 
 **What is actually always-on is rule text inlined into an `AGENTS.md`.** The
-global `~/.config/opencode/AGENTS.md` carries the CodeGraph block and three
-Arbeitsregeln (question tool, command policy, TODO policy). The question rule
-there is the **short form** of the duty; `ask.md` in `.agents/rules/` is its
-source and carries the reasoning. The build/verify minimum is **not** in it —
-that flow reaches a session on demand through a skill, whose `description` is
-the trigger.
+global `~/.config/opencode/AGENTS.md` carries the CodeGraph block, three
+general working principles, the question rule and a short section with this
+machine's host facts. The question rule there is the **short form** of the
+duty; `ask.md` in `.agents/rules/` is its source and carries the reasoning. The
+build/verify minimum is **not** in it — that flow reaches a session on demand
+through a skill, whose `description` is the trigger.
 
 - **The inline may be a short form — not a transcript.** The global `AGENTS.md`
   states the question duty in one line; the reasoning lives in `ask.md`. Judge
@@ -81,12 +81,6 @@ the trigger.
   because the file alone delivers nothing. A rule that is neither inlined nor
   covered by a skill's trigger **silently contributes nothing** — the failure to
   check for after a pull (§8).
-- **`instructions` path forms** (should the key ever be used again): absolute and
-  `~/` paths; relative paths and globs resolve against the project (an absolute
-  glob works too — it is globbed with `cwd = dirname`). Remote `https://` URLs are
-  fetched with a 5 s timeout. Intended delivery: the file's content is injected as
-  `Instructions from: <path>` into the system prompt, alongside every `AGENTS.md`
-  — **not** read on demand, so it costs context in every session.
 - **Reloading:** like any config change, the running `opencode` service caches
   resolved config — `touch ~/.config/opencode/opencode.jsonc` or restart the
   session (see §3 for the same gotcha on MCP). Verify **once** after setup: in a
@@ -155,10 +149,10 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
   clone `git@github.com:reisi007/agents-skills.git`, wire the `skills` array
   (§2) in the global `opencode.jsonc` (or symlink `~/.config/opencode/skills` →
   repo dir — that is the *skills* wiring only; commands are copied, not
-  symlinked). The `instructions` array stays empty on this setup (§2a); the
-  always-on text that must be in every session (CodeGraph block, Arbeitsregeln)
-  is inlined in the global `~/.config/opencode/AGENTS.md`. codegraph is declared
-  once as a **global MCP server** (§3) — no per-project MCP entry for it.
+  symlinked). No config key carries the always-on text (§2a) — it is inlined
+  in the global `~/.config/opencode/AGENTS.md` (CodeGraph block, working
+  principles, question rule, host facts). codegraph is declared once as a
+  **global MCP server** (§3) — no per-project MCP entry for it.
   Create **both** own slash commands from the repo templates under
   `.agents/commands/` into `~/.config/opencode/commands/` (§1): create the
   directory, copy the template contents — the **agent** does this as part of the
@@ -203,8 +197,9 @@ footer and the `nach-verify` flag apply as in every other repo.
 17 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
 in the model's advertised list, but stay registered and load by exact ID — pick
 them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
-the exact ID. They are no longer exposed as `/<id>` slash commands (§1). Reachable
-from here:
+the exact ID. They are no longer exposed as `/<id>` slash commands by the skill
+system (§1) — the repo's own command templates (`update-models`,
+`security-review`) are separate files and stay. Reachable from here:
 
 | ID | Trigger (one line) |
 |---|---|
@@ -222,9 +217,9 @@ from here:
 | `web-audit` | full live-site audit (SEO, images, performance) → self-contained archive |
 | `codegraph-project-setup` | bootstrap CodeGraph (index + git hook) + project conventions |
 | `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory |
-| `update-models` | stale model list, or a model ID about to be written into `opencode.jsonc` (twin + capability gate, price trackers) |
-| `github-ci-filters` | GitHub Actions `paths`/`paths-ignore` filters; docs-only commits triggering CI |
-| `agent-config` | global OpenCode config: `opencode.jsonc`, MCP servers, `skills` array, permissions |
+| `update-models` | stale model list, the models refresh/reload command, reviewing or updating the configured models, a model ID about to be written into `opencode.jsonc` (twin + capability gate) |
+| `github-ci-filters` | GitHub Actions `paths`/`paths-ignore` filters; docs-only commits triggering CI; a PR stuck on a pending check (branch-protection trap) |
+| `agent-config` | global OpenCode config: `opencode.jsonc`, MCP servers, `skills` array |
 
 ## 8. After pull: setup drift check
 
@@ -235,11 +230,11 @@ setup if the source moved under you:
 
 | Changed path | Setup step to re-check |
 |---|---|
-| `.agents/rules/*` (new) | nothing is auto-wired: the rule reaches a session only if its text is inlined into an `AGENTS.md` (global or project) or a skill trigger covers it — the `instructions` array is empty (§2a), so an inlined-nowhere rule **silently contributes nothing** |
+| `.agents/rules/*` (new) | nothing is auto-wired: the rule reaches a session only if its text is inlined into an `AGENTS.md` (global or project) or a skill trigger covers it — no config key carries it (§2a), so an inlined-nowhere rule **silently contributes nothing** |
 | `.agents/rules/*` (changed content) | re-inline **only when the duty changed**, in the inline's own short form. The question rule (from `ask.md`) sits in the global `~/.config/opencode/AGENTS.md` as a deliberate short form, **not** a verbatim copy: a wording diff against `ask.md` is **not** drift, and re-expanding the short form to match the source is the mistake this row prevents. `build-verify.md` has no inline copy |
 | `.agents/skills/*` (new skill) | nothing to wire (the dir is already registered) — but verify the skill resolves in a fresh session |
 | `.agents/commands/*` (new, changed or removed) | re-create the machine copies in `~/.config/opencode/commands/` by copying the file contents; for a **removed** template, delete the orphaned machine file instead. The **agent** does this, the user does not — compare contents, not existence |
-| `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, `instructions`, or MCP wiring may have changed — apply locally |
+| `agent-config/SKILL.md` (§2/§2a/§3) | `skills` paths, the global `AGENTS.md` inline, or MCP wiring may have changed — apply locally |
 | `.githooks/*`, README setup section | re-run the changed step (hook path, clone URL, install command) — **`.githooks/` no longer exists in this repo** (markdown-only, hook removed 2026-10-08): nothing to re-run, and do not re-create it |
 | none of the above | nothing to do |
 

@@ -37,13 +37,17 @@ agents-skills/
 │   └── web-audit/           ← full live-site audit (SEO, images, performance) → self-contained archive
 ```
 
-Rules reach a session through `AGENTS.md` inlining, not the config's
-`instructions` key — that array is empty on this setup.
+Rules reach a session through `AGENTS.md` inlining — the global config carries
+no `instructions` key.
+
+Hidden skills (`opencode/autoinvoke: false`, e.g. `agent-config`,
+`codegraph-project-setup`) are not advertised in a session's system prompt —
+load them by exact ID.
 
 ## CI — skill budget
 
 CI pins the context cost of the **advertised** skills: `activeSkills` (2),
-`totalDescriptionChars` (633) and `maxDescriptionChars` (428, the longest single
+`totalDescriptionChars` (689) and `maxDescriptionChars` (484, the longest single
 description in characters). The descriptions of advertised skills sit in every
 session's system prompt, so that cost must not grow silently — hidden skills
 (`opencode/autoinvoke: false`) are not counted. Run it locally with
@@ -58,7 +62,6 @@ git clone git@github.com:reisi007/agents-skills.git ~/dev/agents-skills
 
 # ~/.config/opencode/opencode.jsonc
 "skills": ["/Users/<user>/dev/agents-skills/.agents/skills"],
-"instructions": [],   // empty: always-on text is inlined into AGENTS.md (see below)
 ```
 
 The own slash commands are versioned as templates under `.agents/commands/`; the
@@ -88,8 +91,7 @@ end), commit and push — then the **agent** copies it into
 
 For a rule that should hold in **every** session (not only on a trigger): keep the
 file in `.agents/rules/` and inline its duty (short form) into an `AGENTS.md` (global or
-project) — on this setup the config's `instructions` array is empty and delivers
-nothing. Details in skill `agent-config`.
+project) — no config key delivers rule text. Details in skill `agent-config`.
 
 ## Ownership rules
 
@@ -113,17 +115,16 @@ Why the rules in `AGENTS.md` read the way they do — kept out of that file on p
   carries it and the overflow is named and moved to `references/`.
 - **After-pull setup drift check** exists because the repo is the source of truth
   and the machine is a copy that rots. The failure it catches: a rule file whose
-  changed *duty* was not re-inlined into an `AGENTS.md` (the global config's
-  `instructions` array is empty, so it delivers nothing) and a new skill that does
-  not resolve.
+  changed *duty* was not re-inlined into an `AGENTS.md` (no config key delivers
+  rule text, so it delivers nothing) and a new skill that does not resolve.
 - **Markdown-only, no CodeGraph.** The `codegraph sync` hook was removed
   2026-10-08 because it warned on every commit while indexing nothing. CodeGraph
   stays a per-*code*-project tool.
 
 ## Related
 
-- `codegraph-project-setup` — CodeGraph index + hook for new projects
-- `agent-config` — global agent configuration (single source of truth)
+- `codegraph-project-setup` — CodeGraph index + hook for new projects (hidden — load by exact ID)
+- `agent-config` — global agent configuration (single source of truth) (hidden — load by exact ID)
 
 ## License
 

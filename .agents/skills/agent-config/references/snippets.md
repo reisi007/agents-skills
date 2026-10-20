@@ -14,15 +14,15 @@ home — never a concrete machine layout. Decisions and wiring rules live in
 ],
 ```
 
-## 2. Always-on rules (`instructions` array — empty on this setup)
+## 2. Always-on rules (inlined into an `AGENTS.md` — no config key)
 
-```jsonc
-// ~/.config/opencode/opencode.jsonc
-// ALWAYS-ON RULES: files injected as `Instructions from: <path>`
-// into every session's system prompt. See agents-skills/.agents/skills/agent-config
-// §2a. Add new rule files here to make them always-on.
-// After changing this array: `touch` this file so the opencode service reloads.
-"instructions": [],
+```
+// ~/.config/opencode/AGENTS.md  — the file that carries always-on text
+// ALWAYS-ON RULES: text inlined here reaches every session as
+// `Instructions from: <path>`. Keep the source in agents-skills/.agents/rules/*
+// and inline the duty (short form); see agents-skills/.agents/skills/agent-config
+// §2a. After editing: `touch ~/.config/opencode/opencode.jsonc` so the
+// opencode service reloads.
 ```
 
 ## 3. CodeGraph global MCP server

@@ -1,8 +1,8 @@
 # AGENTS.md — agents-skills
 
 Central skills repo (`reisi007/agents-skills`). Conventions live in `README.md`;
-global wiring is documented in the `agent-config` skill. This file holds only what
-must apply while working **in this repo**.
+global wiring is documented in the `agent-config` skill (hidden — load it by
+exact ID). This file holds only what must apply while working **in this repo**.
 
 **Rules only, no decisions:** This file contains rules only — instructions that
 apply to any work in this repo. Durable decisions, rationale, measurements and
@@ -42,9 +42,9 @@ Gemessen wird mit `wc -l`; Überlauf wandert nach `references/` und wird benannt
 
 ## After pull: setup drift check
 
-After pulling, run the drift check from `agent-config` §8 (rule files vs. the text
-inlined into `AGENTS.md`, skills registration, command templates, MCP wiring, hooks)
-and re-apply setup locally.
+After pulling, run the drift check from the hidden skill `agent-config` (load it
+by exact ID) §8 (rule files vs. the text inlined into `AGENTS.md`, skills
+registration, command templates, MCP wiring, hooks) and re-apply setup locally.
 
 ## Markdown-only — no CodeGraph here
 
@@ -55,5 +55,6 @@ CodeGraph remains a per-*code*-project tool (`codegraph-project-setup` skill).
 ## What does not belong here
 
 - Project-specific skills — those live in their project (`agent-config` ownership
-  table). Only own, portable skills and rule files live here.
+  table; hidden skill, load by exact ID). Only own, portable skills and rule
+  files live here.
 - Third-party packs installed by tools — those stay where the installer put them.

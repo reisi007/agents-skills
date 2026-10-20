@@ -76,8 +76,8 @@ Playwright hat, schreibt in derselben Lage `trifft nicht zu` mit dem Grund
 
 Ändert sich eine Repo-Konvention — Sprache (Englisch für die Skills in diesem Repo),
 Größen-Disziplin (`SKILL.md` ~150 Zeilen, Überlauf nach `references/`) oder eine
-in eine `AGENTS.md` eingebettete Regel (weil der `instructions`-Array leer ist und
-nichts liefert) — bekommt sie eine Tabellenzeile wie jeder Skill:
+in eine `AGENTS.md` eingebettete Regel (weil kein Config-Key Regeltext liefert) —
+bekommt sie eine Tabellenzeile wie jeder Skill:
 
 | Konvention | angewendet? | wo im Projekt | offene Position |
 |---|---|---|---|
