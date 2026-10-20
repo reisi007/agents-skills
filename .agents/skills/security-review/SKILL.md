@@ -89,7 +89,8 @@ One wave = one coherent finding group, closed through the build/verify flow
 - **Group by mechanism, not by file.** The same defect in four controllers is one
   wave.
 - **Order: severity first, then smallest blast radius.** Critical and high before
-  medium; a one-line config fix before a route refactor.
+  medium; `info` last — it names no defect. A one-line config fix before a route
+  refactor.
 - **A wave leaves the tree green** — tests, lint, build. It is not a branch of
   half-finished work.
 - **Every wave carries its own tests** — anonymous 401/403, "the minimised

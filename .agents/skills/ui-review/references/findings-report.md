@@ -43,7 +43,7 @@ the canonical meaning decides.
 |---|---|
 | `critical` | Blank/broken page, content overlap or cut-off, hard functional blocker visible in the render. |
 | `high` | Visible layout/contrast/hierarchy defect, inconsistent spacing that degrades usability. |
-| `medium` | A defect with a workaround — an empty-state regression while the content stays reachable another way. |
+| `medium` | A defect with a workaround — an empty-state regression while the content stays reachable another way. Without such a workaround the content is unreachable: `high` when another path still works, `critical` when the core path is blocked for everyone. |
 | `low` | Polish issue, minor alignment, suboptimal hierarchy, nitpick, stylistic preference. |
 | `info` | An observation that names no defect — e.g. a deliberate design choice worth recording. |
 

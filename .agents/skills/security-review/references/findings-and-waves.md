@@ -65,8 +65,8 @@ final list reproduces the same phantom, and a wave spends itself on it.
 - **Group by mechanism, not by file.** Four controllers leaking through the same
   missing scope is *one* wave. Two unrelated defects that happen to touch one file
   are *two*.
-- **Order:** severity first (`critical` → `high` → `medium` → `low`), then
-  **smallest blast radius**. A one-line config fix (`'serve' => false`) ships before
+- **Order:** severity first (`critical` → `high` → `medium` → `low` → `info`),
+  then **smallest blast radius**. A one-line config fix (`'serve' => false`) ships before
   a route refactor, even at the same severity.
 - **A wave is one commit** and one independently verified round. If a wave's diff
   cannot be described in one sentence, it is two waves.
