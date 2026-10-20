@@ -53,11 +53,12 @@ Then walk each surface class; recipes with commands: `references/enumeration.md`
 
 ## Stage 2 — Classify every finding
 
-One row per finding: `file:line` (or route/command), severity
-`critical/high/medium/low`, evidence, and class `BELEGT` / `HEURISTIK` /
-`AKZEPTIERT`. **Severity = reach × impact**, not how alarming the word sounds — and
-the **consumers decide the impact**: an anonymous endpoint nothing reads is not the
-same finding as one a live client depends on.
+One row per finding: `file:line` (or route/command), a severity from the
+canonical levels (`ratchet-gates`, `references/vocabulary.md`), evidence, and
+class `BELEGT` / `HEURISTIK` / `AKZEPTIERT`. **Severity = reach × impact** (the
+method: `references/findings-and-waves.md`), not how alarming the word sounds —
+and the **consumers decide the impact**: an anonymous endpoint nothing reads is
+not the same finding as one a live client depends on.
 
 ## Stage 3 — The false-positive gate (before the first wave)
 
@@ -94,8 +95,8 @@ One wave = one coherent finding group, closed through the build/verify flow
 - **Every wave carries its own tests** — anonymous 401/403, "the minimised
   endpoint returns exactly these fields", "the served path is gone".
 - **A fix must not move a finding.** On a redo the verifier checks `fixed` /
-  `open` / `new` — a fixed finding that reappears elsewhere is a new finding, not a
-  closed one.
+  `open` — a fixed finding that reappears elsewhere is a **new** finding, and it
+  is `open`, not `fixed`.
 - **Report-only is a decision, not a default** — `AKZEPTIERT` with the owner's
   reason, or a named follow-up task. Never "left it".
 - **Push per `build-verify` rule 7** (push and watch CI) — the only exception is an

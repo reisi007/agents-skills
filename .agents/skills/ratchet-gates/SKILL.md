@@ -118,6 +118,8 @@ A list that names only what exists is marketing.
 - A skipped test is a dead test: either fix it or name it as a gap.
 - The gap list gets the same discipline as the code: an owner and a ticket per
   entry, otherwise it is a graveyard.
+- The levels and the statuses are defined once, in `references/vocabulary.md`;
+  the owner-and-ticket rule applies to every entry that is not `fixed`.
 
 ## Core rules
 
@@ -161,3 +163,4 @@ A list that names only what exists is marketing.
   deterministic generators, the drift gate by diff, second sources of truth.
   The **prose case** (README files, hand-written documents, counts in prose,
   claims about things that do not exist) lives in the `generated-docs` skill.
+- `references/vocabulary.md` — the shared severity levels and statuses.

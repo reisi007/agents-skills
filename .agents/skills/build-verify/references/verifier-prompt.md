@@ -17,14 +17,16 @@ Open when briefing the verifier (flow Step 2: the verify run).
   against the commission, the architecture/security posture, the storage/cost
   math, and the blast radius; a gate the implementer reported green **with
   quoted output** is trusted and **not re-run** (see "Gates" below).
-- Findings as `file:line` plus severity (`critical`/`high`/`medium`/`low`).
+- Findings as `file:line` plus a severity — the levels and their meanings come
+  from the canonical vocabulary (`ratchet-gates`, `references/vocabulary.md`).
   `critical`/`high` block `APPROVED` and become their own fix tasks. A verdict
   without a complete findings report is not accepted.
 - Every run is explicitly flagged. Without a reference to the previous round, a
   redo run cannot tell whether a finding was fixed or merely moved — so on
-  `nach-verify: true` the verifier reports per prior-round finding: fixed,
-  still open, or new, with the evidence for each, plus a check that no fix
-  merely moved the finding.
+  `nach-verify: true` the verifier reports per prior-round finding: `fixed` or
+  `open`, with the evidence for each, plus a check that no fix merely moved the
+  finding. A finding that was not in the previous round is **new since the
+  last round** — it is reported like any other finding, with the status `open`.
 
 ## Gates — the verifier's default is not to run them
 
@@ -75,7 +77,7 @@ Gates reported: <command — result, with the quoted output>
 Check: the diff against the commission; the gates only under one of the four
 exceptions above.
 Deliver: verdict APPROVED | CHANGES REQUIRED, findings with file:line + severity,
-plus one status per prior finding — fixed / open / new — with the evidence you
-base it on, and a check that no fix merely moved the finding.
+plus one status per prior finding — fixed / open — with the evidence you base it
+on, and a check that no fix merely moved the finding.
 Assert nothing you cannot evidence.
 ```

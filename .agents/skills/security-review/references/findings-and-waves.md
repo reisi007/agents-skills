@@ -10,6 +10,10 @@ the work is cut into waves, and what the report must contain.
 Severity is a **product of two measured things**, not a mood. Grade the reach
 (what can get here) and the impact (what a caller gets), then read the table.
 
+The names and their **meanings** are canonical (the `ratchet-gates` skill,
+`references/vocabulary.md`). The matrix below is this skill's **method** for
+reaching a grade, not a second vocabulary.
+
 | | Low impact | High impact |
 |---|---|---|
 | **Public reach** (no auth) | `medium` | `critical` |
@@ -31,6 +35,11 @@ Severity is a **product of two measured things**, not a mood. Grade the reach
 | `HEURISTIK` | pattern-based; population right, individual case may be wrong | only after the gate confirms the case |
 | `AKZEPTIERT` | a real defect the owner chose to carry | no — it becomes a named open decision |
 | `ZURÜCKGENOMMEN` | failed the gate; published with its cause | no |
+
+The classes grade **how a finding was established**, not its status. The status
+vocabulary is canonical (the `ratchet-gates` skill,
+`references/vocabulary.md`): `AKZEPTIERT` is the canonical `accepted` — a
+decision that stays visible and does not count.
 
 ## The false-positive gate (Stage 3) — before the first wave
 
@@ -74,9 +83,9 @@ Same flow as `build-verify`, applied per wave:
 2. **Verify independently** — a different subagent, fresh context. It checks the
    substance: does the diff close *this* finding, does it move another one, is the
    tree green.
-3. **On a redo the verifier reports `fixed` / `open` / `new`** per finding. A
-   finding that is "fixed" but reappears through another path is **new**, not
-   closed.
+3. **On a redo the verifier reports `fixed` / `open`** per finding. A finding
+   that is "fixed" but reappears through another path is **new since the last
+   round** — it is reported like any other finding, with the status `open`.
 4. **Commit one per wave** — Conventional Commits, `Verify:` footer as in
    `build-verify`.
 5. **Push and watch CI** as in `build-verify` rule 7 — unless the owner asked for
