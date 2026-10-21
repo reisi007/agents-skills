@@ -242,14 +242,14 @@ nicht für den Cursor, der auf einen anderen Repo-Stand zeigt.
 **Die Ergänzung, die gleichzeitig gilt:** Der Cursor deckt den **konsumierten** Stand ab.
 Wer in einem Marker Regelinhalt **zitiert**, der erst **nach** diesem Stand entstanden ist,
 rückt den Cursor vor, damit er den zitierten Inhalt deckt, und begeht die Range dazwischen.
-Beides gilt nebeneinander: der Cursor bleibt die Instanz, die den konsumierten Stand nennt —
-er wird **nicht** zum Rahmen einer Aussage, und er wird **nicht** zum Archiv.
+Beides gilt nebeneinander: der Cursor bleibt, was er ist — er nennt den **konsumierten**
+Stand; er wird **nicht** zum Rahmen einer Aussage, und er wird **nicht** zum Archiv.
 
-### Die Formen (b) und (c) unterscheiden sich an der Zeitform, nicht am Wort
+### Die Formen (b) und (c) unterscheiden sich an der Zeitform, nicht am Nomen
 
-**Regel:** (b) und (c) nennen beide einen **Vorfahren** — das Nomen unterscheidet sie
-nicht. (b) und (c) unterscheiden sich daran, ob die Datei seit dem genannten Stand
-**unverändert** (b) oder **geändert** (c) ist — mithin an der **Zeitform der Aussage**. Der
+**Regel:** (b) und (c) nennen beide einen **Vorfahren**; das **Nomen** („Vorgänger" /
+„Stand") **entscheidet den Fall nicht** — die beiden Formen unterscheiden sich an der
+**Zeitform** (unverändert seit dem genannten Stand (b) oder geändert seit ihm (c)). Der
 genannte SHA ist der **Messstand**: ein Vorfahr, nicht zwingend der direkte Vorgänger. Die
 bestehende Wortlaut-Fassung bleibt: „gemessen am Vorgänger `<sha>`, seitdem unverändert" (b)
 und „gemessen am Stand `<sha>`" (c) — geklärt wird, **was** die Formen unterscheidet, nicht
@@ -451,7 +451,7 @@ zum lokalen Clone: der Marker nennt keinen Pfad zum Skills-Repo (§1 des `SKILL.
 eine Maschine ohne Clone des Skills-Repos hat trotzdem den Anker.
 
 Ein Marker darf die Regel deshalb nicht als eigenen Wortlaut führen. Die Vorlage trägt
-deshalb den **Verweis** und die **Fälle**; die drei Regeln stehen dort als **Kurzform zur
+deshalb den **Verweis** und die **Fälle**; die fünf Regeln stehen dort als **Kurzform zur
 Erinnerung**, mit dem Vorrang der Zitierstelle: weicht die Kurzform ab, gilt die
 Zitierstelle. Die drei Formen stehen an der Zitierstelle, und ein Projekt, das dorthin geht,
 trifft den dritten Fall nicht mehr blind. Die Vorlage nennt zusätzlich die Markierung einer
@@ -497,18 +497,61 @@ Beleg — gemessen in diesem Repo und in den beiden Projektmarkern (read-only):
   (`git grep -c "Bezugsrahmen-Regel" <stand> -- .agents/skills/skills-marker/`).
 - Beide Projektmarker zitieren die Stelle und tragen `agents-skills-consumed: 0449b05` —
   **7** Commits vor `65fbecc` (`git rev-list --count 0449b05..65fbecc` → **7**). An ihrem
-  deklarierten Cursor existiert der Anker **nicht**. Keiner dieser **7** SHAs kommt in
-  `AGENTS.skills.md` oder im Board der beiden Projekte vor (**0** Treffer je SHA) — die Range
-  ist nicht begangen.
+  deklarierten Cursor existiert der Anker **nicht**. Keiner dieser **7** SHAs (`65fbecc`,
+  `992a9eb`, `7341bb0`, `21b29e4`, `e523df9`, `7910ec6`, `d5dc52f`) kommt in `AGENTS.skills.md`
+  oder im Board der beiden Projekte vor (`git show <stand>:<datei> | grep -c "<sha>"` → **0**
+  Treffer je SHA und Datei, gemessen in `opencode-pwa` `a3e4a9f` und `LuminaRust` `207b6e4`) —
+  die Range ist nicht begangen.
 - Warum das erst auffällt: der Skill wird **live** aus dem Arbeitsbaum gelesen —
   `~/.config/opencode/opencode.jsonc` trägt `"skills": ["/projects/agents-skills/.agents/skills"]`,
   es gibt **keine** installierte Kopie. Der **Cursor** ist damit das Einzige, was die
   angewandte Regelversion pinnt.
-- Die Range `0449b05..65fbecc` berührt **zwei** Skills: `skills-marker` (**5** Commits) und
-  `ratchet-gates` (`d5dc52f` → `references/cli.md`: „**No tag was pushed yet** … build from
-  source" → die Releases sind veröffentlicht). Ein Begehen dieser Range trifft also einen vom
-  Projekt genutzten Skill — die Zeile im Marker muss daran nicht veralten, sie wird neu
-  gemessen.
+- Die Range `0449b05..65fbecc` berührt **zwei** Skills (`git log --oneline 0449b05..65fbecc --
+  .agents/skills/skills-marker/ | wc -l` → **5**, `… -- .agents/skills/ratchet-gates/ | wc -l` →
+  **1**): `skills-marker` und `ratchet-gates` (`d5dc52f` → `references/cli.md`: „**No tag was
+  pushed yet** … build from source" → die Releases sind veröffentlicht). Ein Begehen dieser
+  Range trifft also einen vom Projekt genutzten Skill — die Zeile im Marker muss daran nicht
+  veralten, sie wird neu gemessen.
+
+### Eine Aufzählung trägt zwei Behauptungen
+
+**Regel:** Eine Aufzählung trägt **zwei** Behauptungen: **jedes genannte Element trägt die
+Eigenschaft** und **die Liste ist die ganze Menge**. Beide sind zu belegen. Eine Liste, die der
+Commit selbst fortschreibt, **wächst nicht mit** — sie verliert bei jedem Commit ein Element;
+ein **wanderndes** Element („dieser Commit") macht sie unprüfbar. Der Ersatz ist ein
+**Kommando**, das die Menge ableitet — sonst trägt die Zahl eine Liste, die niemand
+vollständig kennt.
+
+Beleg — vier Instanzen aus dem Feld, gemessen read-only:
+
+- `opencode-pwa`, Marker-Stand `b7c318a:AGENTS.skills.md:281-283`: „in der Marker-Serie
+  (`docs(skills):`/`docs(agents):` — die Commits `1f73917`, `4507c4a`, `73c032f`, `c737d17`,
+  `45cb323`, `c86138b` **und dieser**) haben **zwei** einen deutschen Body". Die **Handliste**
+  nennt **sieben** SHAs, die Serie hat aber **zehn** Commits (`git log --oneline
+  --grep='^docs(skills):' --grep='^docs(agents):' b7c318a` → **10**), und „und dieser" ist ein
+  **wanderndes** Element: bei jedem Commit fällt der Vorgänger heraus. Die Zahl „zwei" stimmt —
+  aber über die **vollständige** Serie, nicht über die genannte Liste. **Behoben in `092d512`**
+  durch das Kommando statt der Handliste.
+- `open-accreditation`, Board-Stand `78051f0:AGENTS.todo.md:1317`: die Liste „**16** in Prosa"
+  nennt **sechs** Dateien mit der Summe **17** — `AGENTS.todo.md` 5,
+  `features/05-e2e-test-image.md` 4, `AGENTS.md` 3, `Agents.headless.md` 3,
+  `frontend/playwright.config.ts` 1, `frontend/tests/e2e/helpers/admin-data.ts` 1 — und
+  `frontend/playwright.config.ts` ist **doppelt** gezählt (es steht auch in der Gruppe „**14** in
+  `ci.yml` und den beiden Playwright-Configs") und **Code**, keine Prosa. An den Ständen
+  `dc3bcd2` und `734d7d1` stand dieselbe Liste noch richtig: **fünf** Dateien, Summe **16**,
+  davon **15** in Markdown-Prosa und **1** als Prosa in einer Code-Kommentarzeile.
+- `open-accreditation`, Body `78051f0`: „the body of 2da0404 contains 13 occurrences of „this
+  commit" and all 13 refer to 2da0404". Der Body von `2da0404` trägt „this commit" **13-mal**
+  (`git show -s --format=%B 2da0404 | grep -c "this commit"` → **13**) — **12** davon verweisen auf
+  `2da0404`, **eines** auf `3ad1309` (die Stelle im L4-Absatz: „9170e03 has an English subject
+  AND an English body, so it does not follow the pattern of this commit"). Die Widerlegung, die
+  der Body für richtig hielt, war selbst eine **richtige** Vormessung: `c353313` nennt dieselbe
+  Stelle im Body von `3ad1309` („`2da0404` in three places and `3ad1309` in one").
+- **Im Instrument selbst**: die Formulierung „die **drei** Regeln stehen dort als **Kurzform**"
+  in dieser Datei war nach dem Hinzufügen der vierten Regel eine **veraltete Zahl** über einer
+  gewachsenen Liste (behoben mit `820c140`); und die Verteilung „12/11/5/26" in `820c140` war
+  **keine Partitionierung** der **54** Treffer — zwei Zeilen tragen mehr als ein Muster (behoben
+  im selben Commit).
 
 ## Wo steht was
 
@@ -542,3 +585,10 @@ sie treffen verschiedene Dateien, und
 nicht die Zeile im Marker, und die Zeile im Marker ist nicht die eingebettete Kopie. Was
 dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — geänderte Regel in
 die eingebettete Kopie, MCP, neue Skill-Verdrahtung — steht in `agent-config` §8.
+
+**„Advancing ist kein Updating, der Marker akkumuliert, und Akkumulation verrottet"** — der
+Satz stand in `SKILL.md` §5 (Schritt 6) und ist mit `f7b8f9c` entfallen, weil die **Klausel
+B** seinen Inhalt jetzt an der Zitierstelle trägt: ein weitergerückter Cursor verlangt, dass
+die **Range zwischen altem und neuem Cursor begangen** wird — das Fortschreiben ist mehr als
+das Umschreiben einer Zahl. Der Rest des Satzes steht in `SKILL.md` §5 weiterhin („der Marker
+akkumuliert, und Akkumulation verrottet").

@@ -75,8 +75,9 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    - (c) eine Datei, die sich seit dem genannten Stand **geändert** hat / a file that changed
      since the named state.
    Der genannte SHA ist der **Messstand** — ein **Vorfahr**, nicht zwingend der direkte
-   Vorgänger; (b) und (c) unterscheiden sich an der **Zeitform**, nicht am Wort.
-   Vier Regeln trägt die Zitierstelle — hier als **Kurzform zur Erinnerung; die Fassung steht
+   Vorgänger; (b) und (c) unterscheiden sich an der **Zeitform** (unverändert seit / geändert
+   seit) — das **Nomen** („Vorgänger" / „Stand") entscheidet den Fall **nicht**.
+   Fünf Regeln trägt die Zitierstelle — hier als **Kurzform zur Erinnerung; die Fassung steht
    dort, und weicht sie ab, gilt die Zitierstelle**:
    - eine Messung, deren Umfang der Commit selbst schreibt, trägt **keinen** Vorgänger-Rahmen
      — die Zeile mit dem Suchkommando zählt mit: nur der Wert am committeten Stand, oder alle
@@ -89,9 +90,12 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
      Zeilennummer); eine eigene Zusatzregel des Projekts ist erlaubt, wenn sie als **lokale
      Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht ersetzt:
      **Lokale Ergänzung:** <was in diesem Projekt zusätzlich gilt>
+   - eine **Aufzählung** trägt zwei Behauptungen: jedes Element trägt die Eigenschaft, und die
+     Liste ist die ganze Menge — beides ist zu belegen; eine handgepflegte Aufzählung wird
+     durch ein Kommando ersetzt, das die Menge ableitet;
    - ein Verweis trägt nur, wenn der **Cursor** den Stand deckt, in dem die Zitierstelle
      existiert: wer zitiert, rückt den Cursor vor (bis der Anker existiert) und begeht die
-     Range dazwischen; der Cursor bleibt die Instanz des **konsumierten** Stands.
+     Range dazwischen. Der Cursor bleibt, was er ist: er nennt den **konsumierten** Stand.
    Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,

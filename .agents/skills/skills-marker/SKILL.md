@@ -33,8 +33,7 @@ beim Trigger gelesen, nicht in jede Session injiziert.
 ## 2. Format und Vorlage
 
 ```sh
-cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md \
-   <projekt>/AGENTS.skills.md
+cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md <projekt>/AGENTS.skills.md
 ```
 
 | Feld | Bedeutung |
@@ -47,7 +46,6 @@ cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md \
 Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst** (leere Tabelle, Fortschreib-Anleitung).
 
 **SHA + Datum, sonst nichts.** Keine Version, keine Zähler (`references/notes.md`).
-
 **Angewendet** heißt **am Code geprüft**, nicht gelesen — Auswahlregel in §4.
 
 **Der Bezugsrahmen** — Anker `Bezugsrahmen-Regel`: jede Aussage über einen Stand nennt den Stand, in
@@ -55,9 +53,10 @@ dem sie gemessen wurde. Der Marker-Commit kann seine eigene SHA nicht nennen —
 dem Commit; eine SHA im Rahmen ist also immer ein **Vorfahr**: „am committeten Stand dieses Commits"
 (a, Eigenes), „gemessen am Vorgänger `<sha>`, seitdem unverändert" (b, Fremddatei), „gemessen am Stand
 `<sha>`" (c, geänderte Datei). (b) und (c) unterscheiden sich an der **Zeitform** (unverändert seit
-dem genannten Stand oder geändert seit ihm), nicht am Wort; „Vorgänger" heißt **Vorfahr** — der
-genannte SHA ist der **Messstand**, nicht zwingend der direkte Vorgänger. Der Cursor ist kein Rahmen.
-Fassung, Belege und Fälle: [`references/notes.md`](references/notes.md) § „Der Bezugsrahmen". Vier
+dem genannten Stand oder geändert seit ihm); das **Nomen** („Vorgänger" / „Stand") entscheidet den
+Fall **nicht** — „Vorgänger" heißt hier **Vorfahr**: der SHA ist der **Messstand**, nicht zwingend
+der direkte Vorgänger. Der Cursor ist kein Rahmen.
+Fassung, Belege und Fälle: [`references/notes.md`](references/notes.md) § „Der Bezugsrahmen". Fünf
 Regeln dazu:
 
 - **Eine Messung, deren Umfang der Commit selbst schreibt, trägt keinen Vorgänger-Rahmen** — die
@@ -74,6 +73,10 @@ Regeln dazu:
 - **Ein Verweis trägt nur, wenn der Cursor den Stand deckt, in dem die Zitierstelle existiert** —
   wer zitiert, rückt den Cursor auf einen Stand vor, an dem der Anker steht, und begeht die Range
   dazwischen. Der Cursor bleibt, was er ist: er nennt den **konsumierten** Stand.
+- **Eine Aufzählung trägt zwei Behauptungen:** jedes genannte Element trägt die Eigenschaft, und
+  die Liste ist die ganze Menge — beide sind zu belegen. Eine handgepflegte Aufzählung wird durch
+  ein Kommando ersetzt, das die Menge ableitet; eine Liste, die der Commit selbst fortschreibt,
+  wächst nicht mit.
 
 ## 3. Die Range — was seit dem Marker passiert ist
 
@@ -99,9 +102,9 @@ geprüft werden **müssen**. Range immer **nach** dem Pull bilden (Fälle: `refe
 | Trifft zu, ist aber nicht drin | `offene Position` = Verweis auf den Eintrag in `AGENTS.todo.md` |
 | Trifft nicht zu | `angewendet: nein` \| kurzer Grund: „betrifft CI-Image, Repo hat keins" |
 
-Die zweite Zeile ist der wichtigste Fall: Neues, das hier nicht umgesetzt ist,
-wandert als **Log, kein Auftrag** nach `AGENTS.todo.md` —
-nie stillschweigend übersprungen, nie als erledigt markiert.
+Die zweite Zeile ist der wichtigste Fall: Neues, das nicht umgesetzt ist, wandert als
+**Log, kein Auftrag** nach `AGENTS.todo.md` — nie stillschweigend übersprungen, nie als
+erledigt markiert.
 
 Erst wenn für **jeden** Skill aus der Range eine dieser drei Zeilen steht, wird der
 Marker auf den neuen SHA gesetzt. Nie vorher: ein Marker, der auf einen SHA zeigt, bis zu
@@ -124,11 +127,9 @@ Tabelle — „trifft nicht zu, weil …" ist das **Ergebnis** der Prüfung; ohn
 Zeile unprüfbar.
 
 Die Frage ist nie „ist die Änderung wichtig", sondern „regelt sie hier etwas, das es hier
-gibt": steht dort „in jedem Projekt", ist die Antwort klar — im Zweifel gewinnt **ja** mit
-offener Position, nicht **nein**.
+gibt" — im Zweifel gewinnt **ja** mit offener Position, nicht **nein**.
 
-**Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und in eine
-`AGENTS.md` eingebettete Regeln bekommen je eine Tabellenzeile wie jeder Skill.
+**Konventionen sind Zeilen:** je Konvention eine Zeile wie jeder Skill.
 
 ## 5. Nach einem `git pull` im Skills-Repo
 
@@ -138,10 +139,9 @@ offener Position, nicht **nein**.
    Quelle in `.agents/rules/*` prüfen — Drift ist eine geänderte **Pflicht** (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
 5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
-6. **Marker fortschreiben**: `agents-skills-consumed` auf
-   `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am` auf heute, Abschnitte
-   ersetzen — und **alle bestehenden Anker re-verifizieren**: der Marker akkumuliert,
-   und Akkumulation verrottet.
+6. **Marker fortschreiben**: `agents-skills-consumed` auf `git -C <skills-repo> rev-parse --short
+   HEAD`, `geprüft am` auf heute, Abschnitte ersetzen — und **alle bestehenden Anker
+   re-verifizieren**: der Marker akkumuliert, und Akkumulation verrottet.
 7. **Reload** bei Regeln/Skills: `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
 Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt, steht in
