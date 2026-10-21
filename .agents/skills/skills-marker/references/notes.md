@@ -466,7 +466,7 @@ Beleg:
   „Fortschreiben" plus einen Herkunftsvermerk („sie steht **nur hier** — der committete
   Stand des Skills-Repos (`7910ec6`) führt sie nicht […]"). Mit `e523df9` trägt das geteilte Instrument die Regel;
   die **Bedingung** des Vermerks („kommt sie dort auf, wird sie hier durch einen **Verweis**
-  ersetzt") ist damit eingetreten — der Verifier nennt die Ablösung **fällig**: *Verweis auf
+  ersetzt […]") ist damit eingetreten — der Verifier nennt die Ablösung **fällig**: *Verweis auf
   die Upstream-Regel **+ Beibehaltung** des lokalen Zusatzes*. Nachgemessen in jener Runde:
   ohne Upstream-Gegenstück ist der **erste** Satz der Kopie
   (`9a4bcd9:AGENTS.skills.md:206-209`) — der zweite, der Vergleich über den Vorgänger, ist
