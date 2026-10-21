@@ -149,25 +149,6 @@ nächste Pull nichts, was er fortschreiben könnte.
 
 ## Fallstrick: der `Verify:`-Footer
 
-Ein Footer, der **Runden** nennt, braucht ein Schema, das sich **nicht überschneidet** — sonst
-liest die nächste Runde „F2" und meint eine andere. Zwei Wege bleiben: die IDs werden **je
-Runde** neu vergeben (R1-F1, R2-N1, …) und jede Runde nennt ihre eigenen; oder der Footer
-nennt die Runden **ohne** IDs („Runde 1: 3 medium, 6 low, 3 informational; Runde 2: …"). Die
-**Anzahl** der genannten Befunde passt zur Zahl der Befunde der Runde: acht IDs neben fünf
-Befunden sind kein Rechenfehler, sondern ein Lesefehler.
-
-Der Footer von `65fbecc` verletzt beides: Runde 3 wurde mit **N-1…N-8** (acht IDs) neben
-**fünf** Befunden (2 low + 3 informational) geführt, und die **F**-IDs kollidieren mit denen der
-Runde 1 (dort „F2: every number names the state it was measured at", dort „F2 (the footer of
-round 2 lacked the fix status…)"). Der Footer ist **gepusht und unveränderlich** — die
-Korrektur steht im Body des Folge-Commits.
-
-Die Grundregel steht in `.agents/rules/build-verify.md` (Regel 5): die Runden und ihr Ergebnis
-gehören in den Footer. **Diese Notiz** hält die ID-Regel fest, weil der Auftrag, der sie
-ausgelöst hat, nur die Dateien dieses Skills anfassen durfte.
-
-## Fallstrick: der `Verify:`-Footer
-
 Ein Footer, der **Runden** nennt, braucht ein Schema, das sich **nicht überschneidet** — oder
 er nennt die Runden **ohne IDs**. Zwei Runden, die dieselbe ID verwenden, machen den Footer
 unlesbar: der Leser weiß nicht, welcher Befund geschlossen ist und welcher offen. Die ID
@@ -281,10 +262,10 @@ Beleg — gemessen in `LuminaRust` und `opencode-pwa` (read-only), Marker-Ständ
   Occurrences); **8** dieser 9 Zeilen paaren ihn mit dem Wort „Vorgänger", **2** Zeilen tragen
   die Formulierung „am **Vorgänger** `e744f8b`" (geschrieben von `d38f4fa`, dessen direkter
   Vorgänger `51c430a` ist — `e744f8b` liegt **3** Commits davor, `git rev-list --count
-  e744f8b..d38f4fa` → **3**). Nach dem Wortlaut der `SKILL.md` („eine SHA im Rahmen ist also
-  immer ein **Vorgänger**") liest sich das als Fehler, nach der Semantik dieser Datei (der
-  genannte SHA ist der **Messstand**) ist es korrekt — dieselbe Regel, zwei Verdikte, je
-  nachdem, welche Datei man liest.
+  e744f8b..d38f4fa` → **3**). Nach dem **früheren** Wortlaut der `SKILL.md` („eine SHA im
+  Rahmen ist also immer ein **Vorgänger**" — die Zitierstelle sagt heute „**Vorfahr**") liest
+  sich das als Fehler, nach der Semantik dieser Datei (der genannte SHA ist der **Messstand**)
+  ist es korrekt — dieselbe Regel, zwei Verdikte, je nachdem, welche Datei man liest.
 - `opencode-pwa` `a3e4a9f`: `AGENTS.skills.md` nennt „Vorgänger" **7-mal**,
   `AGENTS.todo.md` **8-mal**; „gemessen am Stand" kommt in **keiner** der beiden Dateien vor
   (**0**). Die Projekte benutzen also durchgehend die Wortlaut-Fassung der Form (b) — eine
@@ -387,8 +368,13 @@ davor.)
   `2da0404` schrieb `AGENTS.todo.md` **und** `AGENTS.skills.md` — und **diese Dateien
   enthalten das Suchmuster selbst**. Dieselbe Messung (`git grep -in baseline <stand> -- .`)
   ergab am Stand `a4551c8` **49** Zeilen in **22** Dateien und am Stand `2da0404` **54**
-  Zeilen in **22** Dateien (Verteilung **12/11/5/26** statt **10/9/3/27**; die Gruppen sind
-  `items-baseline` / `$baseline` / `baseline-browser-mapping` / Rest). Die Board-Messung unter
+  Zeilen in **22** Dateien. Die Treffer nach Muster: `items-baseline` **12**, `$baseline`
+  **11**, `baseline-browser-mapping` **5** — **2** Zeilen tragen zwei Muster (die beiden vom
+  Commit selbst geschriebenen Zeilen `AGENTS.skills.md:43` und `AGENTS.todo.md:1307`), also
+  **25** der **54** Zeilen und **29** Rest (priorisiert: **12/9/4/29**); am Stand `a4551c8`
+  dagegen **10/9/3/27** auf **22** der **49** Zeilen, ohne Mehrfachtreffer. Die beiden Stände
+  mischen also verschiedene Zähleinheiten — vergleichbar sind die **Zeilenzahlen**, nicht die
+  Occurrences. Die Board-Messung unter
   demselben Rahmen (`git grep -inE '\bowner\b|\bticket\b' <stand> -- AGENTS.todo.md`) ergab
   am Stand `a4551c8` **4** und am Stand `2da0404` **15**. Der Rahmen war doppelt falsch: die
   Datei war verändert (also kein „seitdem unverändert"), und der Wert galt für den Vorgänger,
@@ -396,15 +382,20 @@ davor.)
   medium) — dort steht bereits die richtige Form („54 … in 22 Dateien am committeten Stand
   dieses Commits — dieser Wert kann **keinen** Vorgänger-Rahmen tragen").
 - `opencode-pwa`: der **Fehlerstand** ist der Marker-Stand `c86138b:AGENTS.skills.md:177`
-  (dieselbe Zeile steht in `45cb323`) — „die **einzigen** Fundstellen seither". Gemessen mit
+  — eine gleichlautende Aussage steht in `45cb323:AGENTS.skills.md:167` (dort „die einzigen
+  Fundstellen **nach diesem Fortschreiben**"), die Zeile 177 desselben Stands trägt einen
+  anderen Satz. Am Fehlerstand lautet der Wortlaut „die **einzigen** Fundstellen seither".
+  Gemessen mit
   dem Suchmuster `W3` an diesem Stand: im Marker **3** Zeilen (`grep -c` zählt **Zeilen**;
   `grep -o … | wc -l` zählt **4** Occurrences), im Board **2** Zeilen, am Vorgänger `c737d17`
   **0** — an **keinem** Stand der Serie (`c737d17`, `45cb323`, `c86138b`, `ddd15a4`) war „nur
   eine" wahr. Der Fehltreffer war exakt die Zeile mit dem Suchkommando, die der Commit
-  selbst geschrieben hat. **Behoben in `ddd15a4`** (Befund F1, medium) — dort steht die
-  berichtigte Zählung.
-- `LuminaRust`: der **Fehlerstand** ist der Marker-Stand `51c430a:AGENTS.skills.md:133-135`
-  — dort stand „dieselbe Zählung im **Vorgänger** `e744f8b`". `git grep -n ui-review <stand>
+  selbst geschrieben hat. **Behoben in `ddd15a4`** (Befund **N1, low** — der Commit-Body
+  nennt „N1 - the W3 reference named the wrong advance") — dort steht die berichtigte
+  Zählung.
+- `LuminaRust`: der **Fehlerstand** ist der Marker-Stand `51c430a:AGENTS.skills.md:135-137`
+  (Zeile 135 „dieselbe Zählung im **Vorgänger**", Zeile 136 `e744f8b`; der Fix-Commit nennt
+  selbst `AGENTS.skills.md:134`) — dort stand „dieselbe Zählung im **Vorgänger** `e744f8b`". `git grep -n ui-review <stand>
   -- '*.md'` ergab am Stand `e744f8b` **5** Zeilen in **2** Dateien, am direkten Vorgänger
   `0cf154d` (= `51c430a^`) **6** in **2**, am Stand `51c430a` **6** in **2** — die Zählung ist
   am Vorgänger **nicht** dieselbe, die Dateimenge schon. **Behoben in `d38f4fa`** (Befund B1,
