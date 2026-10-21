@@ -173,7 +173,7 @@ festschreibt. Drei Formen, je nachdem, was gemessen wurde:
 |---|---|---|
 | den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
 | eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der genannte SHA ist der **Messstand** (nicht zwingend der direkte Vorgänger) — die Unverändertheit wird belegt |
-| eine Fremddatei, die sich **seit der Messung geändert** hat | „gemessen am Stand `<sha>`" / „measured at the state `<sha>`" — der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — der Diff-Beleg ist **nicht** leer |
+| eine Datei, die sich **seit der Messung geändert** hat | „gemessen am Stand `<sha>`" / „measured at the state `<sha>`" — der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — `git diff --stat <messstand>..<stand> -- <datei>` ist **nicht** leer |
 
 Der Beleg für die zweite Form ist `git diff --stat <messstand>..<stand> -- <datei>`
 — **ohne Ausgabe** heißt: die Datei ist zwischen Messstand und Stand
@@ -191,8 +191,9 @@ Messstand, damit der Leser prüfen kann, statt zu glauben.
 
 Ein SHA im Rahmen, der weder der Stand des schreibenden Commits noch der benannte
 Messstand ist, ist ein Fehler. Die dritte Zeile der Tabelle ist kein Notfall, sondern
-der Fall einer Datei, die sich zwischen der Messung und dem Commit geändert hat: der
-Zählerstand gilt für den genannten Stand — nachmessen, statt die änderung zu leugnen.
+der Fall **einer Datei**, die sich zwischen der Messung und dem Commit geändert hat — auch
+eine, die dieser Commit selbst anfasst: der Zählerstand gilt für den genannten Stand,
+nachmessen, statt die änderung zu leugnen.
 
 Ein **Zähler** bleibt verboten (§2: „SHA + Datum, sonst nichts" — kein
 `offen: 5`, kein „80 % angewendet"). Eine **Messung mit Rahmen** ist etwas

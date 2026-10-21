@@ -72,9 +72,11 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
      Platzhalter: `<stand>` ist der committete Stand dieses Commits, `<messstand>` der Stand,
      an dem gemessen wurde. Gemessen wird mit `git show <messstand>:AGENTS.todo.md | …`,
      `git grep … <messstand> -- …`. `HEAD` ist als Endpunkt falsch — es wandert;
-   - eine Fremddatei, die sich seit der Messung geändert hat: „gemessen am Stand `<sha>`" /
+   - eine Datei, die sich seit der Messung geändert hat: „gemessen am Stand `<sha>`" /
      "measured at the state `<sha>`" — der Zählerstand gilt für den genannten Stand, ohne
-     Unverändertheitsbehauptung.
+     Unverändertheitsbehauptung; `git diff --stat <messstand>..<stand> -- <datei>` ist hier
+     **nicht** leer — nachmessen, statt die änderung zu leugnen. Das gilt auch für eine Datei,
+     die dieser Commit selbst anfasst.
    Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
