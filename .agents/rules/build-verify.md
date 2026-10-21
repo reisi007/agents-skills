@@ -18,6 +18,9 @@ The loop is built for feature-scale commissioned work; a mini clearly under the 
 3. **Verification by a *different* subagent** than the implementer (except trivia, where the orchestrator checks itself); it checks the **substance**, not the mechanical gates: reported green **with quoted output**, the gates are not re-run (the four exceptions live in the skill). Never destroy uncommitted work with `git checkout` / `git restore` / `git reset`.
 4. **Commit after EVERY verify run, whatever the verdict** (`CHANGES REQUIRED` too). **One commit per task**, explicit paths only — never `git add -A`.
 5. **Conventional Commits** with a `Verify:` footer logging the rounds; `git show --stat` before committing.
+   **Every number in the message that claims something about the commit or its gates names what it measures** — the state it was measured in (working tree, committed state) and the scope it covers (a filtered subset, a range, a stage): without that reference the number is incomplete, and a number measured in a dirty working tree is never a statement about the commit — both states are then reported separately.
+   The committed state is **measured, not checked out**: `git archive <sha> | tar -x -C <tmpdir>` exports it into a temp directory — a parallel session's tree is never touched (Rule 3).
+   The trigger is not a dirty tree alone but a number that claims something about the commit: a parallel session holding a dirty tree, or a gate that runs differently in the working tree than in the commit.
 6. **Redo → `git commit --amend`** (verifier gets `nach-verify: true`); amend only while HEAD is this task's unpushed verify commit with no foreign work in the tree, else a new commit.
 7. **Push and watch CI until green** — the only exception: the user explicitly requested manual verification — then **do not push, but keep watching CI if there is one**.
 

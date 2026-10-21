@@ -26,7 +26,9 @@ taken there — rules stated here apply only through their counterpart there.
 - **The `Verify:` footer logs the rounds.** It is why history stays readable
   after an amend — otherwise only the reflog would remain. The
   `Verify: none (Kleinheits-Ausnahme, 0 rounds)` footer is not dropped either —
-  otherwise later no one can tell whether a run happened at all.
+  otherwise later no one can tell whether a run happened at all. What a number
+  in the message claims, and how that claim gets its frame, is its own
+  question — "Every number names what it measures" below.
 - **One commit per task** — the reason lives under "Amend or new commit?"
   below. Committing two parallel tasks as one wave hits the
   wrong commit or fails; one task waiting for all others blocks the others.
@@ -34,6 +36,62 @@ taken there — rules stated here apply only through their counterpart there.
   per-task branches.
 - **Verification runs sequential, never parallel** (Rule 8). CPU oversubscription
   produces a green light with no meaning.
+
+## Every number names what it measures
+
+The `Verify:` footer is a claim about the commit, and so is every number in
+the message that claims something about the commit — a claim needs its frame
+of reference: **which state, which scope** (Rule 5).
+
+- **The failure is a number without a frame.** Measured, not hypothetical: in
+  one working session across two projects it appeared as a commit count
+  filtered to one path presented as the size of the range, a gate stage
+  reported green from the dirty checkout where the committed state had fewer
+  stages, a file line range taken from the dirty checkout of a parallel session
+  where the committed state had different lines, and an open-task count from
+  the dirty checkout where the committed state had fewer tasks. In every case
+  the number was right about the place it was measured in and wrong as a
+  statement about the commit. The target form shows the fix: the checkout
+  figure and the committed figure side by side, each labelled — the figure was
+  right, and the claim became true by naming the frame. The figures
+  themselves — project, commit, both states — are in the commit message that
+  introduced this section.
+- **Two trees, reported separately.** A number measured in the dirty checkout
+  never becomes a statement about the commit — both states are then reported
+  separately, each carrying the state it belongs to.
+- **Naming the frame needs no fixed vocabulary.** Repos that never say
+  "working tree" still name it concretely — by the commit that was measured
+  (`commit <sha>`), by range and filter (`<from>..<to>`, only the `<path>`
+  paths), by the scope of a gate (`stage fast`), by the scope of a task list
+  (all tasks vs. one directory), or in the repo's own words ("uncommitted
+  changes in the checkout"). The frame names what the number is about: the
+  scope it covers and — when the claim is about the commit — the state it was
+  measured in. A filtered count presented as a range size has no frame at
+  all; the filter is part of the frame.
+- **The trigger is not a dirty tree.** A dirty tree is the normal state of a
+  repo with a parallel session; it is not a reason to distrust a number. The
+  trigger is a number that *claims something about the commit* — and the
+  claim is checkable: measure the committed state and compare.
+
+**The method — the committed state is measured, not checked out.**
+
+```sh
+tmp=$(mktemp -d)
+git archive <sha> | tar -x -C "$tmp"   # exports the commit's tree; touches neither index nor checkout
+( cd "$tmp" && <the gate> )             # the gate runs against the committed state
+```
+
+`git archive` reads the object store and writes a copy: index and working
+tree stay untouched, so a parallel session's uncommitted work survives. Rule 3
+of the rule file forbids `git checkout` / `git restore` / `git reset` for
+exactly that reason; `git archive` is the way to measure the committed state
+without taking that risk. The gate runs twice then — once in the checkout, once
+in the exported tree — and the footer names both results, each with its state.
+
+**Who checks the frame.** The footer is written after the verify run, and the
+verifier never sees the message — so the frame is the author's duty at write
+time, not a check that happens later. The cheap test before writing it: does
+the figure hold in the exported tree as well?
 
 ## Why the milestone review is optional and not per-feature
 
@@ -192,6 +250,7 @@ and Step 4 (push) directly.
 | Verifier re-runs the full gate suite | reproduces a green that was already quoted; the context it spends is missing for the substance | trust the quoted green; re-run only under the four exceptions in [`verifier-prompt.md`](verifier-prompt.md) |
 | First verify run without a mode flag | the verifier checks the tree as if after a fix and reports "fits" — with no reference to the findings | pass the `nach-verify:` flag on **every** run |
 | `git checkout <file>` during mutation testing | destroys the implementer's uncommitted work; no way back exists then | commit beforehand (Step 3, commit), a copy, or a documented `git stash` |
+| A number from the dirty checkout presented as a statement about the commit | the footer reports a gate state, a task count or a line range that the commit does not have; the reader cannot tell what was measured | name what the number measures; measure the committed state with `git archive <sha>` into a temp directory |
 | `git add -A` in a shared tree | pulls in a **concurrently running** agent's work: evidenced by a commit with 14 files / 408 lines from `features/` that were not its own — content correct, message wrong, history misleading from then on | always explicit paths; `git show --stat` before the commit |
 | Only committing on `APPROVED` | the work state between rounds exists only in the working tree; every abort loses it | commit after **every** verify run, verdict irrelevant |
 | Amending although already pushed | `git push --force` on a read state overwrites foreign commits | `--force-with-lease`, and normally: don't amend in the first place |

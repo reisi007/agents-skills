@@ -99,6 +99,7 @@ MSG
 
 Headline: Conventional Commits (`feat|fix|docs|refactor|test|chore|perf` +
 optional scope); the `Verify:` footer logs the rounds. **One commit per task.**
+A number in the message that claims something about the commit or its gates names what it measures — state and scope.
 On `CHANGES REQUIRED`: fix, re-verify, then commit per
 [`references/amend.md`](references/amend.md).
 
