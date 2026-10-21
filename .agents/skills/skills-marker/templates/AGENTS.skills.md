@@ -70,16 +70,18 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    nicht an der Zitierstelle, ist sie hier falsch:
    - (a) was der Commit selbst festschreibt (Marker, Board, geänderte Dateien) / what the
      commit fixes itself;
-   - (b) eine Fremddatei, die der Commit nicht anfasst / a foreign file the commit does not
-     touch;
-   - (c) eine Datei, die sich seit der Messung geändert hat / a file that changed since the
-     measurement.
-   Drei Regeln trägt die Zitierstelle — hier als **Kurzform zur Erinnerung; die Fassung steht
+   - (b) eine Fremddatei, die der Commit nicht anfasst und die seit dem genannten Stand
+     **unverändert** ist / a foreign file, unchanged since the named state;
+   - (c) eine Datei, die sich seit dem genannten Stand **geändert** hat / a file that changed
+     since the named state.
+   Der genannte SHA ist der **Messstand** — ein **Vorfahr**, nicht zwingend der direkte
+   Vorgänger; (b) und (c) unterscheiden sich an der **Zeitform**, nicht am Wort.
+   Vier Regeln trägt die Zitierstelle — hier als **Kurzform zur Erinnerung; die Fassung steht
    dort, und weicht sie ab, gilt die Zitierstelle**:
    - eine Messung, deren Umfang der Commit selbst schreibt, trägt **keinen** Vorgänger-Rahmen
-     — die Zeile mit dem Suchkommando zählt mit: nur der Wert am committeten Stand, oder
-     alle Werte mit ihrem Stand, oder über den Vorgänger nur der Vergleich dessen, was
-     **gleich** bleibt (z. B. die Dateimenge);
+     — die Zeile mit dem Suchkommando zählt mit: nur der Wert am committeten Stand, oder alle
+     Werte, jeder mit seinem Stand (auch bei mehr als zwei Ständen), oder über den Vorgänger
+     nur der Vergleich dessen, was **gleich** bleibt (z. B. die Dateimenge);
    - eine Aussage über **wann** etwas galt, nennt den Stand, zu dem es galt (SHA **und**
      Messzeitpunkt — der Zeitpunkt der Messung, nicht der des genannten Stands); ist der
      Bezugszeitpunkt nicht belegbar, nennt sie den gemessenen Stand mit Zeitpunkt;
@@ -87,6 +89,9 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
      Zeilennummer); eine eigene Zusatzregel des Projekts ist erlaubt, wenn sie als **lokale
      Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht ersetzt:
      **Lokale Ergänzung:** <was in diesem Projekt zusätzlich gilt>
+   - ein Verweis trägt nur, wenn der **Cursor** den Stand deckt, in dem die Zitierstelle
+     existiert: wer zitiert, rückt den Cursor vor (bis der Anker existiert) und begeht die
+     Range dazwischen; der Cursor bleibt die Instanz des **konsumierten** Stands.
    Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,

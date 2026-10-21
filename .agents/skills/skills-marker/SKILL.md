@@ -14,9 +14,9 @@ Auftrag**: sie wird **nicht abgearbeitet**, sondern bei jedem `git pull` im Skil
 fortgeschrieben — dieselbe Unterscheidung, die für `AGENTS.todo.md` gilt.
 
 Der Nutzen: aus „lies den Diff und rate, was davon dieses Projekt betrifft" wird eine
-konkrete Liste. `git log <marker-sha>..HEAD` benennt jeden geänderten oder neuen Skill,
-und für jeden steht danach eine Zeile im Marker. Diese Datei ist **der Ablauf** (Details: `references/notes.md`); was gelten
-muss, steht in dessen `AGENTS.md` — der Marker hält Prüfungen fest, keine Pflichten.
+konkrete Liste — `git log <marker-sha>..HEAD` benennt jeden geänderten oder neuen Skill, und
+für jeden steht danach eine Zeile im Marker. Diese Datei ist **der Ablauf** (Details:
+`references/notes.md`); was gelten muss, steht in dessen `AGENTS.md`.
 
 ## 1. Wo die Datei liegt
 
@@ -26,11 +26,9 @@ muss, steht in dessen `AGENTS.md` — der Marker hält Prüfungen fest, keine Pf
 | Marker | `<projekt>/AGENTS.skills.md`, neben `AGENTS.md`/`AGENTS.todo.md` | **genau eine** je Repo |
 | Format | `<skills-repo>/.agents/skills/skills-marker/SKILL.md` (diese Datei) | wird hier festgelegt, nicht im Projekt |
 
-Der Marker liegt im **Projekt** und nennt nur den SHA, nie einen Pfad zum
-Skills-Repo — Begründung in [`references/notes.md`](references/notes.md).
-
-**`AGENTS.skills.md` heißt bewusst nicht `AGENTS.md`:** sie wird beim Trigger
-gelesen, nicht in jede Session injiziert.
+Der Marker liegt im **Projekt** und nennt nur den SHA, nie einen Pfad zum Skills-Repo
+(`references/notes.md`); **`AGENTS.skills.md` heißt bewusst nicht `AGENTS.md`** — sie wird
+beim Trigger gelesen, nicht in jede Session injiziert.
 
 ## 2. Format und Vorlage
 
@@ -46,25 +44,26 @@ cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md \
 | `## Skill-Stand` | Tabelle: `Skill \| angewendet? \| wo im Projekt \| offene Position` |
 | `## Offen aus dem Bereich <alt>..<neu>` | genau die Skills, die in dieser Range neu dazugekommen oder geändert wurden |
 
-Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst** (leere Tabelle,
-Fortschreib-Anleitung); die HTML-Kommentare sind Arbeitsanleitung und fallen beim
-ersten Fortschreiben weg.
+Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst** (leere Tabelle, Fortschreib-Anleitung).
 
-**SHA + Datum, sonst nichts.** Keine Version, keine Zähler — Begründung und
-Beispiel-Range in [`references/notes.md`](references/notes.md).
+**SHA + Datum, sonst nichts.** Keine Version, keine Zähler (`references/notes.md`).
 
 **Angewendet** heißt **am Code geprüft**, nicht gelesen — Auswahlregel in §4.
 
 **Der Bezugsrahmen** — Anker `Bezugsrahmen-Regel`: jede Aussage über einen Stand nennt den Stand, in
 dem sie gemessen wurde. Der Marker-Commit kann seine eigene SHA nicht nennen — sie entsteht erst mit
-dem Commit; eine SHA im Rahmen ist also immer ein **Vorgänger**: „am committeten Stand dieses Commits"
-(Eigenes), „gemessen am Vorgänger `<sha>`, seitdem unverändert" (Fremddatei), „gemessen am Stand
-`<sha>`" (geänderte Datei). Der Cursor ist kein Rahmen. Fassung, Belege und Fälle:
-[`references/notes.md`](references/notes.md) § „Der Bezugsrahmen". Drei Regeln dazu:
+dem Commit; eine SHA im Rahmen ist also immer ein **Vorfahr**: „am committeten Stand dieses Commits"
+(a, Eigenes), „gemessen am Vorgänger `<sha>`, seitdem unverändert" (b, Fremddatei), „gemessen am Stand
+`<sha>`" (c, geänderte Datei). (b) und (c) unterscheiden sich an der **Zeitform** (unverändert seit
+dem genannten Stand oder geändert seit ihm), nicht am Wort; „Vorgänger" heißt **Vorfahr** — der
+genannte SHA ist der **Messstand**, nicht zwingend der direkte Vorgänger. Der Cursor ist kein Rahmen.
+Fassung, Belege und Fälle: [`references/notes.md`](references/notes.md) § „Der Bezugsrahmen". Vier
+Regeln dazu:
 
 - **Eine Messung, deren Umfang der Commit selbst schreibt, trägt keinen Vorgänger-Rahmen** — die
-  Zeile mit dem Suchkommando zählt mit: entweder nur der Wert am committeten Stand, oder alle
-  Werte mit ihrem Stand, oder über den Vorgänger nur der Vergleich dessen, was **gleich** bleibt.
+  Zeile mit dem Suchkommando zählt mit: entweder nur der Wert am committeten Stand, oder alle Werte,
+  jeder mit seinem Stand (auch bei mehr als zwei Ständen), oder über den Vorgänger nur der Vergleich
+  dessen, was **gleich** bleibt.
 - **Eine Aussage über *wann* etwas galt, nennt den Stand, zu dem es galt** — SHA **und**
   Messzeitpunkt (der Zeitpunkt der Messung, nicht der des genannten Stands); „beim Commit
   dieses Markers" und „heute" nennen einen beweglichen Zustand, keinen Stand; ist der
@@ -72,6 +71,9 @@ dem Commit; eine SHA im Rahmen ist also immer ein **Vorgänger**: „am committe
 - **Ein Marker zitiert die Regel, statt sie zu kopieren** — Pfad **im Skill** (ID + Datei) und
   Anker, **ohne Zeilennummer**: die driftet. Eine eigene Zusatzregel des Projekts ist erlaubt,
   wenn sie als **lokale Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht ersetzt.
+- **Ein Verweis trägt nur, wenn der Cursor den Stand deckt, in dem die Zitierstelle existiert** —
+  wer zitiert, rückt den Cursor auf einen Stand vor, an dem der Anker steht, und begeht die Range
+  dazwischen. Der Cursor bleibt, was er ist: er nennt den **konsumierten** Stand.
 
 ## 3. Die Range — was seit dem Marker passiert ist
 
@@ -113,17 +115,17 @@ Verfallsdatum — Projekt-`AGENTS.md` und Workflows wachsen, eine gepinnte Versi
 **Trifft zu**, wenn die Änderung etwas beschreibt, das **dieses Projekt selbst festlegt**:
 eine Pflicht, eine Schwelle, eine Ausnahme, eine Konvention oder ein Kommando, das hier
 gilt — also etwas, das in `AGENTS.md`, in einem Workflow, in einem Hook, in einer
-Package-Script-Datei oder in einer Dockerfile dieses Repos steht oder stehen müsste.
+Package-Script-Datei oder in einer Dockerfile steht oder stehen müsste.
 
 **Trifft nicht zu**, wenn sie etwas beschreibt, das dieses Projekt gar nicht hat: die
 Fallhöhe eines Docker-Test-Images in einem Repo ohne CI-Image, Sharding-Vorgaben in einem
 Projekt ohne E2E-Suite, ein Commit-Schema in einem Wegwerf-Skript. Der Grund gehört in die
 Tabelle — „trifft nicht zu, weil …" ist das **Ergebnis** der Prüfung; ohne ihn wird die
-Zeile beim nächsten Pull unprüfbar.
+Zeile unprüfbar.
 
 Die Frage ist nie „ist die Änderung wichtig", sondern „regelt sie hier etwas, das es hier
-gibt": steht dort „in jedem Projekt" oder „in CI-Workflows mit …", ist die Antwort sofort
-klar — und im Zweifel gewinnt **ja** mit offener Position, nicht **nein**.
+gibt": steht dort „in jedem Projekt", ist die Antwort klar — im Zweifel gewinnt **ja** mit
+offener Position, nicht **nein**.
 
 **Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und in eine
 `AGENTS.md` eingebettete Regeln bekommen je eine Tabellenzeile wie jeder Skill.
@@ -132,17 +134,15 @@ klar — und im Zweifel gewinnt **ja** mit offener Position, nicht **nein**.
 
 1. **Marker lesen** → `<marker-sha>`. Fehlt die Datei: `codegraph-project-setup`, Schritt 2.5.
 2. **Range bilden** (Kommandos aus §3) → Liste der betroffenen Skills.
-3. **Regel-Drift prüfen:** die eingebetteten Regeln in der globalen `~/.config/opencode/AGENTS.md`
-   gegen ihre Quelle in `.agents/rules/*` prüfen (aktuell die Frage-Regel aus `ask.md`) — Drift
-   ist eine geänderte **Pflicht**, kein abweichender Wortlaut (`agent-config` §8).
+3. **Regel-Drift prüfen:** die eingebetteten Regeln in `~/.config/opencode/AGENTS.md` gegen ihre
+   Quelle in `.agents/rules/*` prüfen — Drift ist eine geänderte **Pflicht** (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
 5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
 6. **Marker fortschreiben**: `agents-skills-consumed` auf
-   `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am` auf heute, Tabellen- und
-   Bereichs-Abschnitt ersetzen — und **alle bestehenden Anker re-verifizieren**:
-   Advancing ist kein Updating, der Marker akkumuliert, und Akkumulation verrottet.
-7. **Reload**, falls Regeln oder Skills betroffen sind:
-   `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
+   `git -C <skills-repo> rev-parse --short HEAD`, `geprüft am` auf heute, Abschnitte
+   ersetzen — und **alle bestehenden Anker re-verifizieren**: der Marker akkumuliert,
+   und Akkumulation verrottet.
+7. **Reload** bei Regeln/Skills: `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
 Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt, steht in
 `agent-config` §8 — Konfiguration ist Sache der Maschine, `skills-marker` der Projekte.

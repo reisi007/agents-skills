@@ -147,6 +147,43 @@ Fehlt `AGENTS.skills.md`, ist das Projekt **nicht gescaffoldet** — `codegraph-
 Schritt 2.5. Der Marker ist die Datei, in der das Ergebnis der Prüfung steht; ohne sie hat der
 nächste Pull nichts, was er fortschreiben könnte.
 
+## Fallstrick: der `Verify:`-Footer
+
+Ein Footer, der **Runden** nennt, braucht ein Schema, das sich **nicht überschneidet** — sonst
+liest die nächste Runde „F2" und meint eine andere. Zwei Wege bleiben: die IDs werden **je
+Runde** neu vergeben (R1-F1, R2-N1, …) und jede Runde nennt ihre eigenen; oder der Footer
+nennt die Runden **ohne** IDs („Runde 1: 3 medium, 6 low, 3 informational; Runde 2: …"). Die
+**Anzahl** der genannten Befunde passt zur Zahl der Befunde der Runde: acht IDs neben fünf
+Befunden sind kein Rechenfehler, sondern ein Lesefehler.
+
+Der Footer von `65fbecc` verletzt beides: Runde 3 wurde mit **N-1…N-8** (acht IDs) neben
+**fünf** Befunden (2 low + 3 informational) geführt, und die **F**-IDs kollidieren mit denen der
+Runde 1 (dort „F2: every number names the state it was measured at", dort „F2 (the footer of
+round 2 lacked the fix status…)"). Der Footer ist **gepusht und unveränderlich** — die
+Korrektur steht im Body des Folge-Commits.
+
+Die Grundregel steht in `.agents/rules/build-verify.md` (Regel 5): die Runden und ihr Ergebnis
+gehören in den Footer. **Diese Notiz** hält die ID-Regel fest, weil der Auftrag, der sie
+ausgelöst hat, nur die Dateien dieses Skills anfassen durfte.
+
+## Fallstrick: der `Verify:`-Footer
+
+Ein Footer, der **Runden** nennt, braucht ein Schema, das sich **nicht überschneidet** — oder
+er nennt die Runden **ohne IDs**. Zwei Runden, die dieselbe ID verwenden, machen den Footer
+unlesbar: der Leser weiß nicht, welcher Befund geschlossen ist und welcher offen. Die ID
+gehört deshalb zur Runde („R1-F1", „R2-N1") — oder der Footer nennt je Runde nur die Zahl der
+Befunde („Runde 1: 3 medium, 6 low, 3 informational"), und die Herkunft steht im Body.
+
+Der Footer von `65fbecc` verletzt beides: Runde 3 steht mit **N-1 bis N-8** (acht IDs) neben
+**fünf** Befunden (2 low + 3 informational), und die **F**-IDs kollidieren mit denen der
+Runde 1 im selben Footer. Der **Inhalt** ist aus den Dateien belegbar, die **Kennzeichnung**
+nicht — dieselbe Fehlerform, die diese Serie in den Markern bekämpft: eine Zahl ohne ihren
+Bezugsrahmen.
+
+(Ihren natürlichen Ort hat die Regel in `.agents/rules/build-verify.md`, Regel 5 — dem
+`Verify:`-Footer. Der Auftrag dieser Runde erlaubte nur die drei Dateien dieses Skills,
+deshalb steht sie hier; sie gehört beim nächsten Anlass dorthin.)
+
 ## Gemessen: Anker verrotten (`portal.reisinger.pictures` × `agents-skills`)
 
 Erster vollständiger Anker-Audit: Nach dem Fortschreiben des Markers in
@@ -220,6 +257,38 @@ Rahmen, nicht die Zahl.
 Projekts — und dieser SHA existiert **vor** dem Commit. Er ist kein Rahmen und
 wird nicht umgestellt: die Regel gilt für Aussagen **über** den Projektstand,
 nicht für den Cursor, der auf einen anderen Repo-Stand zeigt.
+
+**Die Ergänzung, die gleichzeitig gilt:** Der Cursor deckt den **konsumierten** Stand ab.
+Wer in einem Marker Regelinhalt **zitiert**, der erst **nach** diesem Stand entstanden ist,
+rückt den Cursor vor, damit er den zitierten Inhalt deckt, und begeht die Range dazwischen.
+Beides gilt nebeneinander: der Cursor bleibt die Instanz, die den konsumierten Stand nennt —
+er wird **nicht** zum Rahmen einer Aussage, und er wird **nicht** zum Archiv.
+
+### Die Formen (b) und (c) unterscheiden sich an der Zeitform, nicht am Wort
+
+**Regel:** (b) und (c) nennen beide einen **Vorfahren** — das Nomen unterscheidet sie
+nicht. (b) und (c) unterscheiden sich daran, ob die Datei seit dem genannten Stand
+**unverändert** (b) oder **geändert** (c) ist — mithin an der **Zeitform der Aussage**. Der
+genannte SHA ist der **Messstand**: ein Vorfahr, nicht zwingend der direkte Vorgänger. Die
+bestehende Wortlaut-Fassung bleibt: „gemessen am Vorgänger `<sha>`, seitdem unverändert" (b)
+und „gemessen am Stand `<sha>`" (c) — geklärt wird, **was** die Formen unterscheidet, nicht
+sie umbenannt.
+
+Beleg — gemessen in `LuminaRust` und `opencode-pwa` (read-only), Marker-Stände `207b6e4` und
+`a3e4a9f`:
+
+- `LuminaRust` `207b6e4`: `AGENTS.skills.md` nennt `e744f8b` auf **9** Zeilen (**12**
+  Occurrences); **8** dieser 9 Zeilen paaren ihn mit dem Wort „Vorgänger", **2** Zeilen tragen
+  die Formulierung „am **Vorgänger** `e744f8b`" (geschrieben von `d38f4fa`, dessen direkter
+  Vorgänger `51c430a` ist — `e744f8b` liegt **3** Commits davor, `git rev-list --count
+  e744f8b..d38f4fa` → **3**). Nach dem Wortlaut der `SKILL.md` („eine SHA im Rahmen ist also
+  immer ein **Vorgänger**") liest sich das als Fehler, nach der Semantik dieser Datei (der
+  genannte SHA ist der **Messstand**) ist es korrekt — dieselbe Regel, zwei Verdikte, je
+  nachdem, welche Datei man liest.
+- `opencode-pwa` `a3e4a9f`: `AGENTS.skills.md` nennt „Vorgänger" **7-mal**,
+  `AGENTS.todo.md` **8-mal**; „gemessen am Stand" kommt in **keiner** der beiden Dateien vor
+  (**0**). Die Projekte benutzen also durchgehend die Wortlaut-Fassung der Form (b) — eine
+  Umbenennung hätte ihre Marker entwertet.
 
 ### Gemessen: `LuminaRust` `0cf154d` — 10 Vorgänger-Rahmen
 
@@ -306,32 +375,42 @@ Das schließt die Form (c) der Rahmen-Tabelle nicht aus: sie bleibt erlaubt, wen
 Messung, deren **Umfang** solche Dateien einschließt — dort zählt die Zeile des Commits
 mit, und der Zählerstand gilt für den Stand, an dem gemessen wurde.
 
-Beleg — gemessen in den Verifikationsrunden der drei Projekte, nicht in diesem Repo:
+Beleg — gemessen in den Verifikationsrunden der drei Projekte, nicht in diesem Repo. **Die
+Konvention der drei Bullets:** jede nennt den Stand, an dem der **Fehler** stand, und danach
+den Commit, der ihn behob — nicht den korrigierten Stand. (Ein Bullet, der den korrigierten
+Stand nennt, führt beim Nachlesen zur falschen Zeile: die Fehlerform steht einen Commit
+davor.)
 
-- `open-accreditation` `c353313` (medium): der Marker trug eine **repo-weite** Grep-Zahl
-  („49 Zeilen-Treffer in 22 Dateien") unter dem Rahmen „gemessen am Vorgänger `a4551c8`,
-  seitdem unverändert". Der Commit schrieb `AGENTS.todo.md` **und** `AGENTS.skills.md` — und
-  **diese Dateien enthalten das Suchmuster selbst**. Dieselbe Messung (`git grep -in
-  baseline <stand> -- .`) ergab am Stand `a4551c8` **49** Zeilen in **22** Dateien und am
-  committeten Stand `c353313` **54** Zeilen in **22** Dateien (Verteilung **12/11/5/26**
-  statt **10/9/3/27**; die Gruppen sind `items-baseline` / `$baseline` /
-  `baseline-browser-mapping` / Rest, nach dem Marker-Stand `2da0404:AGENTS.skills.md:43` des
-  Projekts). Die Board-Messung unter demselben Rahmen (`git grep -inE
-  '\bowner\b|\bticket\b' <stand> -- AGENTS.todo.md`) ergab am Stand `a4551c8` **4** und
-  am Stand `c353313` **15**. Der Rahmen war doppelt falsch: die Datei war verändert (also
-  kein „seitdem unverändert"), und der Wert galt für den Vorgänger, nicht für den Stand,
-  den der Commit festschreibt.
-- `opencode-pwa` `ddd15a4` (medium): „die **einzigen** Fundstellen seither" — im Board **2**
-  an den Ständen `45cb323`, `c86138b` und `ddd15a4` und **0** am Vorgänger `c737d17`, im
-  Marker **3** an denselben drei Ständen; an **keinem** Stand der Serie war „nur eine"
-  wahr. Der Fehltreffer war exakt die Zeile mit dem Suchkommando, die der Commit selbst
-  geschrieben hat (`ddd15a4:AGENTS.skills.md:176`).
-- `LuminaRust` `51c430a` (low): `git grep -n ui-review <stand> -- '*.md'` → am Stand
-  `e744f8b` **5** Zeilen in **2** Dateien, am direkten Vorgänger `0cf154d` (= `51c430a^`)
-  **6** in **2**, am committeten Stand `51c430a` **6** in **2**. Die **Dateimenge** war an
-  allen drei Ständen **2** — über den Vorgänger vergleichbar, die Zeilenzahl nicht. Der
-  Verifier hielt dort ausdrücklich fest, dass diese Klausel **kein** Upstream-Gegenstück hat,
-  weil upstream sie noch nicht trug — sie trägt sie jetzt.
+- `open-accreditation`: der **Fehlerstand** ist der Marker-Stand `2da0404:AGENTS.skills.md:43`
+  — dort trug der Marker die **repo-weite** Grep-Zahl („49 Zeilen-Treffer in 22 Dateien")
+  unter dem Rahmen „gemessen am Vorgänger `a4551c8`, seitdem unverändert". Der Commit
+  `2da0404` schrieb `AGENTS.todo.md` **und** `AGENTS.skills.md` — und **diese Dateien
+  enthalten das Suchmuster selbst**. Dieselbe Messung (`git grep -in baseline <stand> -- .`)
+  ergab am Stand `a4551c8` **49** Zeilen in **22** Dateien und am Stand `2da0404` **54**
+  Zeilen in **22** Dateien (Verteilung **12/11/5/26** statt **10/9/3/27**; die Gruppen sind
+  `items-baseline` / `$baseline` / `baseline-browser-mapping` / Rest). Die Board-Messung unter
+  demselben Rahmen (`git grep -inE '\bowner\b|\bticket\b' <stand> -- AGENTS.todo.md`) ergab
+  am Stand `a4551c8` **4** und am Stand `2da0404` **15**. Der Rahmen war doppelt falsch: die
+  Datei war verändert (also kein „seitdem unverändert"), und der Wert galt für den Vorgänger,
+  nicht für den Stand, den der Commit festschreibt. **Behoben in `c353313`** (Befund N1,
+  medium) — dort steht bereits die richtige Form („54 … in 22 Dateien am committeten Stand
+  dieses Commits — dieser Wert kann **keinen** Vorgänger-Rahmen tragen").
+- `opencode-pwa`: der **Fehlerstand** ist der Marker-Stand `c86138b:AGENTS.skills.md:177`
+  (dieselbe Zeile steht in `45cb323`) — „die **einzigen** Fundstellen seither". Gemessen mit
+  dem Suchmuster `W3` an diesem Stand: im Marker **3** Zeilen (`grep -c` zählt **Zeilen**;
+  `grep -o … | wc -l` zählt **4** Occurrences), im Board **2** Zeilen, am Vorgänger `c737d17`
+  **0** — an **keinem** Stand der Serie (`c737d17`, `45cb323`, `c86138b`, `ddd15a4`) war „nur
+  eine" wahr. Der Fehltreffer war exakt die Zeile mit dem Suchkommando, die der Commit
+  selbst geschrieben hat. **Behoben in `ddd15a4`** (Befund F1, medium) — dort steht die
+  berichtigte Zählung.
+- `LuminaRust`: der **Fehlerstand** ist der Marker-Stand `51c430a:AGENTS.skills.md:133-135`
+  — dort stand „dieselbe Zählung im **Vorgänger** `e744f8b`". `git grep -n ui-review <stand>
+  -- '*.md'` ergab am Stand `e744f8b` **5** Zeilen in **2** Dateien, am direkten Vorgänger
+  `0cf154d` (= `51c430a^`) **6** in **2**, am Stand `51c430a` **6** in **2** — die Zählung ist
+  am Vorgänger **nicht** dieselbe, die Dateimenge schon. **Behoben in `d38f4fa`** (Befund B1,
+  low) — dort steht „am **Vorgänger** `e744f8b` ist die **Dateimenge** dieselbe". Der Verifier
+  hielt dort ausdrücklich fest, dass diese Klausel **kein** Upstream-Gegenstück hat, weil
+  upstream sie noch nicht trug — sie trägt sie jetzt.
 
 ### Die Aussage über einen Zeitpunkt
 
@@ -348,9 +427,10 @@ Skills-Repos habe „**beim Commit dieses Markers**" auf `0449b05` gestanden. Ge
 die Reflog-Zeitachse des Skills-Repos stand er da bereits auf `7910ec6` — der Pull lag
 **31 Minuten** vor dem Commit (Commit-Zeit `c353313`: **2026-10-21 10:12:18 +0000**, in der
 Verifikationsrunde des Projekts gemessen). Die Aussage war **falsch** und widersprach dem
-unmittelbar folgenden **Satz desselben Absatzes** (nachgemessen in jener Verifikationsrunde:
-ein Blockzitat-Absatz mit **vier** Sätzen; der Widerspruch liegt zwischen **Satz 2 und
-Satz 3**).
+unmittelbar folgenden **Satz derselben Satzgruppe** (nachgemessen in jener Verifikationsrunde:
+der Blockzitat-Absatz `c353313:AGENTS.skills.md:6-30` — die erste Leerzeile steht erst in
+Zeile 31 — trägt mehr als vier Sätze; **vier** Sätze hat seine erste Satzgruppe `:6-14`, und
+der Widerspruch liegt zwischen **Satz 2 und Satz 3** dieser Gruppe).
 
 **Selbst gemessen in diesem Repo** (das Skills-Repo selbst), `git reflog --date=iso`:
 
@@ -398,13 +478,46 @@ Beleg:
   ohne Upstream-Gegenstück ist der **erste** Satz der Kopie
   (`9a4bcd9:AGENTS.skills.md:206-209`) — der zweite, der Vergleich über den Vorgänger, ist
   durch die neue Klausel abgedeckt.
-  **Selbst gemessen in diesem Repo:** `git show 7910ec6:.agents/skills/skills-marker/SKILL.md`
-  trägt den Regelsatz **0-mal**, `git show e523df9:...` **1-mal** — die Bedingung des
-  Vermerks ist erfüllt.
+  **Selbst gemessen in diesem Repo:** der Regelsatz „**Jede Aussage über einen Stand nennt
+  den Stand, in dem sie gemessen wurde**" steht in `git show
+  7910ec6:.agents/skills/skills-marker/SKILL.md` **0-mal**, in `git show e523df9:...`
+  **1-mal** — die Bedingung des Vermerks ist erfüllt. Der **Anker** `Bezugsrahmen-Regel`
+  steht an **beiden** Ständen **0-mal**; er kam mit `65fbecc` dazu (siehe die Klausel zum
+  Cursor weiter unten).
 - `opencode-pwa` `473de80`: der Marker trägt einen **neuen Kopf** „Messkonvention" mit
   `<stand>`-Definition und einer Kurzfassung der Formen (a)/(b) — wieder eine Kopie. Der
   Verifier: die Kopie bricht **keine** vorhandene Konvention, verliert aber das Etikett, an
   dem das Geschwisterprojekt die Kopierbarkeit erkennt.
+
+### Ein Verweis trägt nur, wenn der Cursor den Stand deckt, in dem die Zitierstelle existiert
+
+**Regel:** Ein Marker, der die Regel **zitiert**, muss seinen Cursor auf einen Stand
+**vor**rücken, in dem die Zitierstelle **existiert**, und die **Range** zwischen altem und
+neuem Cursor **begehen**. Die Range kann einen vom Projekt **genutzten** Skill treffen, ohne
+dass die Marker-Aussagen daran veralten — das ist der Zweck des Begehens. Diese Ergänzung
+gilt neben „Der Cursor bleibt, was er ist": der Cursor nennt weiter den **konsumierten**
+Stand, er wird nicht zum Rahmen einer Aussage.
+
+Beleg — gemessen in diesem Repo und in den beiden Projektmarkern (read-only):
+
+- Die Zeichenkette `Bezugsrahmen-Regel` steht im Skill-Verzeichnis am Stand `65fbecc`
+  **4-mal** (`SKILL.md` **1**, `references/notes.md` **2**, `templates/AGENTS.skills.md`
+  **1**) und an den Ständen `e523df9`, `21b29e4`, `7341bb0`, `992a9eb` **0-mal**
+  (`git grep -c "Bezugsrahmen-Regel" <stand> -- .agents/skills/skills-marker/`).
+- Beide Projektmarker zitieren die Stelle und tragen `agents-skills-consumed: 0449b05` —
+  **7** Commits vor `65fbecc` (`git rev-list --count 0449b05..65fbecc` → **7**). An ihrem
+  deklarierten Cursor existiert der Anker **nicht**. Keiner dieser **7** SHAs kommt in
+  `AGENTS.skills.md` oder im Board der beiden Projekte vor (**0** Treffer je SHA) — die Range
+  ist nicht begangen.
+- Warum das erst auffällt: der Skill wird **live** aus dem Arbeitsbaum gelesen —
+  `~/.config/opencode/opencode.jsonc` trägt `"skills": ["/projects/agents-skills/.agents/skills"]`,
+  es gibt **keine** installierte Kopie. Der **Cursor** ist damit das Einzige, was die
+  angewandte Regelversion pinnt.
+- Die Range `0449b05..65fbecc` berührt **zwei** Skills: `skills-marker` (**5** Commits) und
+  `ratchet-gates` (`d5dc52f` → `references/cli.md`: „**No tag was pushed yet** … build from
+  source" → die Releases sind veröffentlicht). Ein Begehen dieser Range trifft also einen vom
+  Projekt genutzten Skill — die Zeile im Marker muss daran nicht veralten, sie wird neu
+  gemessen.
 
 ## Wo steht was
 
