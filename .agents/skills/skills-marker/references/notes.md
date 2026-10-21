@@ -153,7 +153,7 @@ Jede Aussage im Marker, die einen Stand nennt, nennt **den Stand, in dem sie
 gemessen wurde**. Das ist die Pflicht aus der gemeinsamen Regel
 (`.agents/rules/build-verify.md`, Regel 5): „Every number in the message that
 claims something about the commit or its gates names what it measures — the state
-it was measured in (working tree, committed state) and the scope it covers." Eine
+it was measured in (working tree, committed state) and the scope it covers …" Eine
 Aussage ohne Rahmen ist unprüfbar: der nächste Pull liest sie und findet einen
 anderen Baum.
 
@@ -172,19 +172,25 @@ festschreibt. Zwei Formen, je nachdem, was gemessen wurde:
 | Die Aussage beschreibt | Der Rahmen lautet | Warum |
 |---|---|---|
 | den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
-| eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der Vorgänger ist der Stand, an dem die Datei gemessen wurde — die Unverändertheit wird belegt |
+| eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der genannte SHA ist der **Messstand** (nicht zwingend der direkte Vorgänger) — die Unverändertheit wird belegt |
+| eine Fremddatei, die sich **seit der Messung geändert** hat | der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — der Diff-Beleg ist **nicht** leer |
 
-Der Beleg für die zweite Form ist `git diff --stat <vorgänger>..<commit> -- <datei>`
-— **ohne Ausgabe** heißt: die Datei ist zwischen Vorgänger und Commit
-unverändert, also gilt die am Vorgänger gemessene Zählung heute noch. Der
-Endpunkt ist der **benannte Commit**, dessen Aussage belegt wird, nicht `HEAD`:
-`HEAD` wandert, und dieselbe Formel beweist zur Lesezeit etwas anderes. Wer den
-committeten Stand eines anderen Repos misst, setzt den Stand als Platzhalter
-(`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`), damit der
-Rahmen den Wert trägt und der Leser ihn einsetzt. Form (b) trägt die Zählung
-**und** den Vorgänger, damit der Leser prüfen kann, statt zu glauben.
+Der Beleg für die zweite Form ist `git diff --stat <messstand>..<stand> -- <datei>`
+— **ohne Ausgabe** heißt: die Datei ist zwischen Messstand und Stand
+unverändert, also gilt die am Messstand gemessene Zählung heute noch. Beide
+Enden sind **Platzhalter**: der Marker kennt seine eigene SHA nicht (sie entsteht erst
+mit dem Commit) und nennt deshalb `<stand>` für den Stand, über den die Aussage gemacht
+wird, und `<messstand>` für den Stand, an dem gemessen wurde. `HEAD` ist als Endpunkt
+falsch — es wandert, und dieselbe Formel beweist zur Lesezeit etwas anderes. Der
+Platzhalter gilt für **jeden** gemessenen Stand, im eigenen Repo wie in einem anderen
+(`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`), damit der Rahmen
+den Wert trägt und der Leser ihn einsetzt. Form (b) trägt die Zählung **und** den
+Messstand, damit der Leser prüfen kann, statt zu glauben.
 
-Ein SHA im Rahmen, der weder das eine noch das andere ist, ist ein Fehler.
+Ein SHA im Rahmen, der weder der Stand des schreibenden Commits noch der benannte
+Messstand ist, ist ein Fehler. Die dritte Zeile der Tabelle ist kein Notfall, sondern
+der Fall einer Datei, die sich zwischen der Messung und dem Commit geändert hat: der
+Zählerstand gilt für den genannten Stand — nachmessen, statt die änderung zu leugnen.
 
 Ein **Zähler** bleibt verboten (§2: „SHA + Datum, sonst nichts" — kein
 `offen: 5`, kein „80 % angewendet"). Eine **Messung mit Rahmen** ist etwas
@@ -242,16 +248,27 @@ insgesamt 2-mal, die zweite Nennung ist ein Kommando-Argument). Drei weitere
 Rahmen desselben Markers nannten gar keinen SHA. Behoben in `c86138b` und
 `ddd15a4` mit Form (a) und Form (b).
 
-Form (b) nennt den **Vorgänger des schreibenden Commits** — und dieser wird bei
-jedem Commit neu gesetzt. Ein mitgeschlepptes Label zeigt auf einen **älteren**
-Vorgänger und trägt den Diff-Beleg nicht: `ddd15a4` nennt `45cb323`, obwohl
-`git rev-parse --short ddd15a4^` → `c86138b` ist, und `AGENTS.todo.md` hat sich
-zwischen `c86138b` und `ddd15a4` geändert (`git diff --stat c86138b..ddd15a4 --
-AGENTS.todo.md` → 15 Einfügungen, 11 Löschungen). Die Zählung bleibt dabei
-gleich (7 offene Kästchen in `45cb323`, `c86138b` und `ddd15a4`), das „seitdem
-unverändert" gilt für die Datei aber nicht mehr — es ist der Zähler, der gleich
-bleibt, nicht der Baum. Wer ein Label übernimmt, setzt es am neuen Commit neu
-und belegt es neu.
+Form (b) nennt den **Messstand** — den Stand, in dem die Datei gemessen wurde, nicht
+zwingend den direkten Vorgänger des schreibenden Commits. Der Beleg
+`git diff --stat <messstand>..<stand> -- <datei>` muss **ohne Ausgabe** sein: die Datei ist
+zwischen dem genannten Stand und dem Commit unverändert, also gilt die am Messstand
+gemessene Zählung heute noch. Der Endpunkt ist der **benannte Commit**, dessen Aussage
+belegt wird, nicht `HEAD` — `HEAD` wandert, und dieselbe Formel beweist zur Lesezeit etwas
+anderes. Die Form steht im Marker-Stand von `opencode-pwa` (`473de80`) als
+`git diff --stat <sha>..<stand> -- <pfad>`: `<stand>` ist der committete Stand des
+schreibenden Commits, und weil der Marker seine eigene SHA nicht kennt, bleibt der
+Endpunkt ein Platzhalter, den der Leser einsetzt.
+
+Ein Label wird deshalb **bei jedem Commit neu gesetzt**: es nennt den Stand, an dem
+tatsächlich gemessen wurde, und es wird gegen den Commit belegt, der die Aussage
+trägt. Ein mitgeschlepptes Label zeigt auf einen **älteren** Stand und trägt den
+Diff-Beleg nicht: `ddd15a4` nennt `45cb323`, obwohl `git rev-parse --short
+ddd15a4^` → `c86138b` ist, und `AGENTS.todo.md` hat sich zwischen `c86138b` und
+`ddd15a4` geändert (`git diff --stat c86138b..ddd15a4 -- AGENTS.todo.md` → 15
+Einfügungen, 11 Löschungen). Die Zählung bleibt dabei gleich (7 offene Kästchen in
+`45cb323`, `c86138b` und `ddd15a4`), das „seitdem unverändert“ gilt für die Datei aber
+nicht mehr — es ist der Zähler, der gleich bleibt, nicht der Baum. Wer ein Label
+übernimmt, setzt es am neuen Commit neu und belegt es neu.
 
 ## Wo steht was
 

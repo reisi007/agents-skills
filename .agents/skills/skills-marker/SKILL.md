@@ -55,9 +55,10 @@ Beispiel-Range in [`references/notes.md`](references/notes.md).
 
 **Angewendet** heißt **am Code geprüft**, nicht gelesen — Auswahlregel in §4.
 
-**Jede Aussage über einen Stand nennt den Stand, in dem sie gemessen wurde.** Der Marker-Commit
-kann seine eigene SHA nicht nennen — sie entsteht erst mit dem Commit; eine SHA im Rahmen ist
-immer ein **Vorgänger**: „am committeten Stand dieses Commits" (Eigenes) bzw. der Vorgänger mit Beleg.
+**Jede Aussage über einen Stand nennt den Stand, in dem sie gemessen wurde.** Der Marker-Commit kann
+seine eigene SHA nicht nennen — sie entsteht erst mit dem Commit; eine SHA im Rahmen ist also immer ein
+**Vorgänger**: „am committeten Stand dieses Commits" für das, was der Commit selbst festschreibt,
+„gemessen am Vorgänger `<sha>`, seitdem unverändert" für eine Fremddatei. Der Cursor ist kein Rahmen.
 
 ## 3. Die Range — was seit dem Marker passiert ist
 

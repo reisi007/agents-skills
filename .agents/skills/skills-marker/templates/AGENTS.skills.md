@@ -68,9 +68,9 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
      „am committeten Stand dieses Commits" / "at the committed state of this commit";
    - eine Fremddatei, die der Commit nicht anfasst: „gemessen am Vorgänger `<sha>`, seitdem
      unverändert" / "measured at the predecessor `<sha>`, unchanged since" — belegt mit
-     `git diff --stat <vorgänger>..<commit> -- <datei>` (ohne Ausgabe). Der Endpunkt ist der
-     benannte Commit, nicht `HEAD`; ein Repo-Stand wird als `<stand>` eingesetzt
-     (`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`).
+     `git diff --stat <messstand>..<stand> -- <datei>` (ohne Ausgabe). Beide Enden sind
+     Platzhalter: `<stand>` ist der committete Stand dieses Commits, `<messstand>` der Stand,
+     an dem gemessen wurde. `HEAD` ist als Endpunkt falsch — es wandert.
    Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
