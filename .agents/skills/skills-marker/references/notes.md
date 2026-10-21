@@ -147,6 +147,112 @@ still auf fremden Inhalt. Eine Zeile war schlimmer als veraltet: Eine
 ein späterer Commit sie hinzugefügt hatte. Eine Zahl ohne Herkunft ist genau das,
 was dieses Repo sonst entfernt — darum steht sie hier mit beiden Repos.
 
+## Der Bezugsrahmen einer Aussage über einen Stand
+
+Jede Aussage im Marker, die einen Stand nennt, nennt **den Stand, in dem sie
+gemessen wurde**. Das ist die Pflicht aus der gemeinsamen Regel
+(`.agents/rules/build-verify.md`, Regel 5): „Every number in the message that
+claims something about the commit or its gates names what it measures — the state
+it was measured in (working tree, committed state) and the scope it covers." Eine
+Aussage ohne Rahmen ist unprüfbar: der nächste Pull liest sie und findet einen
+anderen Baum.
+
+### Der Selbstbezug — warum „dieses Commits" und nicht eine SHA
+
+Der Marker-Commit **schreibt** die Datei, die den Rahmen nennt. Seine eigene SHA
+existiert beim Schreiben noch nicht, sie entsteht erst mit dem Commit. Er kann
+sich also nicht selbst benennen — jede SHA im Rahmen ist damit **immer ein
+Vorgänger** des schreibenden Commits.
+
+Das ist kein Schönheitsfehler, sondern ein falscher Bezug: der Vorgänger ist ein
+anderer Baum als der, den der Commit festschreibt. Der Rahmen „am committeten
+Stand `e744f8b`" beschreibt damit einen Zustand, den die Datei **nicht**
+festschreibt. Zwei Formen, je nachdem, was gemessen wurde:
+
+| Die Aussage beschreibt | Der Rahmen lautet | Warum |
+|---|---|---|
+| den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
+| eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der Vorgänger ist der Stand, an dem die Datei gemessen wurde — die Unverändertheit wird belegt |
+
+Der Beleg für die zweite Form ist `git diff --stat <vorgänger>..<commit> -- <datei>`
+— **ohne Ausgabe** heißt: die Datei ist zwischen Vorgänger und Commit
+unverändert, also gilt die am Vorgänger gemessene Zählung heute noch. Der
+Endpunkt ist der **benannte Commit**, dessen Aussage belegt wird, nicht `HEAD`:
+`HEAD` wandert, und dieselbe Formel beweist zur Lesezeit etwas anderes. Wer den
+committeten Stand eines anderen Repos misst, setzt den Stand als Platzhalter
+(`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`), damit der
+Rahmen den Wert trägt und der Leser ihn einsetzt. Form (b) trägt die Zählung
+**und** den Vorgänger, damit der Leser prüfen kann, statt zu glauben.
+
+Ein SHA im Rahmen, der weder das eine noch das andere ist, ist ein Fehler.
+
+Ein **Zähler** bleibt verboten (§2: „SHA + Datum, sonst nichts" — kein
+`offen: 5`, kein „80 % angewendet"). Eine **Messung mit Rahmen** ist etwas
+anderes: sie steht in der Zelle einer Zeile, nennt ihren Stand und wird beim
+nächsten Pull nachgemessen statt still zu altern. Der Unterschied ist der
+Rahmen, nicht die Zahl.
+
+### Der Cursor bleibt, was er ist
+
+`agents-skills-consumed:` nennt den Stand des **Skills-Repos**, nicht des
+Projekts — und dieser SHA existiert **vor** dem Commit. Er ist kein Rahmen und
+wird nicht umgestellt: die Regel gilt für Aussagen **über** den Projektstand,
+nicht für den Cursor, der auf einen anderen Repo-Stand zeigt.
+
+### Gemessen: `LuminaRust` `0cf154d` — 10 Vorgänger-Rahmen
+
+Der Marker-Commit `0cf154d` (Marker-Datei-Stand `AGENTS.skills.md` am
+committeten Stand `0cf154d`) nennt in seinem Vorgänger `e744f8b`
+(`git rev-parse --short 0cf154d^` → `e744f8b`) **10-mal** als Rahmen die
+Formel „committeter Stand `e744f8b`" — Zählweise: alle Treffer des Textes
+„committeter Stand `e744f8b`" mit normalisiertem Zeilenumbruch
+(`re.sub(r'\s+',' ',text)`), also 9 zeilenweise Treffer (auf 8 Zeilen, Zeile 18
+trägt die Formel zweimal) plus 1 über den Zeilenumbruch zwischen Zeile 133 und
+134 hinweg. **Ein zeilenweises Zählen kommt darunter:** `grep -o … | wc -l`
+zählt **9**, `grep -c` zählt **8** Zeilen. Verteilung: Zeilen 12, 14, 15, 16, 17,
+18 (zweimal), 19, 30 und 133/134. Die Datei nennt `e744f8b` insgesamt **14-mal**:
+die 10 Rahmen, 1 Range-Anker („ab `e744f8b`", der Startpunkt des
+40-Commit-Fensters — kein Rahmen) und 3 Kommando-Argumente
+(`git rev-list --max-count=40 e744f8b`, zweimal
+`git grep -n ui-review e744f8b`). Das Board `Agents.todo.md` desselben Commits
+nennt ebenfalls einen Vorgänger (`fa6411c`), dort in der Form „gemessen am
+committeten Stand `fa6411c`".
+
+Die Verifikation in `LuminaRust` (`51c430a`) hat die **11 Rahmenstellen** einzeln
+geprüft — und sie zählt **Stellen in zwei Dateien**: 10 in `AGENTS.skills.md`, 1 im
+Board `Agents.todo.md`. Von diesen 10 Marker-Stellen tragen **9** die Formel
+(„committeter Stand `e744f8b`", Zeile 18 zweimal → 10 Treffer); die 10. ist der
+**Range-Anker** „ab `e744f8b`" im 40-Commit-Fenster der `build-verify`-Zeile — ein
+Bereichsanfang, kein Rahmen, der Anker bleibt dort stehen. Umgestellt wurde auf
+6 × Form (a) und 5 × Form (b); Form (b) trägt den belegten Nachweis, Form (a)
+nicht — dort ist der Stand der des Commits selbst.
+
+Die Zahl 11 der Verifikation und die 10 Rahmen im Marker sind also
+**verschiedene Zählungen**: die Verifikation zählt *Stellen in zwei Dateien*, die
+10 zählen *Treffer einer Formel in einer Datei*.
+
+### Gemessen: `opencode-pwa` `45cb323` — ein Vorgänger-Rahmen
+
+Derselbe Fehler, an einer Stelle: der Marker-Commit `45cb323` nennt den
+Vorgänger `c737d17` (`git rev-parse --short 45cb323^` → `c737d17`) als Rahmen der
+Anker-Aussage — „alle Zeilen der Tabelle am committeten Stand (`c737d17`) neu
+belegt" (1 Treffer der Formel „committeten Stand (`c737d17`)" im Marker-Stand
+`AGENTS.skills.md` am committeten Stand `45cb323`; die Datei nennt `c737d17`
+insgesamt 2-mal, die zweite Nennung ist ein Kommando-Argument). Drei weitere
+Rahmen desselben Markers nannten gar keinen SHA. Behoben in `c86138b` und
+`ddd15a4` mit Form (a) und Form (b).
+
+Form (b) nennt den **Vorgänger des schreibenden Commits** — und dieser wird bei
+jedem Commit neu gesetzt. Ein mitgeschlepptes Label zeigt auf einen **älteren**
+Vorgänger und trägt den Diff-Beleg nicht: `ddd15a4` nennt `45cb323`, obwohl
+`git rev-parse --short ddd15a4^` → `c86138b` ist, und `AGENTS.todo.md` hat sich
+zwischen `c86138b` und `ddd15a4` geändert (`git diff --stat c86138b..ddd15a4 --
+AGENTS.todo.md` → 15 Einfügungen, 11 Löschungen). Die Zählung bleibt dabei
+gleich (7 offene Kästchen in `45cb323`, `c86138b` und `ddd15a4`), das „seitdem
+unverändert" gilt für die Datei aber nicht mehr — es ist der Zähler, der gleich
+bleibt, nicht der Baum. Wer ein Label übernimmt, setzt es am neuen Commit neu
+und belegt es neu.
+
 ## Wo steht was
 
 | Aussage | Datei |

@@ -63,6 +63,15 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    - trifft zu, ist nicht drin → offene Position: Eintrag in `AGENTS.todo.md` anlegen
    - trifft nicht zu (das Projekt hat das nicht) → `angewendet: nein` + kurzer Grund
 4. Offene Positionen nach `AGENTS.todo.md`; angewendete Zeilen mit `Datei:Zeile` belegen.
+   Jede Aussage über einen Stand nennt den Stand, in dem sie gemessen wurde:
+   - was der Commit selbst festschreibt (Marker, Board, geänderte Dateien):
+     „am committeten Stand dieses Commits" / "at the committed state of this commit";
+   - eine Fremddatei, die der Commit nicht anfasst: „gemessen am Vorgänger `<sha>`, seitdem
+     unverändert" / "measured at the predecessor `<sha>`, unchanged since" — belegt mit
+     `git diff --stat <vorgänger>..<commit> -- <datei>` (ohne Ausgabe). Der Endpunkt ist der
+     benannte Commit, nicht `HEAD`; ein Repo-Stand wird als `<stand>` eingesetzt
+     (`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`).
+   Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
    `geprüft am:` auf heute, Abschnitte ersetzen.
