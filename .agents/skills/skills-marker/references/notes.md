@@ -245,7 +245,7 @@ rückt den Cursor vor, damit er den zitierten Inhalt deckt, und begeht die Range
 Beides gilt nebeneinander: der Cursor bleibt, was er ist — er nennt den **konsumierten**
 Stand; er wird **nicht** zum Rahmen einer Aussage, und er wird **nicht** zum Archiv.
 
-### Die Formen (b) und (c) unterscheiden sich an der Zeitform, nicht am Nomen
+### Die Formen (b) und (c) unterscheiden sich an der Zeitform
 
 **Regel:** (b) und (c) nennen beide einen **Vorfahren**; das **Nomen** („Vorgänger" /
 „Stand") **entscheidet den Fall nicht** — die beiden Formen unterscheiden sich an der
@@ -527,11 +527,11 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
 - `opencode-pwa`, Marker-Stand `b7c318a:AGENTS.skills.md:281-283`: „in der Marker-Serie
   (`docs(skills):`/`docs(agents):` — die Commits `1f73917`, `4507c4a`, `73c032f`, `c737d17`,
   `45cb323`, `c86138b` **und dieser**) haben **zwei** einen deutschen Body". Die **Handliste**
-  nennt **sieben** SHAs, die Serie hat aber **zehn** Commits (`git log --oneline
-  --grep='^docs(skills):' --grep='^docs(agents):' b7c318a` → **10**), und „und dieser" ist ein
-  **wanderndes** Element: bei jedem Commit fällt der Vorgänger heraus. Die Zahl „zwei" stimmt —
-  aber über die **vollständige** Serie, nicht über die genannte Liste. **Behoben in `092d512`**
-  durch das Kommando statt der Handliste.
+  nennt **sechs** SHAs und den Platzhalter „und dieser"; die Serie hat **zehn** Commits (`git log
+  --oneline --grep='^docs(skills):' --grep='^docs(agents):' b7c318a` → **10**), und „und dieser"
+  ist ein **wanderndes** Element: bei jedem Commit fällt der Vorgänger heraus. Die Zahl „zwei"
+  stimmt — über die genannte Liste wie über die vollständige Serie; **falsch ist die Liste,
+  nicht die Zahl**. **Behoben in `092d512`** durch das Kommando statt der Handliste.
 - `open-accreditation`, Board-Stand `78051f0:AGENTS.todo.md:1317`: die Liste „**16** in Prosa"
   nennt **sechs** Dateien mit der Summe **17** — `AGENTS.todo.md` 5,
   `features/05-e2e-test-image.md` 4, `AGENTS.md` 3, `Agents.headless.md` 3,
@@ -544,14 +544,20 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
   commit" and all 13 refer to 2da0404". Der Body von `2da0404` trägt „this commit" **13-mal**
   (`git show -s --format=%B 2da0404 | grep -c "this commit"` → **13**) — **12** davon verweisen auf
   `2da0404`, **eines** auf `3ad1309` (die Stelle im L4-Absatz: „9170e03 has an English subject
-  AND an English body, so it does not follow the pattern of this commit"). Die Widerlegung, die
-  der Body für richtig hielt, war selbst eine **richtige** Vormessung: `c353313` nennt dieselbe
-  Stelle im Body von `3ad1309` („`2da0404` in three places and `3ad1309` in one").
+  AND an English body, so it does not follow the pattern of this commit"). Die „Widerlegung", die
+  der Body `78051f0` für richtig hielt (`the earlier "three places and one place" was wrong`),
+  greift ins Leere: `c353313` prüft den Body von **`2da0404`** (Subject: „the re-check of
+  `2da0404`"; der zitierte Satz steht nur dort) und nennt **dieselbe** Stelle — an einer Stelle
+  bedeutet „this commit" dort `3ad1309` (die L4-Passage) —, und die **13** Stellen, von denen der
+  Body spricht, tragen genau diese eine über `3ad1309`. Was `c353313` mit „three places and one
+  place" genau gezählt hat, ist aus dem Body allein **nicht** rekonstruierbar.
 - **Im Instrument selbst**: die Formulierung „die **drei** Regeln stehen dort als **Kurzform**"
   in dieser Datei war nach dem Hinzufügen der vierten Regel eine **veraltete Zahl** über einer
-  gewachsenen Liste (behoben mit `820c140`); und die Verteilung „12/11/5/26" in `820c140` war
-  **keine Partitionierung** der **54** Treffer — zwei Zeilen tragen mehr als ein Muster (behoben
-  im selben Commit).
+  gewachsenen Liste (am Stand `820c140` noch vorhanden — `git show 820c140:…/references/notes.md |
+  grep "drei Regeln"` → Treffer —, behoben mit `37cefe2`); und die Verteilung „12/11/5/26" in
+  `references/notes.md` (Stand `f7b8f9c`, Zeile 390) war **keine Partitionierung** der **54**
+  Treffer — zwei Zeilen tragen mehr als ein Muster (behoben mit `820c140`; heute steht dort
+  „priorisiert: **12/9/4/29**").
 
 ## Wo steht was
 
@@ -587,8 +593,9 @@ dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — geän
 die eingebettete Kopie, MCP, neue Skill-Verdrahtung — steht in `agent-config` §8.
 
 **„Advancing ist kein Updating, der Marker akkumuliert, und Akkumulation verrottet"** — der
-Satz stand in `SKILL.md` §5 (Schritt 6) und ist mit `f7b8f9c` entfallen, weil die **Klausel
-B** seinen Inhalt jetzt an der Zitierstelle trägt: ein weitergerückter Cursor verlangt, dass
+Satz stand in `SKILL.md` §5 (Schritt 6) und ist mit `f7b8f9c` entfallen, weil die **vierte
+Regel** (der Verweis auf die Zitierstelle, `SKILL.md` §2) seinen Inhalt jetzt an der
+Zitierstelle trägt: ein weitergerückter Cursor verlangt, dass
 die **Range zwischen altem und neuem Cursor begangen** wird — das Fortschreiben ist mehr als
 das Umschreiben einer Zahl. Der Rest des Satzes steht in `SKILL.md` §5 weiterhin („der Marker
 akkumuliert, und Akkumulation verrottet").
