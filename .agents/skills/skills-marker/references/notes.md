@@ -167,13 +167,13 @@ Vorgänger** des schreibenden Commits.
 Das ist kein Schönheitsfehler, sondern ein falscher Bezug: der Vorgänger ist ein
 anderer Baum als der, den der Commit festschreibt. Der Rahmen „am committeten
 Stand `e744f8b`" beschreibt damit einen Zustand, den die Datei **nicht**
-festschreibt. Zwei Formen, je nachdem, was gemessen wurde:
+festschreibt. Drei Formen, je nachdem, was gemessen wurde:
 
 | Die Aussage beschreibt | Der Rahmen lautet | Warum |
 |---|---|---|
 | den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
 | eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der genannte SHA ist der **Messstand** (nicht zwingend der direkte Vorgänger) — die Unverändertheit wird belegt |
-| eine Fremddatei, die sich **seit der Messung geändert** hat | der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — der Diff-Beleg ist **nicht** leer |
+| eine Fremddatei, die sich **seit der Messung geändert** hat | „gemessen am Stand `<sha>`" / „measured at the state `<sha>`" — der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — der Diff-Beleg ist **nicht** leer |
 
 Der Beleg für die zweite Form ist `git diff --stat <messstand>..<stand> -- <datei>`
 — **ohne Ausgabe** heißt: die Datei ist zwischen Messstand und Stand
@@ -182,9 +182,11 @@ Enden sind **Platzhalter**: der Marker kennt seine eigene SHA nicht (sie entsteh
 mit dem Commit) und nennt deshalb `<stand>` für den Stand, über den die Aussage gemacht
 wird, und `<messstand>` für den Stand, an dem gemessen wurde. `HEAD` ist als Endpunkt
 falsch — es wandert, und dieselbe Formel beweist zur Lesezeit etwas anderes. Der
-Platzhalter gilt für **jeden** gemessenen Stand, im eigenen Repo wie in einem anderen
-(`git show <stand>:AGENTS.todo.md | …`, `git grep … <stand> -- …`), damit der Rahmen
-den Wert trägt und der Leser ihn einsetzt. Form (b) trägt die Zählung **und** den
+Platzhalter gilt für **jeden** gemessenen Stand, im eigenen Repo wie in einem anderen:
+gemessen wird mit `git show <messstand>:AGENTS.todo.md | …`,
+`git grep … <messstand> -- …` — der gemessene Stand, nicht der Stand, über den die
+Aussage gemacht wird; bei Form (a) sind beide derselbe Stand. So trägt der Rahmen den
+Wert, und der Leser setzt ihn ein. Form (b) trägt die Zählung **und** den
 Messstand, damit der Leser prüfen kann, statt zu glauben.
 
 Ein SHA im Rahmen, der weder der Stand des schreibenden Commits noch der benannte
