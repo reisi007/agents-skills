@@ -96,15 +96,11 @@ do not pad the report with low-confidence findings.
 ## Step 3 — Findings report
 
 Consolidate every batch into a single findings report using the template in
-`references/findings-report.md` (columns `Severity | File:Line | Screenshot |
-Finding | Suggested fix`). Assign each finding a severity:
-
-- `critical` — broken/blank page, content overlap or cut-off, hard functional
-  blocker visible in the render.
-- `high` — visible layout/contrast/hierarchy defect, empty-state regression,
-  inconsistent spacing that degrades usability.
-- `medium` — polish issues, minor alignment, suboptimal hierarchy.
-- `low` — nitpicks, stylistic preferences.
+`references/findings-report.md` (columns `Id | Severity | Status | Owner |
+Ticket | File:Line | Screenshot | Finding | Suggested fix`). Assign each
+finding a severity from the **canonical vocabulary** (`ratchet-gates`,
+`references/vocabulary.md`); the render criteria that put a defect into which
+level live in `references/findings-report.md` — cite them, do not restate them.
 
 `critical` and `high` findings **block** an APPROVED verdict for a page.
 
