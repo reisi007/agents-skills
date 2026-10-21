@@ -19,6 +19,7 @@ owns the gate. The manual is the README of
 | `ratchet drift` | runs the drift gates (the generated files) and nothing else | "is the committed artifact in sync?" — after a generator changed |
 | `ratchet report` | renders the run into a Markdown report | the derived document the repository publishes |
 | `ratchet verify` | runs the pre-release checks against their committed snapshots | the release pipeline — a benchmark is a measurement, not a defect class |
+| `ratchet release` | computes the next version from the commits since the last release, renders the changelog block and writes it into the manifest and the changelog | the release pipeline — the version and the changelog are derived facts, not hand-written |
 | `ratchet init` | writes a starter config when there is none | the first minute in a new repository |
 | `ratchet update` | replaces the binary with the newest release, checksum verified | a new version exists |
 
@@ -78,6 +79,10 @@ baseline — is the subject of
 | `1` | at least one gate failed |
 | `2` | operational error: invalid config, missing config, crashed counter, unreadable file, unknown command or path |
 
+The **release** has its own middle: it exits `1` when there is nothing to
+release — no commit since the last release moves the version. The tool did its
+job; the release that was asked for does not exist.
+
 `ratchet report` is the exception: it exits `0` whenever it produced a report —
 the verdict is in the content, `ratchet check` on the same tree exits `1`.
 
@@ -105,9 +110,8 @@ it counts words.
 
 ## Install
 
-**No tag was pushed yet** — there is no GitHub Release to download and no
-release for the action to install. Until the first tag exists, build from
-source.
+The releases are published: every version tag carries the assets of five
+platforms and a `checksums.txt`.
 
 - **Release asset** — a release publishes **two** assets per platform: the
   archive (`ratchet-<version>-<os>-<arch>.tar.gz`, `.zip` on windows) for the
