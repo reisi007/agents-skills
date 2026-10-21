@@ -182,10 +182,10 @@ was dieses Repo sonst entfernt — darum steht sie hier mit beiden Repos.
 
 Jede Aussage im Marker, die einen Stand nennt, nennt **den Stand, in dem sie
 gemessen wurde**. Das ist die Pflicht aus der gemeinsamen Regel
-(`.agents/rules/build-verify.md`, Regel 5): „Every number in the message that
-claims something about the commit or its gates names what it measures — the state
-it was measured in (working tree, committed state) and the scope it covers …" Eine
-Aussage ohne Rahmen ist unprüfbar: der nächste Pull liest sie und findet einen
+(`.agents/rules/build-verify.md`, Regel 5 am Stand `80664ab`): „**Every number in the
+message that claims something about the commit or its gates names what it measures** —
+the state it was measured in (working tree, committed state) and the scope it covers …"
+Eine Aussage ohne Rahmen ist unprüfbar: der nächste Pull liest sie und findet einen
 anderen Baum.
 
 ### Der Selbstbezug — warum „dieses Commits" und nicht eine SHA
@@ -262,10 +262,12 @@ Beleg — gemessen in `LuminaRust` und `opencode-pwa` (read-only), Marker-Ständ
   Occurrences); **8** dieser 9 Zeilen paaren ihn mit dem Wort „Vorgänger", **2** Zeilen tragen
   die Formulierung „am **Vorgänger** `e744f8b`" (geschrieben von `d38f4fa`, dessen direkter
   Vorgänger `51c430a` ist — `e744f8b` liegt **3** Commits davor, `git rev-list --count
-  e744f8b..d38f4fa` → **3**). Nach dem **früheren** Wortlaut der `SKILL.md` („eine SHA im
-  Rahmen ist also immer ein **Vorgänger**" — die Zitierstelle sagt heute „**Vorfahr**") liest
-  sich das als Fehler, nach der Semantik dieser Datei (der genannte SHA ist der **Messstand**)
-  ist es korrekt — dieselbe Regel, zwei Verdikte, je nachdem, welche Datei man liest.
+  e744f8b..d38f4fa` → **3**). Nach dem **früheren** Wortlaut der `SKILL.md` am Stand
+  `65fbecc` (`65fbecc:.agents/skills/skills-marker/SKILL.md:60`: „eine SHA im Rahmen ist
+  also immer ein **Vorgänger** […]" — dieselbe Formel steht am Stand `37cefe2`
+  (`37cefe2:.agents/skills/skills-marker/SKILL.md:53`) als „**Vorfahr**") liest sich das als
+  Fehler, nach der Semantik dieser Datei (der genannte SHA ist der **Messstand**) ist es
+  korrekt — dieselbe Regel, zwei Verdikte, je nachdem, welche Datei man liest.
 - `opencode-pwa` `a3e4a9f`: `AGENTS.skills.md` nennt „Vorgänger" **7-mal**,
   `AGENTS.todo.md` **8-mal**; „gemessen am Stand" kommt in **keiner** der beiden Dateien vor
   (**0**). Die Projekte benutzen also durchgehend die Wortlaut-Fassung der Form (b) — eine
@@ -415,11 +417,11 @@ beweglich; der **belegte** Stand nicht. Ist der Bezugszeitpunkt nicht belegbar �
 Zustand inzwischen weitergegangen ist —, trägt die Aussage den **gemessenen** Stand mit
 Zeitpunkt.
 
-Beleg: `open-accreditation` `c353313` (medium): die Kopfnote behauptete, der HEAD des
-Skills-Repos habe „**beim Commit dieses Markers**" auf `0449b05` gestanden. Gemessen über
-die Reflog-Zeitachse des Skills-Repos stand er da bereits auf `7910ec6` — der Pull lag
-**31 Minuten** vor dem Commit (Commit-Zeit `c353313`: **2026-10-21 10:12:18 +0000**, in der
-Verifikationsrunde des Projekts gemessen). Die Aussage war **falsch** und widersprach dem
+Beleg: `open-accreditation` `c353313:AGENTS.skills.md:9` (medium): die Kopfnote behauptete,
+der HEAD des Skills-Repos habe „beim Commit dieses Markers auf `0449b05` […]" gestanden.
+Gemessen über die Reflog-Zeitachse des Skills-Repos stand er da bereits auf `7910ec6` — der
+Pull lag **31 Minuten** vor dem Commit (Commit-Zeit `c353313`: **2026-10-21 10:12:18 +0000**,
+in der Verifikationsrunde des Projekts gemessen). Die Aussage war **falsch** und widersprach dem
 unmittelbar folgenden **Satz derselben Satzgruppe** (nachgemessen in jener Verifikationsrunde:
 der Blockzitat-Absatz `c353313:AGENTS.skills.md:6-30` — die erste Leerzeile steht erst in
 Zeile 31 — trägt mehr als vier Sätze; **vier** Sätze hat seine erste Satzgruppe `:6-14`, und
@@ -511,10 +513,11 @@ Beleg — gemessen in diesem Repo und in den beiden Projektmarkern (read-only):
   angewandte Regelversion pinnt.
 - Die Range `0449b05..65fbecc` berührt **zwei** Skills (`git log --oneline 0449b05..65fbecc --
   .agents/skills/skills-marker/ | wc -l` → **5**, `… -- .agents/skills/ratchet-gates/ | wc -l` →
-  **1**): `skills-marker` und `ratchet-gates` (`d5dc52f` → `references/cli.md`: „**No tag was
-  pushed yet** … build from source" → die Releases sind veröffentlicht). Ein Begehen dieser
-  Range trifft also einen vom Projekt genutzten Skill — die Zeile im Marker muss daran nicht
-  veralten, sie wird neu gemessen.
+  **1**): `skills-marker` und `ratchet-gates` (der Text stand in
+  `d7888cd:.agents/skills/ratchet-gates/references/cli.md:108`: „**No tag was pushed yet** …
+  build from source" — und wurde von `d5dc52f` entfernt → die Releases sind veröffentlicht).
+  Ein Begehen dieser Range trifft also einen vom Projekt genutzten Skill — die Zeile im Marker
+  muss daran nicht veralten, sie wird neu gemessen.
 
 ### Eine Aufzählung trägt zwei Behauptungen
 
@@ -549,8 +552,9 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
   `2da0404`, **eines** auf `3ad1309` (die Stelle im L4-Absatz: „9170e03 has an English subject
   AND an English body, so it does not follow the pattern of this commit"). Die „Widerlegung", die
   der Body `78051f0` für richtig hielt (`the earlier "three places and one place" was wrong`),
-  greift ins Leere: `c353313` prüft den Body von **`2da0404`** (Subject: „the re-check of
-  `2da0404`"; der zitierte Satz steht nur dort) und nennt **dieselbe** Stelle — an einer Stelle
+  greift ins Leere: `c353313` prüft den Body von **`2da0404`** (Subject: „docs(marker): fix the
+  findings of the re-check of `2da0404` (N1–N6)"; der zitierte Satz steht nur dort) und nennt
+  **dieselbe** Stelle — an einer Stelle
   bedeutet „this commit" dort `3ad1309` (die L4-Passage) —, und die **13** Stellen, von denen der
   Body spricht, tragen genau diese eine über `3ad1309`. Was `c353313` mit „three places and one
   place" genau gezählt hat, ist aus dem Body allein **nicht** rekonstruierbar.
