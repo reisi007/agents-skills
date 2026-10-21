@@ -120,6 +120,8 @@ A list that names only what exists is marketing.
   entry, otherwise it is a graveyard.
 - The levels and the statuses are defined once, in `references/vocabulary.md`;
   the owner-and-ticket rule applies to every entry that is not `fixed`.
+- The blind spots of `ratchet` itself are named in its own repository, in the
+  section that gates the tool against itself.
 
 ## Core rules
 
@@ -152,6 +154,9 @@ A list that names only what exists is marketing.
    direction, as easy as the baseline update.
 10. List the classes no tier covers, with owner and ticket.
 
+Steps 2, 4 and 9 have a tool: `ratchet` — the header is its config, the
+baseline its file, the paydown a command (`references/cli.md`).
+
 ## Reference files
 
 - `references/ratchet-baselines.md` — which defect classes ratchet, count vs
@@ -164,3 +169,5 @@ A list that names only what exists is marketing.
   The **prose case** (README files, hand-written documents, counts in prose,
   claims about things that do not exist) lives in the `generated-docs` skill.
 - `references/vocabulary.md` — the shared severity levels and statuses.
+- `references/cli.md` — the `ratchet` binary: the commands, the config shape,
+  the exit codes.
