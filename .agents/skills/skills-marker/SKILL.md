@@ -47,18 +47,31 @@ cp <skills-repo>/.agents/skills/skills-marker/templates/AGENTS.skills.md \
 | `## Offen aus dem Bereich <alt>..<neu>` | genau die Skills, die in dieser Range neu dazugekommen oder geändert wurden |
 
 Kopieren genügt: die Vorlage ist ein **lauffähiges Gerüst** (leere Tabelle,
-Fortschreib-Anleitung). HTML-Kommentare darin sind Arbeitsanleitung und
-fallen beim ersten Fortschreiben weg.
+Fortschreib-Anleitung); die HTML-Kommentare sind Arbeitsanleitung und fallen beim
+ersten Fortschreiben weg.
 
 **SHA + Datum, sonst nichts.** Keine Version, keine Zähler — Begründung und
 Beispiel-Range in [`references/notes.md`](references/notes.md).
 
 **Angewendet** heißt **am Code geprüft**, nicht gelesen — Auswahlregel in §4.
 
-**Jede Aussage über einen Stand nennt den Stand, in dem sie gemessen wurde.** Der Marker-Commit kann
-seine eigene SHA nicht nennen — sie entsteht erst mit dem Commit; eine SHA im Rahmen ist also immer ein
-**Vorgänger**: „am committeten Stand dieses Commits" (Eigenes), „gemessen am Vorgänger `<sha>`, seitdem
-unverändert" (Fremddatei), „gemessen am Stand `<sha>`" (geänderte Datei). Der Cursor ist kein Rahmen.
+**Der Bezugsrahmen** — Anker `Bezugsrahmen-Regel`: jede Aussage über einen Stand nennt den Stand, in
+dem sie gemessen wurde. Der Marker-Commit kann seine eigene SHA nicht nennen — sie entsteht erst mit
+dem Commit; eine SHA im Rahmen ist also immer ein **Vorgänger**: „am committeten Stand dieses Commits"
+(Eigenes), „gemessen am Vorgänger `<sha>`, seitdem unverändert" (Fremddatei), „gemessen am Stand
+`<sha>`" (geänderte Datei). Der Cursor ist kein Rahmen. Fassung, Belege und Fälle:
+[`references/notes.md`](references/notes.md) § „Der Bezugsrahmen". Drei Regeln dazu:
+
+- **Eine Messung, deren Umfang der Commit selbst schreibt, trägt keinen Vorgänger-Rahmen** — die
+  Zeile mit dem Suchkommando zählt mit: entweder nur der Wert am committeten Stand, oder alle
+  Werte mit ihrem Stand, oder über den Vorgänger nur der Vergleich dessen, was **gleich** bleibt.
+- **Eine Aussage über *wann* etwas galt, nennt den Stand, zu dem es galt** — SHA **und**
+  Messzeitpunkt (der Zeitpunkt der Messung, nicht der des genannten Stands); „beim Commit
+  dieses Markers" und „heute" nennen einen beweglichen Zustand, keinen Stand; ist der
+  Bezugszeitpunkt nicht belegbar, trägt sie den gemessenen Stand mit Zeitpunkt.
+- **Ein Marker zitiert die Regel, statt sie zu kopieren** — Pfad **im Skill** (ID + Datei) und
+  Anker, **ohne Zeilennummer**: die driftet. Eine eigene Zusatzregel des Projekts ist erlaubt,
+  wenn sie als **lokale Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht ersetzt.
 
 ## 3. Die Range — was seit dem Marker passiert ist
 
@@ -73,9 +86,8 @@ git -C <skills-repo> log --diff-filter=A --name-only <marker-sha>..HEAD -- .agen
 git -C <skills-repo> log --name-only --format= <marker-sha>..HEAD -- .agents/skills | sort -u   # alle berührten Skills
 ```
 
-Der letzte Befehl ist der Arbeitsauftrag: die Liste der Skills, die gegen
-**dieses** Projekt geprüft werden **müssen**. Range immer **nach** dem Pull
-bilden (Fälle und Begründung: `references/notes.md`).
+Der letzte Befehl ist der Arbeitsauftrag: die Skills, die gegen **dieses** Projekt
+geprüft werden **müssen**. Range immer **nach** dem Pull bilden (Fälle: `references/notes.md`).
 
 **Für jeden dieser Skills gilt genau eine von drei Entscheidungen:**
 
@@ -98,38 +110,31 @@ Verfallsdatum — Projekt-`AGENTS.md` und Workflows wachsen, eine gepinnte Versi
 
 ## 4. Wann trifft eine Skill-Änderung dieses Projekt zu?
 
-**Trifft zu**, wenn die Änderung etwas beschreibt, das **dieses Projekt selbst
-festlegt**: eine Pflicht, eine Schwelle, eine Ausnahme, eine Konvention oder ein
-Kommando, das hier gilt — also etwas, das in `AGENTS.md`, in einem Workflow, in einem
-Hook, in einer Package-Script-Datei oder in einer Dockerfile dieses Repos steht oder
-stehen müsste.
+**Trifft zu**, wenn die Änderung etwas beschreibt, das **dieses Projekt selbst festlegt**:
+eine Pflicht, eine Schwelle, eine Ausnahme, eine Konvention oder ein Kommando, das hier
+gilt — also etwas, das in `AGENTS.md`, in einem Workflow, in einem Hook, in einer
+Package-Script-Datei oder in einer Dockerfile dieses Repos steht oder stehen müsste.
 
 **Trifft nicht zu**, wenn sie etwas beschreibt, das dieses Projekt gar nicht hat: die
 Fallhöhe eines Docker-Test-Images in einem Repo ohne CI-Image, Sharding-Vorgaben in einem
-Projekt ohne E2E-Suite, ein Commit-Schema in einem Wegwerf-Skript. Der Grund gehört in
-die Tabelle — „trifft nicht zu, weil …" ist das **Ergebnis** der Prüfung, kein Weg
-daran vorbei. Ohne Grund wird die Zeile beim nächsten Pull unprüfbar.
+Projekt ohne E2E-Suite, ein Commit-Schema in einem Wegwerf-Skript. Der Grund gehört in die
+Tabelle — „trifft nicht zu, weil …" ist das **Ergebnis** der Prüfung; ohne ihn wird die
+Zeile beim nächsten Pull unprüfbar.
 
-Die Frage ist nie „ist die Änderung wichtig", sondern „regelt sie hier etwas, das es
-hier gibt". Sie ist meist in einem Satz entschieden, weil eine gute Änderung ihren
-Geltungsbereich mitliefert: steht dort „in jedem Projekt" oder „in CI-Workflows mit …",
-ist die Antwort sofort klar — und im Zweifel gewinnt **ja** mit offener Position,
-nicht **nein**.
+Die Frage ist nie „ist die Änderung wichtig", sondern „regelt sie hier etwas, das es hier
+gibt": steht dort „in jedem Projekt" oder „in CI-Workflows mit …", ist die Antwort sofort
+klar — und im Zweifel gewinnt **ja** mit offener Position, nicht **nein**.
 
 **Konventionen sind Zeilen, keine Annahmen:** Sprache, Größen-Disziplin und in eine
 `AGENTS.md` eingebettete Regeln bekommen je eine Tabellenzeile wie jeder Skill.
 
 ## 5. Nach einem `git pull` im Skills-Repo
 
-1. **Marker lesen** → `<marker-sha>`. Fehlt die Datei, ist das Projekt nicht gescaffoldet
-   — `codegraph-project-setup`, Schritt 2.5.
+1. **Marker lesen** → `<marker-sha>`. Fehlt die Datei: `codegraph-project-setup`, Schritt 2.5.
 2. **Range bilden** (Kommandos aus §3) → Liste der betroffenen Skills.
-3. **Regel-Drift prüfen:** die eingebetteten Regeln in der globalen
-   `~/.config/opencode/AGENTS.md` gegen ihre Quelle in `.agents/rules/*` prüfen
-   (aktuell die Frage-Regel aus `ask.md`) — Drift ist eine geänderte **Pflicht**,
-   kein abweichender Wortlaut: die Einbettung ist bewusst Kurzform, ein Text-Diff
-   gegen die Quelle ist **kein** Drift. Nachziehen heißt sinngemäß einbetten, nicht
-   die Kurzform wörtlich aufblasen (`agent-config` §8).
+3. **Regel-Drift prüfen:** die eingebetteten Regeln in der globalen `~/.config/opencode/AGENTS.md`
+   gegen ihre Quelle in `.agents/rules/*` prüfen (aktuell die Frage-Regel aus `ask.md`) — Drift
+   ist eine geänderte **Pflicht**, kein abweichender Wortlaut (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
 5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
 6. **Marker fortschreiben**: `agents-skills-consumed` auf
@@ -139,12 +144,8 @@ nicht **nein**.
 7. **Reload**, falls Regeln oder Skills betroffen sind:
    `touch ~/.config/opencode/opencode.jsonc` (→ `agent-config` §2a).
 
-Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — geänderte
-Regel in die eingebettete Kopie, MCP, neue Skill-Verdrahtung — steht in
-`agent-config` §8 und wird hier nicht wiederholt. Die Trennung ist strikt:
-**`agent-config` §8 = Konfiguration (Sache der Maschine), `skills-marker` =
-Projekt-Anwendung (Sache des Projekts).** Beide laufen nach demselben Pull, sie treffen
-verschiedene Dateien, und keiner ersetzt den anderen.
+Was dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt, steht in
+`agent-config` §8 — Konfiguration ist Sache der Maschine, `skills-marker` der Projekte.
 
 ## 6. Anti-Patterns
 

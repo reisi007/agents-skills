@@ -91,6 +91,13 @@ Kurzform, ein Text-Diff gegen die Quelle ist **kein** Drift. Nachziehen heißt
 sinngemäß einbetten, nicht die Kurzform wörtlich aufblasen; der Marker hält das erst
 als geprüft fest, wenn die Pflicht in der Kopie steht.
 
+## Warum die Auswahlregel meist in einem Satz entschieden ist
+
+(Kurzform: `SKILL.md` §4.) Die Auswahlregel („trifft zu" / „trifft nicht zu") ist selten mehr
+als ein Satz: eine gute Änderung **liefert ihren Geltungsbereich mit** — steht dort „in jedem Projekt"
+oder „in CI-Workflows mit …", ist die Antwort sofort klar. Bleibt der Geltungsbereich offen,
+gewinnt im Zweifel **ja** mit offener Position, nicht **nein**.
+
 ## Fallstrick: der Marker-SHA verschwindet
 
 `agent-config` §6 (agents-skills) hatte Amend + `--force-with-lease` als Stil — seit
@@ -134,6 +141,12 @@ Bereichs-Abschnitt des nächsten Pulls „`docker-test-image` — entfernt in `<
 notieren, dann verschwindet sie beim nächsten Fortschreiben mit. Sonst bleibt die Frage
 offen, ob das Projekt den Inhalt inzwischen selbst braucht.
 
+## Fallstrick: der Marker fehlt
+
+Fehlt `AGENTS.skills.md`, ist das Projekt **nicht gescaffoldet** — `codegraph-project-setup`,
+Schritt 2.5. Der Marker ist die Datei, in der das Ergebnis der Prüfung steht; ohne sie hat der
+nächste Pull nichts, was er fortschreiben könnte.
+
 ## Gemessen: Anker verrotten (`portal.reisinger.pictures` × `agents-skills`)
 
 Erster vollständiger Anker-Audit: Nach dem Fortschreiben des Markers in
@@ -147,7 +160,7 @@ still auf fremden Inhalt. Eine Zeile war schlimmer als veraltet: Eine
 ein späterer Commit sie hinzugefügt hatte. Eine Zahl ohne Herkunft ist genau das,
 was dieses Repo sonst entfernt — darum steht sie hier mit beiden Repos.
 
-## Der Bezugsrahmen einer Aussage über einen Stand
+## Der Bezugsrahmen
 
 Jede Aussage im Marker, die einen Stand nennt, nennt **den Stand, in dem sie
 gemessen wurde**. Das ist die Pflicht aus der gemeinsamen Regel
@@ -171,9 +184,9 @@ festschreibt. Drei Formen, je nachdem, was gemessen wurde:
 
 | Die Aussage beschreibt | Der Rahmen lautet | Warum |
 |---|---|---|
-| den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
-| eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der genannte SHA ist der **Messstand** (nicht zwingend der direkte Vorgänger) — die Unverändertheit wird belegt |
-| eine Datei, die sich **seit der Messung geändert** hat | „gemessen am Stand `<sha>`" / „measured at the state `<sha>`" — der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — `git diff --stat <messstand>..<stand> -- <datei>` ist **nicht** leer |
+| **(a)** den Marker selbst, das Board, jede Datei, die dieser Commit ändert | **am committeten Stand dieses Commits** / „at the committed state of this commit" | der schreibende Commit nennt den Stand, den er selbst festschreibt |
+| **(b)** eine Fremddatei, die dieser Commit **nicht** anfasst | **gemessen am Vorgänger `<sha>`, seitdem unverändert** / „measured at the predecessor `<sha>`, unchanged since" | der genannte SHA ist der **Messstand** (nicht zwingend der direkte Vorgänger) — die Unverändertheit wird belegt |
+| **(c)** eine Datei, die sich **seit der Messung geändert** hat | „gemessen am Stand `<sha>`" / „measured at the state `<sha>`" — der Stand, an dem sie gemessen wurde, **mit dessen SHA** (kein „seitdem unverändert") | der Zählerstand gilt für den genannten Stand; die Datei ist seither anders — `git diff --stat <messstand>..<stand> -- <datei>` ist **nicht** leer |
 
 Der Beleg für die zweite Form ist `git diff --stat <messstand>..<stand> -- <datei>`
 — **ohne Ausgabe** heißt: die Datei ist zwischen Messstand und Stand
@@ -273,6 +286,126 @@ Einfügungen, 11 Löschungen). Die Zählung bleibt dabei gleich (7 offene Kästc
 nicht mehr — es ist der Zähler, der gleich bleibt, nicht der Baum. Wer ein Label
 übernimmt, setzt es am neuen Commit neu und belegt es neu.
 
+### Die Messung, die den Commit selbst mitzählt
+
+**Regel:** Wenn der **Umfang** einer Messung eine Datei einschließt, die der Commit
+selbst schreibt, **misst die Messung den Commit mit** — die neue Zeile mit dem
+Suchkommando wird mitgezählt. Eine solche Messung trägt **keinen** Vorgänger-Rahmen. Drei
+Wege bleiben: nur der Wert am committeten Stand; **alle** Werte, jeder mit seinem Stand
+(„am Vorgänger `<sha>`: …; am committeten Stand dieses Commits: …" — bei mehr als zwei
+Ständen einer je); oder über den Vorgänger nur der Vergleich dessen, was **gleich** ist
+(etwa die Dateimenge). Der dritte Weg ist der Kern der Klausel, nicht eine Nebenbemerkung —
+er ist die Form, die im `LuminaRust`-Marker lokal erprobt wurde.
+
+Zwei Dinge sind zu trennen: der **Rahmen** ist in jedem Fall betroffen, weil der Commit die
+Datei verändert (also „seitdem unverändert" nicht gilt); die **Zählung** ändert sich nur,
+wenn die vom Commit geschriebene Datei das Suchmuster auch enthält.
+
+Das schließt die Form (c) der Rahmen-Tabelle nicht aus: sie bleibt erlaubt, wenn die
+**gemessene** Datei eine ist, die der Commit selbst anfasst. Verboten ist der Vorgänger-Rahmen über eine
+Messung, deren **Umfang** solche Dateien einschließt — dort zählt die Zeile des Commits
+mit, und der Zählerstand gilt für den Stand, an dem gemessen wurde.
+
+Beleg — gemessen in den Verifikationsrunden der drei Projekte, nicht in diesem Repo:
+
+- `open-accreditation` `c353313` (medium): der Marker trug eine **repo-weite** Grep-Zahl
+  („49 Zeilen-Treffer in 22 Dateien") unter dem Rahmen „gemessen am Vorgänger `a4551c8`,
+  seitdem unverändert". Der Commit schrieb `AGENTS.todo.md` **und** `AGENTS.skills.md` — und
+  **diese Dateien enthalten das Suchmuster selbst**. Dieselbe Messung (`git grep -in
+  baseline <stand> -- .`) ergab am Stand `a4551c8` **49** Zeilen in **22** Dateien und am
+  committeten Stand `c353313` **54** Zeilen in **22** Dateien (Verteilung **12/11/5/26**
+  statt **10/9/3/27**; die Gruppen sind `items-baseline` / `$baseline` /
+  `baseline-browser-mapping` / Rest, nach dem Marker-Stand `2da0404:AGENTS.skills.md:43` des
+  Projekts). Die Board-Messung unter demselben Rahmen (`git grep -inE
+  '\bowner\b|\bticket\b' <stand> -- AGENTS.todo.md`) ergab am Stand `a4551c8` **4** und
+  am Stand `c353313` **15**. Der Rahmen war doppelt falsch: die Datei war verändert (also
+  kein „seitdem unverändert"), und der Wert galt für den Vorgänger, nicht für den Stand,
+  den der Commit festschreibt.
+- `opencode-pwa` `ddd15a4` (medium): „die **einzigen** Fundstellen seither" — im Board **2**
+  an den Ständen `45cb323`, `c86138b` und `ddd15a4` und **0** am Vorgänger `c737d17`, im
+  Marker **3** an denselben drei Ständen; an **keinem** Stand der Serie war „nur eine"
+  wahr. Der Fehltreffer war exakt die Zeile mit dem Suchkommando, die der Commit selbst
+  geschrieben hat (`ddd15a4:AGENTS.skills.md:176`).
+- `LuminaRust` `51c430a` (low): `git grep -n ui-review <stand> -- '*.md'` → am Stand
+  `e744f8b` **5** Zeilen in **2** Dateien, am direkten Vorgänger `0cf154d` (= `51c430a^`)
+  **6** in **2**, am committeten Stand `51c430a` **6** in **2**. Die **Dateimenge** war an
+  allen drei Ständen **2** — über den Vorgänger vergleichbar, die Zeilenzahl nicht. Der
+  Verifier hielt dort ausdrücklich fest, dass diese Klausel **kein** Upstream-Gegenstück hat,
+  weil upstream sie noch nicht trug — sie trägt sie jetzt.
+
+### Die Aussage über einen Zeitpunkt
+
+**Regel:** Eine Aussage darüber, **wann** etwas galt, nennt den Stand, **zu dem** sie gilt
+(SHA **und** Messzeitpunkt — der **Zeitpunkt der Messung**, nicht der Zeitstempel des
+genannten Stands), nicht eine relative Angabe („beim Commit dieses Markers", „heute",
+„seither") über einen Zustand, der sich bewegt. Ein `HEAD` ist per Definition
+beweglich; der **belegte** Stand nicht. Ist der Bezugszeitpunkt nicht belegbar — weil der
+Zustand inzwischen weitergegangen ist —, trägt die Aussage den **gemessenen** Stand mit
+Zeitpunkt.
+
+Beleg: `open-accreditation` `c353313` (medium): die Kopfnote behauptete, der HEAD des
+Skills-Repos habe „**beim Commit dieses Markers**" auf `0449b05` gestanden. Gemessen über
+die Reflog-Zeitachse des Skills-Repos stand er da bereits auf `7910ec6` — der Pull lag
+**31 Minuten** vor dem Commit (Commit-Zeit `c353313`: **2026-10-21 10:12:18 +0000**, in der
+Verifikationsrunde des Projekts gemessen). Die Aussage war **falsch** und widersprach dem
+unmittelbar folgenden **Satz desselben Absatzes** (nachgemessen in jener Verifikationsrunde:
+ein Blockzitat-Absatz mit **vier** Sätzen; der Widerspruch liegt zwischen **Satz 2 und
+Satz 3**).
+
+**Selbst gemessen in diesem Repo** (das Skills-Repo selbst), `git reflog --date=iso`:
+
+```
+7910ec6 HEAD@{2026-10-21 09:41:13 +0000}: pull --rebase: Fast-forward
+0449b05 HEAD@{2026-10-21 07:43:59 +0000}: commit: docs(build-verify): every number in the footer names what it measures
+```
+
+Der HEAD des Skills-Repos stand damit von **07:43:59** bis **09:41:13** auf `0449b05` und
+von **09:41:13** bis **12:37:35** auf `7910ec6` — das Fenster ist durch den nächsten
+Reflog-Eintrag (`e523df9`, **2026-10-21 12:37:35 +0000**) abgeschlossen, nicht offen. Der
+Marker-Commit `c353313` liegt in diesem Fenster und nennt einen überholten Stand.
+
+### Wie ein Projektmarker die Regel zitiert
+
+**Regel:** Ein Projektmarker, der die Regel anwendet, **referenziert** sie (Pfad **im
+Skill** + Anker, **ohne** Zeilennummer — die driftet) statt sie zu **kopieren**. Eine
+**eigene Ergänzung** des Projekts (etwa eine projektspezifische Zusatzregel) ist erlaubt,
+wenn sie als **lokale Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht
+ersetzt.
+
+Die Zitierstelle ist die Zeichenkette `Bezugsrahmen-Regel` in `skills-marker/SKILL.md`:
+`skills-marker/SKILL.md` → „Bezugsrahmen-Regel". Sie ist ein **Anker**, keine Zeilennummer
+— Zeilen und Überschriften dürfen sich ändern, die Zeichenkette bleibt; wer sie entfernt,
+bricht die Zitierstellen der Projekte. Der Pfad nennt **Skill-ID + Datei**, nicht einen Pfad
+zum lokalen Clone: der Marker nennt keinen Pfad zum Skills-Repo (§1 des `SKILL.md`), und
+eine Maschine ohne Clone des Skills-Repos hat trotzdem den Anker.
+
+Ein Marker darf die Regel deshalb nicht als eigenen Wortlaut führen. Die Vorlage trägt
+deshalb den **Verweis** und die **Fälle**; die drei Regeln stehen dort als **Kurzform zur
+Erinnerung**, mit dem Vorrang der Zitierstelle: weicht die Kurzform ab, gilt die
+Zitierstelle. Die drei Formen stehen an der Zitierstelle, und ein Projekt, das dorthin geht,
+trifft den dritten Fall nicht mehr blind. Die Vorlage nennt zusätzlich die Markierung einer
+eigenen Ergänzung (`**Lokale Ergänzung:** …`): daran sieht der Leser, dass dort eine
+Projektregel steht und nicht die gemeinsame.
+
+Beleg:
+
+- `LuminaRust` `9a4bcd9`: der Marker führt die Regel als **lokale Kopie** im Abschnitt
+  „Fortschreiben" plus einen Herkunftsvermerk („sie steht **nur hier** — der committete
+  Stand `7910ec6` führt sie nicht"). Mit `e523df9` trägt das geteilte Instrument die Regel;
+  die **Bedingung** des Vermerks („kommt sie dort auf, wird sie hier durch einen **Verweis**
+  ersetzt") ist damit eingetreten — der Verifier nennt die Ablösung **fällig**: *Verweis auf
+  die Upstream-Regel **+ Beibehaltung** des lokalen Zusatzes*. Nachgemessen in jener Runde:
+  ohne Upstream-Gegenstück ist der **erste** Satz der Kopie
+  (`9a4bcd9:AGENTS.skills.md:206-209`) — der zweite, der Vergleich über den Vorgänger, ist
+  durch die neue Klausel abgedeckt.
+  **Selbst gemessen in diesem Repo:** `git show 7910ec6:.agents/skills/skills-marker/SKILL.md`
+  trägt den Regelsatz **0-mal**, `git show e523df9:...` **1-mal** — die Bedingung des
+  Vermerks ist erfüllt.
+- `opencode-pwa` `473de80`: der Marker trägt einen **neuen Kopf** „Messkonvention" mit
+  `<stand>`-Definition und einer Kurzfassung der Formen (a)/(b) — wieder eine Kopie. Der
+  Verifier: die Kopie bricht **keine** vorhandene Konvention, verliert aber das Etikett, an
+  dem das Geschwisterprojekt die Kopierbarkeit erkennt.
+
 ## Wo steht was
 
 | Aussage | Datei |
@@ -281,8 +414,9 @@ nicht mehr — es ist der Zähler, der gleich bleibt, nicht der Baum. Wer ein La
 | Was **dieses Projekt** gelten muss (Kommandos, Schwellen, Gates) | `<projekt>/AGENTS.md` |
 | Was als offene Position noch umzusetzen ist (Log, kein Auftrag) | `<projekt>/AGENTS.todo.md` |
 | Wie dieses Format aussieht und wie man es fortschreibt | `<skills-repo>/.agents/skills/skills-marker/SKILL.md` |
+| Wie eine Aussage über einen Stand zu belegen ist (Bezugsrahmen, Zitierform) | `<skills-repo>/.agents/skills/skills-marker/references/notes.md` § „Der Bezugsrahmen" |
 
-Die vier Aussagen überschneiden sich nicht. Der Verwechslungsfehler, den der Marker
+Die fünf Aussagen überschneiden sich nicht. Der Verwechslungsfehler, den der Marker
 verhindern soll, ist genau dieser: eine **globale** Skill-Regel als **projektlokale**
 Pflicht zu behandeln (⇒ offene Position, die keiner braucht) oder eine echte
 Projektpflicht zu übergehen, weil „die Skill sagt das ja sowieso" (⇒ stille Lücke).
@@ -294,3 +428,13 @@ Genau eine `AGENTS.skills.md` im Repo-Root. Monorepos mit mehreren Packages füh
 die auseinanderlaufen, und die Frage „welcher gilt?" ist teurer als die Arbeit, die sie
 einsparen — zumal beide Dateien von Hand aktualisiert werden müssten und der
 zuverlässigere davon still veraltet.
+
+## Zwei Abläufe nach demselben Pull
+
+(Kurzform: `SKILL.md` §5.) `agent-config` §8 = Konfiguration (Sache der Maschine),
+`skills-marker` = Projekt-Anwendung (Sache des Projekts). Beide laufen nach demselben Pull,
+sie treffen verschiedene Dateien, und
+**keiner ersetzt den anderen**: die eingebettete Kopie einer Regel im globalen `AGENTS.md` ist
+nicht die Zeile im Marker, und die Zeile im Marker ist nicht die eingebettete Kopie. Was
+dieselbe Session noch tun muss, damit **diese Maschine** wieder stimmt — geänderte Regel in
+die eingebettete Kopie, MCP, neue Skill-Verdrahtung — steht in `agent-config` §8.

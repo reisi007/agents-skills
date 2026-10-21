@@ -63,20 +63,30 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    - trifft zu, ist nicht drin → offene Position: Eintrag in `AGENTS.todo.md` anlegen
    - trifft nicht zu (das Projekt hat das nicht) → `angewendet: nein` + kurzer Grund
 4. Offene Positionen nach `AGENTS.todo.md`; angewendete Zeilen mit `Datei:Zeile` belegen.
-   Jede Aussage über einen Stand nennt den Stand, in dem sie gemessen wurde:
-   - was der Commit selbst festschreibt (Marker, Board, geänderte Dateien):
-     „am committeten Stand dieses Commits" / "at the committed state of this commit";
-   - eine Fremddatei, die der Commit nicht anfasst: „gemessen am Vorgänger `<sha>`, seitdem
-     unverändert" / "measured at the predecessor `<sha>`, unchanged since" — belegt mit
-     `git diff --stat <messstand>..<stand> -- <datei>` (ohne Ausgabe). Beide Enden sind
-     Platzhalter: `<stand>` ist der committete Stand dieses Commits, `<messstand>` der Stand,
-     an dem gemessen wurde. Gemessen wird mit `git show <messstand>:AGENTS.todo.md | …`,
-     `git grep … <messstand> -- …`. `HEAD` ist als Endpunkt falsch — es wandert;
-   - eine Datei, die sich seit der Messung geändert hat: „gemessen am Stand `<sha>`" /
-     "measured at the state `<sha>`" — der Zählerstand gilt für den genannten Stand, ohne
-     Unverändertheitsbehauptung; `git diff --stat <messstand>..<stand> -- <datei>` ist hier
-     **nicht** leer — nachmessen, statt die änderung zu leugnen. Das gilt auch für eine Datei,
-     die dieser Commit selbst anfasst.
+   Bezugsrahmen — die gemeinsame Regel, **zitiert statt kopiert**: `skills-marker/SKILL.md` →
+   „Bezugsrahmen-Regel" (Skill-ID + Datei + Anker, **ohne Zeilennummer** — die driftet, der
+   Anker bleibt); Wortlaut, Belege und Fälle: `skills-marker/references/notes.md`
+   § „Der Bezugsrahmen". Diese Liste nennt die **Fälle**, nicht die Fassung — steht eine Form
+   nicht an der Zitierstelle, ist sie hier falsch:
+   - (a) was der Commit selbst festschreibt (Marker, Board, geänderte Dateien) / what the
+     commit fixes itself;
+   - (b) eine Fremddatei, die der Commit nicht anfasst / a foreign file the commit does not
+     touch;
+   - (c) eine Datei, die sich seit der Messung geändert hat / a file that changed since the
+     measurement.
+   Drei Regeln trägt die Zitierstelle — hier als **Kurzform zur Erinnerung; die Fassung steht
+   dort, und weicht sie ab, gilt die Zitierstelle**:
+   - eine Messung, deren Umfang der Commit selbst schreibt, trägt **keinen** Vorgänger-Rahmen
+     — die Zeile mit dem Suchkommando zählt mit: nur der Wert am committeten Stand, oder
+     alle Werte mit ihrem Stand, oder über den Vorgänger nur der Vergleich dessen, was
+     **gleich** bleibt (z. B. die Dateimenge);
+   - eine Aussage über **wann** etwas galt, nennt den Stand, zu dem es galt (SHA **und**
+     Messzeitpunkt — der Zeitpunkt der Messung, nicht der des genannten Stands); ist der
+     Bezugszeitpunkt nicht belegbar, nennt sie den gemessenen Stand mit Zeitpunkt;
+   - ein Marker **zitiert** die Regel statt sie zu kopieren (Pfad im Skill + Anker, ohne
+     Zeilennummer); eine eigene Zusatzregel des Projekts ist erlaubt, wenn sie als **lokale
+     Ergänzung** gekennzeichnet ist und die gemeinsame Regel nicht ersetzt:
+     **Lokale Ergänzung:** <was in diesem Projekt zusätzlich gilt>
    Der Cursor `agents-skills-consumed` nennt das Skills-Repo — er ist kein Rahmen.
 5. Erst wenn für **jeden** Skill aus der Range eine Zeile steht:
    `agents-skills-consumed: $(git -C <skills-repo> rev-parse --short HEAD)`,
