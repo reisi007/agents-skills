@@ -363,8 +363,8 @@ Stand nennt, führt beim Nachlesen zur falschen Zeile: die Fehlerform steht eine
 davor.)
 
 - `open-accreditation`: der **Fehlerstand** ist der Marker-Stand `2da0404:AGENTS.skills.md:43`
-  — dort trug der Marker die **repo-weite** Grep-Zahl („**49** Zeilen-Treffer in **22** Dateien")
-  unter dem Rahmen „Gemessen am Vorgänger `a4551c8` (seitdem unverändert)". Der Commit
+  — dort trug der Marker die **repo-weite** Grep-Zahl („**49** Zeilen-Treffer in **22** Dateien […]")
+  unter dem Rahmen „Gemessen am Vorgänger `a4551c8` (seitdem unverändert) […]". Der Commit
   `2da0404` schrieb `AGENTS.todo.md` **und** `AGENTS.skills.md` — und **diese Dateien
   enthalten das Suchmuster selbst**. Dieselbe Messung (`git grep -in baseline <stand> -- .`)
   ergab am Stand `a4551c8` **49** Zeilen in **22** Dateien und am Stand `2da0404` **54**
@@ -379,12 +379,13 @@ davor.)
   am Stand `a4551c8` **4** und am Stand `2da0404` **15**. Der Rahmen war doppelt falsch: die
   Datei war verändert (also kein „seitdem unverändert"), und der Wert galt für den Vorgänger,
   nicht für den Stand, den der Commit festschreibt. **Behoben in `c353313`** (Befund N1,
-  medium) — dort steht bereits die richtige Form („54 … in 22 Dateien am committeten Stand
-  dieses Commits — dieser Wert kann **keinen** Vorgänger-Rahmen tragen").
+  medium) — dort steht bereits die richtige Form („sind es **54** Zeilen-Treffer in **22**
+  Dateien am committeten Stand dieses Commits — dieser Wert kann **keinen** Vorgänger-Rahmen
+  tragen, weil die Doku Teil […]").
 - `opencode-pwa`: der **Fehlerstand** ist der Marker-Stand `c86138b:AGENTS.skills.md:177`
   — eine gleichlautende Aussage steht in `45cb323:AGENTS.skills.md:167` (dort „die einzigen
-  Fundstellen **nach diesem Fortschreiben**"), die Zeile 177 desselben Stands trägt einen
-  anderen Satz. Am Fehlerstand lautet der Wortlaut „die einzigen Fundstellen seither".
+  Fundstellen nach diesem Fortschreiben […]"), die Zeile 177 desselben Stands trägt einen
+  anderen Satz. Am Fehlerstand lautet der Wortlaut „die einzigen Fundstellen seither […]".
   Gemessen mit
   dem Suchmuster `W3` an diesem Stand: im Marker **3** Zeilen (`grep -c` zählt **Zeilen**;
   `grep -o … | wc -l` zählt **4** Occurrences), im Board **2** Zeilen, am Vorgänger `c737d17`
@@ -463,7 +464,7 @@ Beleg:
 
 - `LuminaRust` `9a4bcd9`: der Marker führt die Regel als **lokale Kopie** im Abschnitt
   „Fortschreiben" plus einen Herkunftsvermerk („sie steht **nur hier** — der committete
-  Stand `7910ec6` führt sie nicht"). Mit `e523df9` trägt das geteilte Instrument die Regel;
+  Stand des Skills-Repos (`7910ec6`) führt sie nicht […]"). Mit `e523df9` trägt das geteilte Instrument die Regel;
   die **Bedingung** des Vermerks („kommt sie dort auf, wird sie hier durch einen **Verweis**
   ersetzt") ist damit eingetreten — der Verifier nennt die Ablösung **fällig**: *Verweis auf
   die Upstream-Regel **+ Beibehaltung** des lokalen Zusatzes*. Nachgemessen in jener Runde:
@@ -475,7 +476,8 @@ Beleg:
   7910ec6:.agents/skills/skills-marker/SKILL.md` **0-mal**, in `git show e523df9:...`
   **1-mal** — die Bedingung des Vermerks ist erfüllt. Der **Anker** `Bezugsrahmen-Regel`
   steht an **beiden** Ständen **0-mal**; er kam mit `65fbecc` dazu (siehe den Abschnitt „Ein
-  Verweis trägt nur, wenn der Cursor den Stand deckt" weiter unten).
+  Verweis trägt nur, wenn der Cursor den Stand deckt, in dem die Zitierstelle existiert" weiter
+  unten).
 - `opencode-pwa` `473de80`: der Marker trägt einen **neuen Kopf** „Messkonvention" mit
   `<stand>`-Definition und einer Kurzfassung der Formen (a)/(b) — wieder eine Kopie. Der
   Verifier: die Kopie bricht **keine** vorhandene Konvention, verliert aber das Etikett, an
@@ -527,7 +529,7 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
 
 - `opencode-pwa`, Marker-Stand `b7c318a:AGENTS.skills.md:281-283`: „in der Marker-Serie
   (`docs(skills):`/`docs(agents):` — die Commits `1f73917`, `4507c4a`, `73c032f`, `c737d17`,
-  `45cb323`, `c86138b` **und dieser**) haben **zwei** einen deutschen Body […]". Die **Handliste**
+  `45cb323`, `c86138b` und dieser) haben **zwei** einen deutschen Body […]". Die **Handliste**
   nennt **sechs** SHAs und den Platzhalter „und dieser"; die Serie hat **zehn** Commits (`git log
   --oneline --grep='^docs(skills):' --grep='^docs(agents):' b7c318a` → **10**), und „und dieser"
   ist ein **wanderndes** Element: bei jedem Commit fällt der Vorgänger heraus. Die Zahl „zwei"
@@ -553,8 +555,8 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
   Body spricht, tragen genau diese eine über `3ad1309`. Was `c353313` mit „three places and one
   place" genau gezählt hat, ist aus dem Body allein **nicht** rekonstruierbar.
 - **Im Instrument selbst**: die Formulierung „die drei Regeln stehen dort als **Kurzform zur
-  Erinnerung**"
-  in dieser Datei war nach dem Hinzufügen der vierten Regel eine **veraltete Zahl** über einer
+  Erinnerung** […]" in dieser Datei war nach dem Hinzufügen der vierten Regel eine **veraltete
+  Zahl** über einer
   gewachsenen Liste (am Stand `820c140` noch vorhanden — `git show 820c140:…/references/notes.md |
   grep "drei Regeln"` → Treffer —, behoben mit `37cefe2`); und die Verteilung „12/11/5/26" in
   `references/notes.md` (Stand `f7b8f9c`, Zeile 390) war **keine Partitionierung** der **54**
