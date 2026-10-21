@@ -36,7 +36,7 @@ The `+` line is optional and sits outside that order.
 ## References — open each when the flow reaches it
 
 - Briefing the verifier (Step 2) → [`references/verifier-prompt.md`](references/verifier-prompt.md): contract (incl. the gates rule), plus first-run and redo templates.
-- Redo commit after `CHANGES REQUIRED` (Step 3/5) → [`references/amend.md`](references/amend.md): amend-vs-new-commit table plus reflog recovery.
+- Redo commit after `CHANGES REQUIRED` (Step 3/5) → [`references/amend.md`](references/amend.md): amend-vs-new-commit table, the one exception (replace your own fresh pushed commit), plus reflog recovery.
 - Why-questions, traps, measured evidence → [`references/notes.md`](references/notes.md).
 
 ## Step 0 — pull before any real change

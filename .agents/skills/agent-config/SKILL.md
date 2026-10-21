@@ -174,6 +174,12 @@ unpushed:
 - once pushed, it is history: a new commit instead, because an amend changes the
   SHA and other projects record those SHAs as their `skills-marker` range
   (see the `skills-marker` skill);
+- the general flow allows one exception to "amend only unpushed": your own fresh
+  pushed commit, replaced with `--force-with-lease` when the remote head is
+  still exactly that commit and the replaced SHA is disclosed (conditions:
+  `build-verify` skill, `references/amend.md`). **This repo does not take it** —
+  its SHAs are other projects' `skills-marker` range, and a rewritten one leaves
+  a dangling cursor there;
 - if a force-push is ever unavoidable: `--force-with-lease`, never bare
   `--force` — it refuses to clobber remote state you haven't seen. That this
   repo is private/single-user is not the reason; the marker SHAs are;

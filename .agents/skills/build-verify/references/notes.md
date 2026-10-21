@@ -185,9 +185,11 @@ key delivers it) — here only their derivation, so the two don't drift apart.
 - **The repo-specific amend rule is gone.** `agent-config` §6 used to document
   amend + `--force-with-lease` as `agents-skills`' own style; since 2026-10-10
   separate commits are the default there too (the owner's correction: an amended
-  SHA breaks the `skills-marker` ranges other projects record). No repo
-  overrides the flow's commit rules any more. Amend stays what it always was:
-  the flow's redo path (Rule 6) and a fix to your own unpushed HEAD.
+  SHA breaks the `skills-marker` ranges other projects record). Amend is the
+  flow's redo path (Rule 6), a fix to your own unpushed HEAD, and — since
+  2026-10-21 — one exception for your own fresh pushed commit, under the
+  conditions in [`amend.md`](amend.md). A repo's own branch policy can still
+  forbid that exception: `agents-skills` does, for the reason above.
 - **The test is not "is it easy" but "is it clearly under the bar."** Two rounds
   for a cheap task cost less than a feature with a silent defect.
 
@@ -253,7 +255,7 @@ and Step 4 (push) directly.
 | A number from the dirty checkout presented as a statement about the commit | the footer reports a gate state, a task count or a line range that the commit does not have; the reader cannot tell what was measured | name what the number measures; measure the committed state with `git archive <sha>` into a temp directory |
 | `git add -A` in a shared tree | pulls in a **concurrently running** agent's work: evidenced by a commit with 14 files / 408 lines from `features/` that were not its own — content correct, message wrong, history misleading from then on | always explicit paths; `git show --stat` before the commit |
 | Only committing on `APPROVED` | the work state between rounds exists only in the working tree; every abort loses it | commit after **every** verify run, verdict irrelevant |
-| Amending although already pushed | `git push --force` on a read state overwrites foreign commits | `--force-with-lease`, and normally: don't amend in the first place |
+| Amending although already pushed | `git push --force` on a read state overwrites foreign commits | `--force-with-lease`, and normally: don't amend in the first place — the one exception (your own fresh commit, nothing on top of it, replaced SHA disclosed) is in [`amend.md`](amend.md) |
 | Commit from a wave of parallel tasks | `--amend` hits the wrong commit or fails; a `revert` then drags foreign work along | one commit per task |
 | Running two full suites in parallel | CPU oversubscription: test times bloat 3–5× (measured 14 → 56 ms), a reserve test tore a 10-s budget although it intrinsically costs ~563 ms — green with no meaning | **sequential** verification runs, even mixed ones (backend next to frontend) |
 | Treating a locally red, CI-green test as a code defect | three evidenced cases in `portal.reisinger.pictures` — environment, not defect (`Storage::fake` path, `E2E_CHECKOUT_LIMIT`, shard load) | check the environment first; don't invent a second hypothesis to fit the first |
