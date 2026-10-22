@@ -46,7 +46,7 @@ reasoning in its `AGENTS.md`). Do not bootstrap it there.
      tracked-able `.codegraph/.gitignore` (`*` + `!.gitignore`) that keeps all
      index artifacts out of git.
 2. Commit the ignore file so every clone stays clean:
-   `git add .codegraph/.gitignore && git commit -m "chore: codegraph index gitignore"`
+   `git add .codegraph/.gitignore && git commit -m "chore: codegraph index gitignore" -- .codegraph/.gitignore`
 3. Verify: `codegraph status` (Files/Nodes populated) and
    `codegraph explore "main"` returns source.
 
