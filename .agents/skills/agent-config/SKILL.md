@@ -183,7 +183,7 @@ unpushed:
 - if a force-push is ever unavoidable: `--force-with-lease`, never bare
   `--force` — it refuses to clobber remote state you haven't seen. That this
   repo is private/single-user is not the reason; the marker SHAs are;
-- never `git add -A`: explicit paths plus `git show --stat`.
+- never `git add -A`: explicit paths plus `git show --stat`; **in a tree with parallel sessions, commit with the paths** — `git commit -- <path>` takes only the named paths, a bare `git commit` takes the whole index and with it another session's staged work; leave nothing of yours staged (rule file, Rule 4).
 
 This section is **not** an exception to the build/verify flow's rules — the
 commit-per-task / push / watch-CI policy holds here unchanged. The `Verify:`

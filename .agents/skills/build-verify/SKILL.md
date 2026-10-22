@@ -89,7 +89,7 @@ A separate subagent verifies. First run passes `nach-verify: false`, a redo run
 ```sh
 git add <file1> <file2> …        # explicit paths, NEVER git add -A
 git show --stat                    # content check before the commit
-git commit -F - <<'MSG'
+git commit -F - -- <file1> <file2> <<'MSG'
 feat(pricing): add peak-window calculation for z.ai plans
 
 Verify: round 1 CHANGES REQUIRED (2 findings: 1 high, 1 medium)
@@ -102,6 +102,12 @@ optional scope); the `Verify:` footer logs the rounds. **One commit per task.**
 A number in the message that claims something about the commit or its gates names what it measures — state and scope.
 On `CHANGES REQUIRED`: fix, re-verify, then commit per
 [`references/amend.md`](references/amend.md).
+
+**In a tree where other sessions work the paths are not optional**:
+`git commit -- <path>` takes only the named paths, a bare `git commit` takes the
+whole index and with it another session's staged work; leave nothing of yours
+staged (rule file, Rule 4 — the measured case in
+[`references/notes.md`](references/notes.md)).
 
 ## Step 4 — push and watch CI
 

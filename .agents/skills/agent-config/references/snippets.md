@@ -49,8 +49,9 @@ stay untouched.
 ```sh
 cd ~/dev/agents-skills && git add <explicit path>... \
   && git show --stat \
-  && git commit -F - \
+  && git commit -F - -- <explicit path>... \
   && git push            # separate commits are the default
+                          # the paths are the mechanism in a shared tree
                           # amend only an unpushed HEAD: git commit --amend --no-edit
                           # a force-push, if ever unavoidable: --force-with-lease
 ```

@@ -32,6 +32,23 @@ taken there — rules stated here apply only through their counterpart there.
 - **One commit per task** — the reason lives under "Amend or new commit?"
   below. Committing two parallel tasks as one wave hits the
   wrong commit or fails; one task waiting for all others blocks the others.
+- **In a shared tree the paths are the mechanism, not a style.** A bare
+  `git commit` takes the **whole index** — and in a tree with parallel
+  sessions the index holds another session's staged work. Measured 2026-10-21
+  on the committed state of `LuminaRust` (`git show --numstat`, scope: the
+  file `AGENTS.skills.md`): the commit `a094cb8` (subject "docs(plan): falsche
+  CI-Praemisse im UX-Gap-Task korrigiert") carries a `skills-marker` advance
+  of **another** session — **+147/−151** lines (298 changed lines) — and
+  `5e35b50` (subject "chore(scripts): Werkzeug zum Erneut-Erzeugen der
+  generierten Doku-Bloecke") carries the next advance in the same file,
+  **+82/−29** (111 changed lines); both under a foreign subject and with the
+  footer "Verify: none (…, 0 Runden)". Content correct, history wrong.
+  `git commit -- <path>` takes only the named paths — their working-tree
+  content, the index ignored for them; `git add -A` is the same accident with
+  a wider radius. **Leave nothing staged**: staged and left lying is an
+  invitation to the next commit, and the next commit need not be yours.
+  **The duty is the committer's, not the neighbour's** — nobody can know who
+  commits next, so nobody hands over a loaded index.
 - **`--rebase` instead of merge**, because `main` is consolidated onto — no
   per-task branches.
 - **Verification runs sequential, never parallel** (Rule 8). CPU oversubscription
@@ -208,7 +225,11 @@ Moved to [`amend.md`](amend.md): the amend-vs-new-commit decision table and the
 reflog commands for the last round's delta. Rationale kept here: amend rewrites
 `HEAD` only, never an earlier commit — so two parallel
 tasks committed as one wave hit the wrong commit or fail, and one task waiting
-for all others blocks the others.
+for all others blocks the others. **The path-commit clause creates no amend
+obligation**: it binds *how* a commit is made (only the named paths, nothing
+left staged), not *when* one is made — rule 6's exception ([`amend.md`](amend.md),
+your own fresh pushed commit under `--force-with-lease`) stands **beside** the
+clause, not in it, and stays as it is.
 
 ## Verifier: what it must not do
 
@@ -254,6 +275,7 @@ and Step 4 (push) directly.
 | `git checkout <file>` during mutation testing | destroys the implementer's uncommitted work; no way back exists then | commit beforehand (Step 3, commit), a copy, or a documented `git stash` |
 | A number from the dirty checkout presented as a statement about the commit | the footer reports a gate state, a task count or a line range that the commit does not have; the reader cannot tell what was measured | name what the number measures; measure the committed state with `git archive <sha>` into a temp directory |
 | `git add -A` in a shared tree | pulls in a **concurrently running** agent's work: evidenced by a commit with 14 files / 408 lines from `features/` that were not its own — content correct, message wrong, history misleading from then on | always explicit paths; `git show --stat` before the commit |
+| A bare `git commit` in a shared tree | takes the **whole index**, so a staged file of another session rides along under your subject: measured 2026-10-21 on the committed state of `LuminaRust` — `a094cb8` and `5e35b50` each carry a foreign `skills-marker` advance in `AGENTS.skills.md` (298 and 111 changed lines, that file), content correct, history wrong | commit with `git commit -- <path>` (only the named paths) and leave nothing staged |
 | Only committing on `APPROVED` | the work state between rounds exists only in the working tree; every abort loses it | commit after **every** verify run, verdict irrelevant |
 | Amending although already pushed | `git push --force` on a read state overwrites foreign commits | `--force-with-lease`, and normally: don't amend in the first place — the one exception (your own fresh commit, nothing on top of it, replaced SHA disclosed) is in [`amend.md`](amend.md) |
 | Commit from a wave of parallel tasks | `--amend` hits the wrong commit or fails; a `revert` then drags foreign work along | one commit per task |
