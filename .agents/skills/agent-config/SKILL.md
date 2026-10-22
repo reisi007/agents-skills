@@ -184,6 +184,7 @@ unpushed:
   `--force` — it refuses to clobber remote state you haven't seen. That this
   repo is private/single-user is not the reason; the marker SHAs are;
 - never `git add -A`: explicit paths plus `git show --stat`; **in a tree with parallel sessions, commit with the paths** — `git commit -- <path>` takes only the named paths, a bare `git commit` takes the whole index and with it another session's staged work; leave nothing of yours staged (rule file, Rule 4).
+  The path-commit clause of rule 4 binds **every** session in a shared tree, and the responsibility is the **committer's**, not the neighbour's; no repo's branch policy overrides it.
 
 This section is **not** an exception to the build/verify flow's rules — the
 commit-per-task / push / watch-CI policy holds here unchanged. The `Verify:`

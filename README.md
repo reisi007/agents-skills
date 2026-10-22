@@ -78,7 +78,10 @@ see skill `agent-config`.
 # New skill
 mkdir -p .agents/skills/<id>/
 # SKILL.md with frontmatter (name + description), kebab-case ID = folder name
-git add -A && git commit && git push
+git add .agents/skills/<id>/
+git show --stat
+git commit -m "feat(skill): <id>" -- .agents/skills/<id>/
+git push
 ```
 
 No config change needed — the directory is already registered.

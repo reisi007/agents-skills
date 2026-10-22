@@ -106,7 +106,7 @@ On `CHANGES REQUIRED`: fix, re-verify, then commit per
 **In a tree where other sessions work the paths are not optional**:
 `git commit -- <path>` takes only the named paths, a bare `git commit` takes the
 whole index and with it another session's staged work; leave nothing of yours
-staged (rule file, Rule 4 — the measured case in
+staged. The path-commit clause of rule 4 binds **every** session in a shared tree, and the responsibility is the **committer's**, not the neighbour's; no repo's branch policy overrides it (rule file, Rule 4 — the measured case in
 [`references/notes.md`](references/notes.md)).
 
 ## Step 4 — push and watch CI
