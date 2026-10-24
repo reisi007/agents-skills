@@ -18,7 +18,7 @@ green in a given repo lives in that repo's `AGENTS.md`.**
 
 ```
 0  git pull --rebase          before any real change
-1  check commission (a TODO entry alone is NO commission) → log in AGENTS.todo.md
+1  check commission (an open-work entry alone is NO commission) → log in the open-work list (issues or AGENTS.todo.md)
 2  Kleinheit check → a) delegate (default)  b) OR do it yourself if all 4 criteria hold
 3  verify run by a separate subagent → APPROVED | CHANGES REQUIRED   (omitted for b)
 4  commit — ALWAYS, whatever the verdict says        one commit per task
@@ -52,7 +52,7 @@ git pull --rebase               # only on a clean tree
 
 | Role | Who | May |
 |---|---|---|
-| **Orchestrator** | main agent | **read** `AGENTS.md` / `AGENTS.todo.md`; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
+| **Orchestrator** | main agent | **read** `AGENTS.md` / the open-work list; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
 | **Implementer** | subagent | write code/tests, target files + full specification |
 | **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
 | **Milestone reviewer** | separate subagent (**optional**) | cross-feature coherence, E2E, regression scan at releases / every N features; **not per feature** |
@@ -62,7 +62,7 @@ git pull --rebase               # only on a clean tree
 Conventional Commit, push + CI, footer `Verify: none (Kleinheits-Ausnahme, 0
 rounds)`, self-checked with the repo `AGENTS.md`'s sub-minute commands.
 Otherwise: delegate, with target files and a full specification. No
-`AGENTS.todo.md` entry except for a real decision. Config with no repo (e.g.
+open-work-list entry except for a real decision. Config with no repo (e.g.
 `~/.config/opencode/opencode.jsonc`): no pull/commit/CI — reload via `touch`,
 check in a fresh session.
 
@@ -109,12 +109,13 @@ whole index and with it another session's staged work; leave nothing of yours
 staged. The path-commit clause of rule 4 binds **every** session in a shared tree, and the responsibility is the **committer's**, not the neighbour's; no repo's branch policy overrides it (rule file, Rule 4 — the measured case in
 [`references/notes.md`](references/notes.md)).
 
-## Step 4 — push and watch CI
+## Step 4 — push, open a PR, and watch CI
 
 ```sh
 git push
-gh run list -L 3                    # which runs started
-gh run watch <run-id> --exit-status # until green or red
+gh pr create                         # where the repository requires PRs
+gh pr checks --watch
+gh pr merge                           # merge through the queue only
 ```
 
 Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes

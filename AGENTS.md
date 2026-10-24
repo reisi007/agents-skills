@@ -7,14 +7,34 @@ exact ID). This file holds only what must apply while working **in this repo**.
 **Rules only, no decisions:** This file contains rules only — instructions that
 apply to any work in this repo. Durable decisions, rationale, measurements and
 history do not belong here but in `README.md`/`.agents/rules/`; open work goes to
-`AGENTS.todo.md`, settled matters to git history.
+GitHub Issues, settled matters to git history.
+
+## Open work — GitHub Issues
+
+Every actionable item is an issue: one issue per self-contained change, closed
+from its PR (`Closes #N`). Assign one `severity:*` label (`severity:critical`,
+`severity:high`, `severity:medium`, `severity:low` or `severity:info`) and an
+assignee. This repo has no file-based TODO log.
+
+## Branches, commits, pull requests
+
+Never commit directly to `main`; use a `<type>/<slug>` branch. One Conventional
+Commit per task, explicit paths, and `git show --stat`. PR titles are
+Conventional; the body names the issue and verification. The required check is
+`budget`. Merge only through the merge queue (`gh pr merge`): no `--admin` and
+no direct push.
+
+## Local gate
+
+Install `ratchet` from the ratchet-cli releases. Run `ratchet check`; render the
+table with `ratchet report --format md`.
 
 ## Commit convention
 
 One Conventional Commit per self-contained change (`feat(skill): …`) is the
-default; amend only while the commit is still **unpushed** (message wording, a
-forgotten file). `git add -A` is never used — explicit paths plus
-`git show --stat`.
+default; the merge queue squashes, so `main` carries one commit per PR. Amend
+only while the commit is still **unpushed** (message wording, a forgotten file).
+`git add -A` is never used — explicit paths plus `git show --stat`.
 
 ## Sprache
 

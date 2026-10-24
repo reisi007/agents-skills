@@ -5,7 +5,7 @@
 
   Diese Datei wird bei jedem `git pull` im Skills-Repo FORTGESCHRIEBEN, nicht
   abgearbeitet — sie ist ein Cursor, kein Archiv und kein Auftrag (dieselbe
-  Unterscheidung wie `AGENTS.todo.md`).
+  Unterscheidung wie bei der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue).
   Format und Ablauf: Skill `skills-marker` im Skills-Repo.
   Die HTML-Kommentare sind Arbeitsanleitung und fallen beim ersten Fortschreiben weg.
 -->
@@ -19,7 +19,7 @@ geprüft am: <YYYY-MM-DD>
   Eine Zeile je Skill aus `.agents/skills/` des Skills-Repos.
   `angewendet?`  = ja | nein
   `wo im Projekt`= `Datei:Zeile` als Beleg (leer bei "nein")
-  `offene Position` = Verweis auf den Eintrag in `AGENTS.todo.md` (leer, wenn nichts offen)
+  `offene Position` = Verweis auf das Issue bzw. den Eintrag in der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue) (leer, wenn nichts offen)
 
   "Angewendet" heißt: am Code dieses Projekts geprüft — nicht: die Doku gelesen.
 
@@ -60,9 +60,9 @@ geprüft werden musste. Dieser Abschnitt wird beim ersten Pull im Skills-Repo an
    sie eine Pflicht, Schwelle, Ausnahme, Konvention oder ein Kommando betrifft, das
    **hier** gilt:
    - trifft zu und ist drin → `angewendet: ja` + `Datei:Zeile`
-   - trifft zu, ist nicht drin → offene Position: Eintrag in `AGENTS.todo.md` anlegen
+   - trifft zu, ist nicht drin → offene Position: Verweis auf das Issue bzw. den Eintrag in der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue)
    - trifft nicht zu (das Projekt hat das nicht) → `angewendet: nein` + kurzer Grund
-4. Offene Positionen nach `AGENTS.todo.md`; angewendete Zeilen mit `Datei:Zeile` belegen.
+4. Offene Positionen mit Verweis auf das Issue bzw. den Eintrag in der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue); angewendete Zeilen mit `Datei:Zeile` belegen.
    Bezugsrahmen — die gemeinsame Regel, **zitiert statt kopiert**: `skills-marker/SKILL.md` →
    „Bezugsrahmen-Regel" (Skill-ID + Datei + Anker, **ohne Zeilennummer** — die driftet, der
    Anker bleibt); Wortlaut, Belege und Fälle: `skills-marker/references/notes.md`

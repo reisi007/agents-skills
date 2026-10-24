@@ -12,7 +12,7 @@ CLI tools work immediately and the index stays fresh:
 
 1. `codegraph init` → `.codegraph/` index + `.codegraph/.gitignore` (index stays out of git)
 2. `.githooks/pre-commit` + `core.hooksPath` → index refresh before every commit (fails open)
-3. `AGENTS.md` + `AGENTS.todo.md` → project conventions incl. build-agent rules
+3. `AGENTS.md` + open-work list → project conventions incl. build-agent rules
 4. `AGENTS.skills.md` → which state of the central skills repo this project consumes
 5. Skill registration → available in every project, not just the one holding it
 
@@ -68,7 +68,7 @@ reasoning in its `AGENTS.md`). Do not bootstrap it there.
    If post-hooks are ever needed (e.g. WSL2 without file watcher), write them as
    versioned files into `.githooks/` instead.
 
-### 2.4 Project conventions (AGENTS.md / AGENTS.todo.md)
+### 2.4 Project conventions (AGENTS.md / open-work list)
 
 - Create `AGENTS.md` — copy the structure of `portal.reisinger.pictures/AGENTS.md`
   (§1–§11) and adapt the module-specific sections. Keep the strict parts:
@@ -82,23 +82,27 @@ reasoning in its `AGENTS.md`). Do not bootstrap it there.
     safe patching (validate every search/replace before applying); zero
     pre-existing failures; max 3 fix attempts, then hand back to the user.
   - **Docs:** `features/` = permanent SOLL state (architecture, data models, API
-    contracts); `AGENTS.todo.md` = temporary tasks, review notes, session
-    tracking. Every feature needs actionable TODOs incl. test-writing TODOs.
+    contracts); prefer GitHub Issues when the remote has an issue tracker,
+    otherwise `AGENTS.todo.md` = temporary tasks, review notes, session
+    tracking. Every feature needs actionable issues (or TODOs) incl.
+    test-writing ones.
   - **E2E tagging:** every E2E test carries `{ tag: [...] }` — `@smoke` on the
     critical path, `@regression` before deploy, `@feature:<name>` for
     feature-specific selection.
   - **Build-agent rules (STRICT, established 2026-07-31, not to be bypassed):**
     the build agent is **orchestrator only**. It may read/edit only `AGENTS.md`
-    and `AGENTS.todo.md` (plus tiny typo/policy fixes in those files). Every
-    other file MUST be delegated to subagents — implementation goes to the
+    and the open-work list (GitHub Issues, or `AGENTS.todo.md` as fallback;
+    plus tiny typo/policy fixes in those files). Every other file MUST be
+    delegated to subagents — implementation goes to the
     `general` subagent (never to `build`). Delegate independent tasks in
     parallel when sensible; a **separate** subagent verifies each
     implementation (verifier ≠ implementer); visual/layout/screenshot checks you
     do yourself (the configured model is vision-capable) — re-read
     ambiguous or high-stakes images yourself; do not guess.
 
-- Create `AGENTS.todo.md` task board (temporary, header pattern: "Stand: <date>.
-  Nur offene TODOs.").
+- Create an open-work list: prefer GitHub Issues when the remote has a tracker;
+  otherwise create an `AGENTS.todo.md` task board (temporary, header pattern:
+  "Stand: <date>. Nur offene TODOs.").
 
 ### 2.5 Skills-Marker (AGENTS.skills.md)
 
