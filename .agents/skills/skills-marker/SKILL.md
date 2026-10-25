@@ -11,7 +11,8 @@ metadata:
 den Commit des Skills-Repos, **bis zu dem** es geprüft hat, und wann. Alles andere ist
 eine Zeile in der Tabelle darunter. Die Datei ist ein **Cursor, kein Archiv und kein
 Auftrag**: sie wird **nicht abgearbeitet**, sondern bei jedem `git pull` im Skills-Repo
-fortgeschrieben — dieselbe Unterscheidung, die für `AGENTS.todo.md` gilt.
+fortgeschrieben — dieselbe Unterscheidung wie bei der offenen Arbeitsliste
+(`AGENTS.todo.md` oder Issue).
 
 Der Nutzen: aus „lies den Diff und rate, was davon dieses Projekt betrifft" wird eine
 konkrete Liste — `git log <marker-sha>..HEAD` benennt jeden geänderten oder neuen Skill, und
@@ -99,11 +100,11 @@ geprüft werden **müssen**. Range immer **nach** dem Pull bilden (Fälle: `refe
 | Ergebnis | Eintrag im Marker |
 |---|---|
 | Trifft zu **und** ist drin | `angewendet: ja` \| `wo im Projekt` = stabile Referenz (Abschnitt/Überschrift oder Suchstring), Zeile nur Lesehilfe \| offene Position leer |
-| Trifft zu, ist aber nicht drin | `offene Position` = Verweis auf den Eintrag in `AGENTS.todo.md` |
+| Trifft zu, ist aber nicht drin | `offene Position` = Verweis auf das Issue bzw. den Eintrag in der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue) |
 | Trifft nicht zu | `angewendet: nein` \| kurzer Grund: „betrifft CI-Image, Repo hat keins" |
 
 Die zweite Zeile ist der wichtigste Fall: Neues, das nicht umgesetzt ist, wandert als
-**Log, kein Auftrag** nach `AGENTS.todo.md` — nie stillschweigend übersprungen, nie als
+**Log, kein Auftrag** in die offene Arbeitsliste (`AGENTS.todo.md` oder Issue) — nie stillschweigend übersprungen, nie als
 erledigt markiert.
 
 Erst wenn für **jeden** Skill aus der Range eine dieser drei Zeilen steht, wird der
@@ -138,7 +139,7 @@ gibt" — im Zweifel gewinnt **ja** mit offener Position, nicht **nein**.
 3. **Regel-Drift prüfen:** die eingebetteten Regeln in `~/.config/opencode/AGENTS.md` gegen ihre
    Quelle in `.agents/rules/*` prüfen — Drift ist eine geänderte **Pflicht** (`agent-config` §8).
 4. **Jeden Skill gegen das Projekt prüfen** (§4) → ja / nein + Grund.
-5. **Offene Positionen nach `AGENTS.todo.md`**, Belege als stabile Referenz, Zeile nur Lesehilfe.
+5. **Offene Positionen** mit Verweis auf das Issue bzw. den Eintrag in der offenen Arbeitsliste (`AGENTS.todo.md` oder Issue), Belege als stabile Referenz, Zeile nur Lesehilfe.
 6. **Marker fortschreiben**: `agents-skills-consumed` auf `git -C <skills-repo> rev-parse --short
    HEAD`, `geprüft am` auf heute, Abschnitte ersetzen — und **alle bestehenden Anker
    re-verifizieren**: der Marker akkumuliert, und Akkumulation verrottet.

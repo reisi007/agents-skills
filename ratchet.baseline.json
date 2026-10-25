@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "rules": {
+    "advertised-skills": {
+      "value": 2
+    },
+    "description-chars-max": {
+      "value": 484
+    },
+    "description-chars-total": {
+      "value": 689
+    }
+  }
+}

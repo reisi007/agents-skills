@@ -1,22 +1,15 @@
 #!/usr/bin/env node
-// Pins the context cost of the *advertised* skill catalog of this repo.
-// The descriptions of advertised skills sit in every session's system prompt,
-// so CI fails when one of the three metrics grows above its baseline value.
+// Counts the context cost of the advertised skill catalog; ratchet owns the gate.
 //
-// Usage: node scripts/skill-budget.mjs [--update]
-//   0  every metric <= its pinned value (a strictly lower value prints a hint)
-//   1  at least one metric is above its pinned value
-//   2  usage / parse / config error (broken skill, bad baseline, unknown flag)
+// Usage: node scripts/skill-budget.mjs <advertised-skills|description-chars-total|description-chars-max>
+// Prints one count; 2 means usage or malformed skill input.
 
-import { readdirSync, readFileSync, writeFileSync, appendFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SKILLS_DIR = join(ROOT, '.agents', 'skills');
-const BASELINE_REL = '.github/skill-budget.json';
-const BASELINE = join(ROOT, BASELINE_REL);
-const METRICS = ['activeSkills', 'totalDescriptionChars', 'maxDescriptionChars'];
 
 const fail = (msg) => {
   console.error(`skill-budget: ${msg}`);
@@ -116,75 +109,20 @@ function measure() {
   }
 
   const longest = advertised.reduce((a, b) => (b.chars > a.chars ? b : a), { id: null, chars: 0 });
-  return {
-    activeSkills: advertised.length,
-    totalDescriptionChars: advertised.reduce((sum, s) => sum + s.chars, 0),
-    maxDescriptionChars: longest.chars,
-    longest,
-    hiddenCount,
-  };
-}
-
-// --- baseline ----------------------------------------------------------------
-
-function readBaseline() {
-  let data;
-  try {
-    data = JSON.parse(readFileSync(BASELINE, 'utf8'));
-  } catch {
-    fail(`cannot read or parse ${BASELINE_REL}`);
-  }
-  for (const key of METRICS) {
-    if (!Number.isInteger(data[key])) fail(`${BASELINE_REL}: "${key}" must be an integer`);
-  }
-  return data;
+  return { advertised, longest, hiddenCount };
 }
 
 // --- main --------------------------------------------------------------------
 
 const args = process.argv.slice(2);
-const update = args.length === 1 && args[0] === '--update';
-if (args.length > 0 && !update) fail('usage: node scripts/skill-budget.mjs [--update]');
-
-const baseline = readBaseline();
-const actual = measure();
-
-if (update) {
-  const next = { note: typeof baseline.note === 'string' ? baseline.note : '' };
-  for (const key of METRICS) {
-    next[key] = actual[key];
-    if (baseline[key] !== actual[key]) console.log(`${key}: ${baseline[key]} → ${actual[key]}`);
-  }
-  writeFileSync(BASELINE, JSON.stringify(next, null, 2) + '\n');
-  console.log(`wrote ${BASELINE_REL} — commit this on purpose`);
-  process.exit(0);
+const counters = ['advertised-skills', 'description-chars-total', 'description-chars-max'];
+if (args.length !== 1 || !counters.includes(args[0])) {
+  fail(`usage: node scripts/skill-budget.mjs <${counters.join('|')}>`);
 }
-
-const over = METRICS.filter((key) => actual[key] > baseline[key]);
-const below = METRICS.filter((key) => actual[key] < baseline[key]);
-
-const out = ['### Skill budget', ''];
-out.push('| Metric | Pinned | Actual | Delta | Status |');
-out.push('| --- | --- | --- | --- | --- |');
-for (const key of METRICS) {
-  const delta = actual[key] - baseline[key];
-  out.push(`| ${key} | ${baseline[key]} | ${actual[key]} | ${delta > 0 ? '+' : ''}${delta} | ${delta > 0 ? 'OVER' : 'ok'} |`);
-}
-out.push(
-  '',
-  `Longest description: ${actual.longest.id ? `\`${actual.longest.id}\`` : 'none'} ` +
-    `(${actual.longest.chars} chars). Hidden skills excluded: ${actual.hiddenCount}.`,
-);
-if (over.length > 0) {
-  out.push('');
-  for (const key of over) out.push(`- ${key}: ${actual[key]} > ${baseline[key]} (pinned)`);
-  out.push(`- The baseline lives in \`${BASELINE_REL}\`; \`node scripts/skill-budget.mjs --update\` writes the current numbers as a deliberate commit.`);
-} else if (below.length > 0) {
-  out.push('', `- below budget (${below.join(', ')}): consider lowering the baseline in \`${BASELINE_REL}\`.`);
-}
-
-const block = out.join('\n') + '\n';
-process.stdout.write(block);
-if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, block);
-
-process.exit(over.length > 0 ? 1 : 0);
+const result = measure();
+const count = args[0] === 'advertised-skills'
+  ? result.advertised.length
+  : args[0] === 'description-chars-total'
+    ? result.advertised.reduce((sum, skill) => sum + skill.chars, 0)
+    : result.longest.chars;
+process.stdout.write(`${count}\n`);

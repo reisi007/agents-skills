@@ -95,7 +95,8 @@ als geprüft fest, wenn die Pflicht in der Kopie steht.
 
 (Kurzform: `SKILL.md` §4.) Die Auswahlregel („trifft zu" / „trifft nicht zu") ist selten mehr
 als ein Satz: eine gute Änderung **liefert ihren Geltungsbereich mit** — steht dort „in jedem Projekt"
-oder „in CI-Workflows mit …", ist die Antwort sofort klar. Bleibt der Geltungsbereich offen,
+oder „in CI-Workflows mit …", ist die Antwort sofort klar (Beispiele gemessen an `291497a`
+bzw. `65fbecc`; das aktuelle `SKILL.md` trägt keines von beiden). Bleibt der Geltungsbereich offen,
 gewinnt im Zweifel **ja** mit offener Position, nicht **nein**.
 
 ## Fallstrick: der Marker-SHA verschwindet
@@ -184,7 +185,7 @@ Jede Aussage im Marker, die einen Stand nennt, nennt **den Stand, in dem sie
 gemessen wurde**. Das ist die Pflicht aus der gemeinsamen Regel
 (`.agents/rules/build-verify.md`, Regel 5 am Stand `80664ab`): „**Every number in the
 message that claims something about the commit or its gates names what it measures** —
-the state it was measured in (working tree, committed state) and the scope it covers …"
+the state it was measured in (working tree, committed state) and the scope it covers […]"
 Eine Aussage ohne Rahmen ist unprüfbar: der nächste Pull liest sie und findet einen
 anderen Baum.
 
@@ -514,7 +515,7 @@ Beleg — gemessen in diesem Repo und in den beiden Projektmarkern (read-only):
 - Die Range `0449b05..65fbecc` berührt **zwei** Skills (`git log --oneline 0449b05..65fbecc --
   .agents/skills/skills-marker/ | wc -l` → **5**, `… -- .agents/skills/ratchet-gates/ | wc -l` →
   **1**): `skills-marker` und `ratchet-gates` (der Text stand in
-  `d7888cd:.agents/skills/ratchet-gates/references/cli.md:108`: „**No tag was pushed yet** …
+  `d7888cd:.agents/skills/ratchet-gates/references/cli.md:108`: „**No tag was pushed yet** […]
   build from source" — und wurde von `d5dc52f` entfernt → die Releases sind veröffentlicht).
   Ein Begehen dieser Range trifft also einen vom Projekt genutzten Skill — die Zeile im Marker
   muss daran nicht veralten, sie wird neu gemessen.

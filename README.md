@@ -11,6 +11,10 @@ project.
 
 ```
 agents-skills/
+├── ratchet.config.jsonc     ← skill-budget ratchet rules
+├── ratchet.baseline.json    ← machine-written ratchet baseline
+├── .github/ISSUE_TEMPLATE/  ← open-work issue forms
+├── .github/PULL_REQUEST_TEMPLATE.md  ← PR body: issue, verification, check
 ├── .agents/rules/            ← rule files; always-on only where inlined into an `AGENTS.md`
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
 │   └── build-verify.md       ← build/verify flow: non-negotiable core rules
@@ -44,16 +48,17 @@ Hidden skills (`opencode/autoinvoke: false`, e.g. `agent-config`,
 `codegraph-project-setup`) are not advertised in a session's system prompt —
 load them by exact ID.
 
-## CI — skill budget
+## CI — the skill budget (ratchet)
 
-CI pins the context cost of the **advertised** skills: `activeSkills` (2),
-`totalDescriptionChars` (689) and `maxDescriptionChars` (484, the longest single
-description in characters). The descriptions of advertised skills sit in every
-session's system prompt, so that cost must not grow silently — hidden skills
-(`opencode/autoinvoke: false`) are not counted. Run it locally with
-`node scripts/skill-budget.mjs`. Raising a value is a deliberate change:
-`node scripts/skill-budget.mjs --update` writes the current numbers into
-`.github/skill-budget.json`, which the commit then has to justify.
+Ratchet enforces three ceilings on advertised skills: count (2), total delivered
+description characters (689), and longest description (484). Hidden skills
+(`opencode/autoinvoke: false`) are excluded. Install the binary from the
+ratchet-cli releases, run `ratchet check` locally and `ratchet report
+--format md` for the table. `ratchet baseline update` pays a ceiling down;
+deliberate growth uses
+`ratchet baseline raise --rule <id> --value <n> --reason "<why>"`. The
+`ratchet.baseline.json` file is machine-written. The check runs on every PR;
+the ruleset also requires the branch to be up to date before the squash merge.
 
 ## Installation / registration (once per machine)
 
@@ -85,6 +90,10 @@ git push
 ```
 
 No config change needed — the directory is already registered.
+
+A new **hidden** skill costs nothing and needs no baseline move. A new
+**advertised** skill changes `advertised-skills` and both character budgets, so
+it needs a deliberate `ratchet baseline raise` with a reason in the same commit.
 
 Adding a **command** instead: create the template in `.agents/commands/<name>.md`
 (frontmatter `description`, body loads the skill by exact ID, `$ARGUMENTS` at the
@@ -123,6 +132,17 @@ Why the rules in `AGENTS.md` read the way they do — kept out of that file on p
 - **Markdown-only, no CodeGraph.** The `codegraph sync` hook was removed
   2026-10-08 because it warned on every commit while indexing nothing. CodeGraph
   stays a per-*code*-project tool.
+- **Ratchet owns the skill-budget baseline and direction; the script counts.**
+  The old script held both counting and baseline handling.
+- **GitHub Issues are the only open-work list.** A PR closes an issue; a file
+  cannot.
+- **PRs and the required check.** `budget` is required, squash-merging keeps
+  `main` linear, and direct pushes are not allowed. This repository is
+  user-owned, and GitHub offers no merge queue there: the ruleset's strict
+  up-to-date check is the substitute. `ratchet-cli` is an organization repo and
+  uses the queue.
+- **Severity labels follow the `ratchet-gates` vocabulary:** critical, high,
+  medium, low, info.
 
 ## Related
 

@@ -1,0 +1,47 @@
+// The gate of this repository: the context cost of the advertised skill
+// catalog.
+//
+// The engine owns the baseline, the direction, the monotonicity and the
+// report; `scripts/skill-budget.mjs` owns the counting.  Every rule is a
+// ceiling: the descriptions of the advertised skills sit in every session's
+// system prompt, so their cost may only shrink.  A deliberate growth is a
+// `ratchet baseline raise --rule <id> --value <n> --reason "<why>"` commit.
+[
+  {
+    "name": "agents-skills",
+    "tiers": {
+      // Three rules run in the only tier of this repository.  The floor keeps
+      // a clean checkout from passing vacuously if a rule is removed.
+      "fast": { "floor": 3 }
+    },
+    "rules": {
+      "advertised-skills": {
+        "class": "context cost of the advertised skill catalog",
+        "incident": "prevention: no recorded breach — the budget was pinned by the old script before this rule",
+        "unit": "advertised skills",
+        "direction": "ceiling",
+        "tier": "fast",
+        "description": "the counted scope is every directory under `.agents/skills/` that holds a `SKILL.md`; a skill whose frontmatter carries `metadata.opencode/autoinvoke: false` is hidden and does not count, but its frontmatter is still validated. The count is the number of advertised skills — each one puts its description into every session's system prompt",
+        "count": { "command": ["node", "scripts/skill-budget.mjs", "advertised-skills"] }
+      },
+      "description-chars-total": {
+        "class": "context cost of the advertised skill catalog",
+        "incident": "prevention: no recorded breach — the budget was pinned by the old script before this rule",
+        "unit": "characters",
+        "direction": "ceiling",
+        "tier": "fast",
+        "description": "the counted scope is the delivered description of every advertised skill: the frontmatter value after quotes and escapes are resolved, as the model receives it; hidden skills are excluded. The count is the sum over the advertised catalog",
+        "count": { "command": ["node", "scripts/skill-budget.mjs", "description-chars-total"] }
+      },
+      "description-chars-max": {
+        "class": "context cost of the advertised skill catalog",
+        "incident": "prevention: no recorded breach — the budget was pinned by the old script before this rule",
+        "unit": "characters",
+        "direction": "ceiling",
+        "tier": "fast",
+        "description": "the counted scope is the delivered description of every advertised skill; hidden skills are excluded. The count is the length of the longest single description, so one runaway description cannot hide behind the total",
+        "count": { "command": ["node", "scripts/skill-budget.mjs", "description-chars-max"] }
+      }
+    }
+  }
+]
