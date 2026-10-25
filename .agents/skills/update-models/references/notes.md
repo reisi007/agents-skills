@@ -45,9 +45,17 @@ only privacy signal that may still drive a decision is `privacy.validUntil`
   `model_removed` (old version) + `model_added` (new version) pair for the same
   family — that *is* the successor. Version tokens live in `name`
   (e.g. `<Family>-<oldver>` → `<Family>-<newver>`).
-- **Usage drift.** A `usage_changed` increase (e.g. `15→60`, `60→480`) lowers
-  the effective price — a good KEEP reason. A price increase means checking
-  siblings for a cheaper alternative.
+- **Usage is a budget, not consumption.** `usage` is the plan's monthly dollar
+  allowance *for one model* (`usage.go`); the effective price is list ×
+  `creditsMonthly / usage`. So a `usage_changed` increase (e.g. `15→60`, `60→480`)
+  lowers the effective price — a good KEEP reason. Measured 2026-10-25: a decision
+  run read DeepSeek V4.1 Flash's `usage.go = 80` as consumption and called it the
+  more expensive model; against GPT-6 Luna (`usage.go = 15`) the real effective
+  input price is **$0.0187 vs $0.0667** per MTok (Go, paid basis, off-peak) and
+  ~173k vs ~20k requests/month. The list prices ($0.15 vs $0.10) point the other
+  way — under a subscription, list price is the wrong ranking metric.
+- **Price drift.** A price increase means checking siblings for a cheaper
+  alternative.
 - **Staleness.** A role whose `// updated:` comment predates the latest
   relevant changelog entry is stale — call it out.
 
