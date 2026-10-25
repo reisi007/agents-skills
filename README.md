@@ -14,7 +14,7 @@ agents-skills/
 ├── ratchet.config.jsonc     ← skill-budget ratchet rules
 ├── ratchet.baseline.json    ← machine-written ratchet baseline
 ├── .github/ISSUE_TEMPLATE/  ← open-work issue forms
-├── .github/PULL_REQUEST_TEMPLATE.md  ← PR body: issue, verification, queue
+├── .github/PULL_REQUEST_TEMPLATE.md  ← PR body: issue, verification, check
 ├── .agents/rules/            ← rule files; always-on only where inlined into an `AGENTS.md`
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
 │   └── build-verify.md       ← build/verify flow: non-negotiable core rules
@@ -57,8 +57,8 @@ ratchet-cli releases, run `ratchet check` locally and `ratchet report
 --format md` for the table. `ratchet baseline update` pays a ceiling down;
 deliberate growth uses
 `ratchet baseline raise --rule <id> --value <n> --reason "<why>"`. The
-`ratchet.baseline.json` file is machine-written. The check runs on PRs and
-`merge_group` (the merge queue).
+`ratchet.baseline.json` file is machine-written. The check runs on every PR;
+the ruleset also requires the branch to be up to date before the squash merge.
 
 ## Installation / registration (once per machine)
 
@@ -136,8 +136,11 @@ Why the rules in `AGENTS.md` read the way they do — kept out of that file on p
   The old script held both counting and baseline handling.
 - **GitHub Issues are the only open-work list.** A PR closes an issue; a file
   cannot.
-- **PRs and merge queue.** `budget` is required; the queue squash-merges to a
-  linear `main`; direct pushes are not allowed.
+- **PRs and the required check.** `budget` is required, squash-merging keeps
+  `main` linear, and direct pushes are not allowed. This repository is
+  user-owned, and GitHub offers no merge queue there: the ruleset's strict
+  up-to-date check is the substitute. `ratchet-cli` is an organization repo and
+  uses the queue.
 - **Severity labels follow the `ratchet-gates` vocabulary:** critical, high,
   medium, low, info.
 

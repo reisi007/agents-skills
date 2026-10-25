@@ -21,8 +21,8 @@ assignee. This repo has no file-based TODO log.
 Never commit directly to `main`; use a `<type>/<slug>` branch. One Conventional
 Commit per task, explicit paths, and `git show --stat`. PR titles are
 Conventional; the body names the issue and verification. The required check is
-`budget`. Merge only through the merge queue (`gh pr merge`): no `--admin` and
-no direct push.
+`budget`, and the branch must be up to date before merging. Merge through a PR
+with `gh pr merge` — no `--admin`, no direct push.
 
 ## Local gate
 
@@ -32,7 +32,7 @@ table with `ratchet report --format md`.
 ## Commit convention
 
 One Conventional Commit per self-contained change (`feat(skill): …`) is the
-default; the merge queue squashes, so `main` carries one commit per PR. Amend
+default; the PR is squash-merged, so `main` carries one commit per PR. Amend
 only while the commit is still **unpushed** (message wording, a forgotten file).
 `git add -A` is never used — explicit paths plus `git show --stat`.
 

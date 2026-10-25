@@ -8,4 +8,4 @@ Closes #
 
 - [ ] `ratchet check`
 - [ ] `ratchet report --format md`
-- [ ] merged through the queue
+- [ ] merged after the `budget` check, with the branch up to date

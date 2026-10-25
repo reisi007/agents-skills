@@ -113,9 +113,9 @@ staged. The path-commit clause of rule 4 binds **every** session in a shared tre
 
 ```sh
 git push
-gh pr create                         # where the repository requires PRs
+gh pr create                        # where the repository requires PRs
 gh pr checks --watch
-gh pr merge                           # merge through the queue only
+gh pr merge                         # the repo's policy decides the merge
 ```
 
 Except when the user explicitly requested manual verification — then do not push, but keep watching CI if there is one. A red CI takes

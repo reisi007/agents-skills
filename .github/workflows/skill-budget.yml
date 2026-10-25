@@ -1,14 +1,13 @@
 name: Skill budget
 
 # Run always, no `paths` filter: this repo is tiny, and a path-filtered required
-# check would leave the merge group pending — see the
-# `github-ci-filters` skill.
+# check would stay pending on an unrelated PR — see the `github-ci-filters`
+# skill.
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  merge_group:
 
 permissions:
   contents: read
