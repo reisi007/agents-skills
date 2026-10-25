@@ -96,8 +96,12 @@ Apply the `model-preferences.md` rule (above); hard capability needs override.
 "not found in tracker". **3. Newer same-family version.** Group by `provider`, compare
 version tokens; strictly newer ⇒ **UPDATE** (strongest signal: a `model_removed` +
 `model_added` pair). No downgrades or cross-provider swaps unless asked. **4.
-Price/usage drift.** `usage_changed` increase → good **KEEP** reason; price increase →
-note it, check siblings. **5. Context.** Below `minUsableContext` with a same-family
+Price/usage drift.** `usage` is the plan's monthly **dollar allowance for that model**
+(`usage[plan.id]`, e.g. `usage.go`) — **higher is better**: effective price = list ×
+`creditsMonthly / usage` (basis `paid`: list × `priceMonthly / usage`). `usage_changed`
+increase → good **KEEP** reason; never read `usage` as consumption or "credits burned",
+and rank by **effective** price, not list price. Price increase → note it, check
+siblings. **5. Context.** Below `minUsableContext` with a same-family
 alternative meeting it → **UPDATE**. **6. New candidates.** Surface 1–3 unconfigured,
 preference-meeting models as "worth trying" — all gates apply. Cross-check CC for
 shared families. Inputs (config + `jq` recipe, preferences schema) and the full

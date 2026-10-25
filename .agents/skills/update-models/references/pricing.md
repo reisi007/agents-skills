@@ -50,8 +50,15 @@ naming it → discontinued: **REPLACE** (same `provider`, highest available vers
 removal date); absent without one → "not found in tracker". **3. Newer same-family
 version.** Group by `provider`, compare version tokens; strictly newer ⇒ **UPDATE**
 (strongest signal: a `model_removed` + `model_added` pair). No downgrades or
-cross-provider swaps unless asked. **4. Price/usage drift.** `usage_changed` increase →
-good **KEEP** reason; price increase → note it, check siblings. **5. Context.** Below
+cross-provider swaps unless asked. **4. Price/usage drift.** `usage` is the monthly
+**dollar allowance for that model** inside the plan (`usage.go`, `usage["go-plus"]`;
+`null` = unlimited) — **higher `usage` = lower effective price**. The math lives in the
+tracker, `ocgo-price-tracker/src/weighted.ts`: `multiplier = creditsMonthly / usage`
+(basis `full`), `priceMonthly / usage` (basis `paid`), `requestsPerMonth = usage /
+requestCost(list)`. A `usage_changed` increase → good **KEEP** reason; never read `usage`
+as consumption or "credits burned"; compare **effective** prices, never list prices — a
+subscription buys the allowance, not the list rate. Price increase → note it, check
+siblings. **5. Context.** Below
 `minUsableContext` with a same-family alternative meeting it → **UPDATE**. **6. New
 candidates.** Surface 1–3 unconfigured, preference-meeting models as "worth trying" —
 all gates apply. Cross-check CC for shared families.
