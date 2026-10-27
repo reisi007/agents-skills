@@ -18,7 +18,8 @@ green in a given repo lives in that repo's `AGENTS.md`.**
 
 ```
 0  git pull --rebase          before any real change
-1  check commission (an open-work entry alone is NO commission) → log in the open-work list (issues or AGENTS.todo.md)
+1  check commission (an open-work entry / scratch priority note alone is NO commission)
+   → log in the repo's documented open-work list (AGENTS.todo.md or issue tracker)
 2  Kleinheit check → a) delegate (default)  b) OR do it yourself if all 4 criteria hold
 3  verify run by a separate subagent → APPROVED | CHANGES REQUIRED   (omitted for b)
 4  commit — ALWAYS, whatever the verdict says        one commit per task
@@ -52,7 +53,7 @@ git pull --rebase               # only on a clean tree
 
 | Role | Who | May |
 |---|---|---|
-| **Orchestrator** | main agent | **read** `AGENTS.md` / the open-work list; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
+| **Orchestrator** | main agent | **read** `AGENTS.md` / the repo's open-work list and any priority note; may write a temporary priority note only under the policy below; always log real decisions in the repo's documented log; implement only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
 | **Implementer** | subagent | write code/tests, target files + full specification |
 | **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
 | **Milestone reviewer** | separate subagent (**optional**) | cross-feature coherence, E2E, regression scan at releases / every N features; **not per feature** |
@@ -65,6 +66,17 @@ Otherwise: delegate, with target files and a full specification. No
 open-work-list entry except for a real decision. Config with no repo (e.g.
 `~/.config/opencode/opencode.jsonc`): no pull/commit/CI — reload via `touch`,
 check in a fresh session.
+
+**Priorities: the repo's documented open-work list/tracker stays authoritative.**
+On explicit user request, and only where repo policy permits, the orchestrator
+may create and maintain one temporary priority note — IDs and order of existing
+tickets only, never copied descriptions, status, completion history or issue
+records. It is a planning aid, never a second backlog or **commission**. Prefer
+a location outside the working tree; use a git-ignored in-repo path only if
+explicitly permitted. Never stage or commit it; delete it once priorities are
+settled or the session ends. Repo `AGENTS.md` wins: if it forbids local notes,
+use its canonical tracker or the session plan; pointer-style `AGENTS.todo.md`
+stays a pointer.
 
 **The verifier is never the implementer of the same task** — fresh context is the
 whole point (contract in
