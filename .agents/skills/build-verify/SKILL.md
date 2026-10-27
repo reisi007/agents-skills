@@ -53,7 +53,7 @@ git pull --rebase               # only on a clean tree
 
 | Role | Who | May |
 |---|---|---|
-| **Orchestrator** | main agent | **read** `AGENTS.md` / the repo's open-work list and any priority note; may write a temporary priority note only under the policy below; always log real decisions, otherwise write only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
+| **Orchestrator** | main agent | **read** `AGENTS.md` / the repo's open-work list and any priority note; may write a temporary priority note only under the policy below; always log real decisions in the repo's documented log; implement only under the Kleinheits-Ausnahme. Delegate, have verified, commit |
 | **Implementer** | subagent | write code/tests, target files + full specification |
 | **Verifier** | **different** subagent | check the substance (diff vs. commission, invariants, blast radius); do **not** re-run green gates (four exceptions in the reference); report findings, **not** fix |
 | **Milestone reviewer** | separate subagent (**optional**) | cross-feature coherence, E2E, regression scan at releases / every N features; **not per feature** |
@@ -71,13 +71,12 @@ check in a fresh session.
 On explicit user request, and only where repo policy permits, the orchestrator
 may create and maintain one temporary priority note — IDs and order of existing
 tickets only, never copied descriptions, status, completion history or issue
-records. It is an ephemeral planning aid, never a second backlog and
-**never commission**. Prefer a location outside the repository working tree
-(e.g. the session temp directory); if the repo explicitly permits an in-repo
-note, use a git-ignored path. Never stage or commit it, and delete it once
-priorities are settled or the session ends. A repo's `AGENTS.md` wins: if it
-forbids local priority notes, use its canonical tracker or the session plan; a
-pointer-style `AGENTS.todo.md` stays a pointer.
+records. It is a planning aid, never a second backlog or **commission**. Prefer
+a location outside the working tree; use a git-ignored in-repo path only if
+explicitly permitted. Never stage or commit it; delete it once priorities are
+settled or the session ends. Repo `AGENTS.md` wins: if it forbids local notes,
+use its canonical tracker or the session plan; pointer-style `AGENTS.todo.md`
+stays a pointer.
 
 **The verifier is never the implementer of the same task** — fresh context is the
 whole point (contract in
