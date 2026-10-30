@@ -17,12 +17,12 @@ agents-skills/
 ├── .github/PULL_REQUEST_TEMPLATE.md  ← PR body: issue, verification, check
 ├── .agents/rules/            ← rule files; always-on only where inlined into an `AGENTS.md`
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
-│   └── build-verify.md       ← build/verify flow: non-negotiable core rules
+│   └── build-verify.md       ← push flow: pull, implement, commit, review the range, push
 ├── .agents/commands/        ← versioned slash-command templates the agent copies into `~/.config/opencode/commands/`
 ├── .agents/gates/           ← canonical agent-rule gates: `count.sh` + `ratchet.fragment.jsonc` for every project
 ├── .agents/skills/          ← Agent Skills spec structure (portable for OpenCode, Claude Code, …)
 │   ├── agent-config/        ← global setup: opencode.jsonc, MCP, skills registration
-│   ├── build-verify/        ← build/verify flow in detail: verifier, amend, commit schema
+│   ├── build-verify/        ← push flow in detail: range review, amend, commit schema
 │   ├── codegraph-project-setup/  ← bootstrap: codegraph init + pre-commit hook + AGENTS.md
 │   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
 │   ├── generated-docs/      ← documentation generated from a source of truth, checked for drift
