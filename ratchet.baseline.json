@@ -9,6 +9,24 @@
     },
     "description-chars-total": {
       "value": 689
+    },
+    "gates-untouched": {
+      "value": 0
+    },
+    "plan-status-line": {
+      "value": 0
+    },
+    "rule-file-max-lines": {
+      "value": 80
+    },
+    "rule-file-name": {
+      "value": 0
+    },
+    "rule-file-present": {
+      "value": 1
+    },
+    "unverified-commits": {
+      "value": 37
     }
   }
 }

@@ -7,12 +7,14 @@
 // system prompt, so their cost may only shrink.  A deliberate growth is a
 // `ratchet baseline raise --rule <id> --value <n> --reason "<why>"` commit.
 [
+  { "preset": "agent-rules" },
   {
     "name": "agents-skills",
     "tiers": {
-      // Three rules run in the only tier of this repository.  The floor keeps
+      // Nine rules run in the only tier of this repository: the six of the
+      // `agent-rules` preset and the three of the skill budget.  The floor keeps
       // a clean checkout from passing vacuously if a rule is removed.
-      "fast": { "floor": 3 }
+      "fast": { "floor": 9 }
     },
     "rules": {
       "advertised-skills": {

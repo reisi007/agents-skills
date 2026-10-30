@@ -19,6 +19,7 @@ agents-skills/
 │   ├── ask.md                ← questions: always via the question tool, answers suggested
 │   └── build-verify.md       ← build/verify flow: non-negotiable core rules
 ├── .agents/commands/        ← versioned slash-command templates the agent copies into `~/.config/opencode/commands/`
+├── .agents/gates/           ← canonical agent-rule gates: `count.sh` + `ratchet.fragment.jsonc` for every project
 ├── .agents/skills/          ← Agent Skills spec structure (portable for OpenCode, Claude Code, …)
 │   ├── agent-config/        ← global setup: opencode.jsonc, MCP, skills registration
 │   ├── build-verify/        ← build/verify flow in detail: verifier, amend, commit schema
@@ -32,6 +33,7 @@ agents-skills/
 │   ├── node-deps/           ← pnpm dependency policy: no pins, ranges + lockfile
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
+│   ├── project-gates/       ← rollout of the canonical agent-rule gates into a project (fragment, baseline, hook, CI)
 │   ├── react-i18n/          ← German React+Vite UI with Lingui; extract/compile gate
 │   ├── ratchet-gates/       ← quality gates as ratchets: baselines that only move one way, fast/slow tiers, docs generated from data
 │   ├── security-review/     ← commissioned security review: enumerate surfaces, prove findings, close all in waves
@@ -51,7 +53,8 @@ load them by exact ID.
 ## CI — the skill budget (ratchet)
 
 Ratchet enforces three ceilings on advertised skills: count (2), total delivered
-description characters (689), and longest description (484). Hidden skills
+description characters (689), and longest description (484). The same binary
+runs the canonical agent rules in every project (`project-gates`). Hidden skills
 (`opencode/autoinvoke: false`) are excluded. Install the binary from the
 ratchet-cli releases, run `ratchet check` locally and `ratchet report
 --format md` for the table. `ratchet baseline update` pays a ceiling down;
