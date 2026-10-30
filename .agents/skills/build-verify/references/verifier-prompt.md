@@ -1,6 +1,6 @@
 # Verifier prompt — contract and templates
 
-Open when briefing the verifier (flow Step 2: the verify run).
+Open when briefing the verifier (flow Step 4: the review of the unpushed range).
 
 ## The contract
 
@@ -13,7 +13,11 @@ Open when briefing the verifier (flow Step 2: the verify run).
   documented `git stash` with `stash pop` at the end. A violation is reported
   immediately and completely — including which statement can no longer be made
   afterwards.
-- **It checks the substance, not the gates.** The verifier reviews the diff
+- **It reviews the whole unpushed range, not the last commit.** The object is
+  `git diff origin/main...HEAD` plus `git log --oneline origin/main..HEAD`: a
+  single commit's diff cannot show that a later round undid an earlier fix, and
+  the series is what gets pushed.
+- **It checks the substance, not the gates.** The verifier reviews the range
   against the commission, the architecture/security posture, the storage/cost
   math, and the blast radius; a gate the implementer reported green **with
   quoted output** is trusted and **not re-run** (see "Gates" below).
@@ -58,10 +62,11 @@ Four cases where a second run — narrowed where that suffices — has real valu
 ```
 Project: <path>   Task: <what>
 nach-verify: false
+Range: git diff origin/main...HEAD  (list the commits you saw)
 Gates reported: <command — result, with the quoted output>
 
-Check: the diff against the commission; the gates only under one of the four
-exceptions above.
+Check: the range against the commission — completeness, smallest change, does it
+belong here; the gates only under one of the four exceptions above.
 Deliver: verdict APPROVED | CHANGES REQUIRED, findings with file:line + severity.
 Assert nothing you cannot evidence.
 ```
@@ -72,9 +77,11 @@ Assert nothing you cannot evidence.
 Project: <path>   Task: <what>
 nach-verify: true
 Previous round: <last verdict + finding list>
+Range: git diff origin/main...HEAD  (the amended range, not the delta since
+  the last review — a fix that moved the finding shows only there)
 Gates reported: <command — result, with the quoted output>
 
-Check: the diff against the commission; the gates only under one of the four
+Check: the range against the commission; the gates only under one of the four
 exceptions above.
 Deliver: verdict APPROVED | CHANGES REQUIRED, findings with file:line + severity,
 plus one status per prior finding — fixed / open — with the evidence you base it
