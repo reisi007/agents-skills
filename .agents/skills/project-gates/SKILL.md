@@ -97,6 +97,13 @@ Run from the repository root. Every step is idempotent.
   `"since": "YYYY-MM-DD"` once the project tags releases.
 - **`gates-untouched` counts what is not yet on `origin/main`.** On a clean
   `main` checkout it is 0 by design; it guards the unpushed range.
+- **`ratchet baseline update` is not a sync.** It moves every ceiling down to
+  the current count. A baseline that carries a `reason` is a **policy
+  constant** — a hard limit somebody commissioned — not a measurement; lowering
+  it silently weakens the rule. Read the baseline for `reason` fields before
+  updating. LuminaRust's 1000-line ceiling was lowered to 976 that way, and the
+  project's own guard (`global baseline must be 1000`) caught it in CI rather
+  than in review.
 - **The tier floor must cover the rules.** If the project sets
   `tiers.fast.floor`, it must be at least the number of rules that run there,
   or the tier can go green having run nothing.
