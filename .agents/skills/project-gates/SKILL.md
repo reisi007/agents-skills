@@ -53,9 +53,12 @@ Run from the repository root. Every step is idempotent.
    Then `git config core.hooksPath .githooks`. The hook path is **local** Git
    config — the repository cannot switch it on for anyone else, so this is a
    bootstrap step as much as a gate.
-5. **CI.** `uses: all-the-rest/ratchet-cli@v1` with `mode: validate`,
-   `tier: fast`, and `version:` pinned to the release the project was
-   migrated on. Mark the job a required check.
+5. **CI.** `uses: all-the-rest/ratchet-cli@<full commit sha>` with
+   `mode: validate`, `tier: fast`, and `version:` pinned to the release the
+   project was migrated on. The action itself is pinned by a **40-character
+   commit** — a moving `v1` tag fails every supply-chain policy that requires
+   immutable actions, and portal's security contract is one. Mark the job a
+   required check.
 6. **Rules in `AGENTS.md`.** Two sentences, both canonical:
 
    > Regeln dieser Ebene. Was nur ein Verzeichnis betrifft, gehört in die
