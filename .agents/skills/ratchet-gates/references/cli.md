@@ -121,8 +121,9 @@ platforms and a `checksums.txt`.
   `windows-x86_64`; `checksums.txt` covers every asset. Verify the checksum,
   then put the binary on the `PATH`.
 - **From source** — `cargo install --path .` in a clone of the repository.
-- **GitHub Action** — `uses: all-the-rest/ratchet-cli@v1` installs the binary
-  and verifies its SHA-256 against the release's `checksums.txt`. `mode:
+- **GitHub Action** — `uses: all-the-rest/ratchet-cli@<full 40-char commit sha>`
+  installs the binary (pin the release with the `version:` input, for example
+  `v0.6.2`) and verifies its SHA-256 against the release's `checksums.txt`. `mode:
   validate` runs `ratchet check` and fails the job on a failing gate; `mode:
   update` runs `ratchet baseline update` and **commits** the changed
   baseline. The update mode is opt-in — a bot that moves the baseline on
