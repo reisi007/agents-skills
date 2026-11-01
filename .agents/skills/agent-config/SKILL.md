@@ -160,8 +160,7 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
   then loads `codegraph-project-setup` and `permissions` **by
   exact ID** (both are hidden, §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
-  open-work list: GitHub Issues when the remote has a tracker, otherwise
-  `AGENTS.todo.md`) — load it **by exact ID** (hidden), as above. Do NOT create
+  GitHub Issues for open work) — load it **by exact ID** (hidden), as above. Do NOT create
   new skills in the project — add them to agents-skills instead.
 
 ## 6. Commit convention (agents-skills repo)
