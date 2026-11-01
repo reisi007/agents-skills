@@ -574,7 +574,7 @@ Beleg — vier Instanzen aus dem Feld, gemessen read-only:
 |---|---|
 | Welchen Stand dieses Projekt konsumiert hat | `<projekt>/AGENTS.skills.md` |
 | Was **dieses Projekt** gelten muss (Kommandos, Schwellen, Gates) | `<projekt>/AGENTS.md` |
-| Was als offene Position noch umzusetzen ist (Log, kein Auftrag) | `<projekt>/AGENTS.todo.md` |
+| Was als offene Position noch umzusetzen ist (Log, kein Auftrag) | GitHub-Issue im Projekt-Tracker |
 | Wie dieses Format aussieht und wie man es fortschreibt | `<skills-repo>/.agents/skills/skills-marker/SKILL.md` |
 | Wie eine Aussage über einen Stand zu belegen ist (Bezugsrahmen, Zitierform) | `<skills-repo>/.agents/skills/skills-marker/references/notes.md` § „Der Bezugsrahmen" |
 

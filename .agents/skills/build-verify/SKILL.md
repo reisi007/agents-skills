@@ -18,8 +18,8 @@ green in a given repo lives in that repo's `AGENTS.md`.**
 
 ```
 0  git pull --rebase          before any real change
-1  check commission (an open-work entry / scratch priority note alone is NO commission)
-   → log in the repo's documented open-work list (AGENTS.todo.md or issue tracker)
+1  check commission (an issue / scratch priority note alone is NO commission)
+   → log in the repo's issue tracker (GitHub Issues by default)
 2  implement — ≤5 files / ~80 diff lines: yourself; above: a builder subagent
    (trivia: all four criteria hold → no review, footer `none`)
 3  commit once — Conventional, explicit paths, `Verify:` footer written after the review
@@ -63,11 +63,11 @@ git pull --rebase               # only on a clean tree
 
 **A dirty tree is never cleared away automatically.** Ask before touching it.
 
-## Step 1 — commission, and the open-work log
+## Step 1 — commission, and the issue tracker
 
-An open-work entry, a scratch priority note, or a TODO line is **not** a
-commission. The orchestrator reads `AGENTS.md` and the repo's documented
-open-work list, logs real decisions there, and writes a temporary priority note
+An issue, a scratch priority note, or a TODO line is **not** a
+commission. The orchestrator reads `AGENTS.md` and the repo's issue tracker,
+logs real decisions there, and writes a temporary priority note
 only where repo policy permits (IDs and order of existing tickets only, never a
 second backlog, never staged, deleted when priorities settle).
 
