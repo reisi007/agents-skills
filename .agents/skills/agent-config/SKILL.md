@@ -156,7 +156,10 @@ Status commands: `codegraph status | sync | index | explore | upgrade`.
   Create **both** own slash commands from the repo templates under
   `.agents/commands/` into `~/.config/opencode/commands/` (§1): create the
   directory, copy the template contents — the **agent** does this as part of the
-  bring-up, the user does not, and **not** via symlink. Bootstrap work
+  bring-up, the user does not, and **not** via symlink. Give the models the
+  config actually selects a reduced-window alias — main agents (`plan`, `build`)
+  the larger cap, subagents the smaller one — per `update-models`,
+  `references/context-caps.md` (load it by exact ID). Bootstrap work
   then loads `codegraph-project-setup` and `permissions` **by
   exact ID** (both are hidden, §7).
 - **New project:** follow `codegraph-project-setup` (init + hook + AGENTS.md +
