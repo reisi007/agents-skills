@@ -1,6 +1,6 @@
 ---
 name: Update Models
-description: 'TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check twin + capability gate first); AND when the user wants to review or update their configured models ("which models should I update", "model recommendations", "check my models against the price trackers", "set all models to X", "alle Modelle auf X stellen") — the vision gate and the namespace rule apply to the user''s pick too. Cross-references the configured models with the live ocgo/cc price trackers (prices + changelog), recommends UPDATE vs KEEP, and fixes the namespace from `model-preferences.md`, never from the slug.'
+description: 'TRIGGER when the actual OpenCode model list is stale or a model is missing (e.g. a newly released free model never shows up), when asking for the models refresh/reload command, when distinguishing paid opencode-go/* vs free opencode/* model IDs — including which twin to pick when a model exists under both namespaces — or whenever a model ID is about to be written into opencode.jsonc (check twin + capability gate first); AND when the user wants to review or update their configured models ("which models should I update", "model recommendations", "check my models against the price trackers", "set all models to X", "alle Modelle auf X stellen") — the vision gate and the namespace rule apply to the user''s pick too. Cross-references the configured models with the live ocgo/cc price trackers (prices + changelog), recommends UPDATE vs KEEP, and fixes the namespace from `model-preferences.md`, never from the slug. Also when a model''s context window is far larger than the work needs and the models the config actually uses should carry a capped alias (main agents the larger cap, subagents the smaller one).'
 metadata:
   opencode/autoinvoke: false
 ---
@@ -125,12 +125,20 @@ configured):
 Then "Optional new candidates" — vision-capable only, one line each, every reason tied
 to a changelog event or current-price fact.
 
-## Reasoning variants — DISABLED by user decision (2026-10-02)
+## Variants disabled — a context cap is an alias, not a variant
 
 `variants: none`. **Do not propose, keep, or re-add any `variant` field**; a configured
 one is a REPLACE by deletion. `variant` is its own `AgentConfig` field, never a `#max`
 suffix; not every model has variants — check the `models` tool (`query` + `all: true`).
 History in `references/notes.md`.
+
+**Capping a window.** A window far larger than the work needs compacts late and lets
+the transcript drift. Cap it with an **alias** — `providers.<provider>.models.<id>-<cap>k`,
+same catalog `modelID`, only `limit.context` lower (recipe, inherited fields and the
+measured evidence: `references/context-caps.md`). Only for the models the config
+actually selects; main agents (`plan`, `build`) take the larger cap, subagents the
+smaller one, and a main agent that must also serve as a subagent keeps `mode: all`.
+Downward only — and never as a `#variant`.
 
 ## Applying changes (only when the user asks)
 
