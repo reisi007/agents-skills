@@ -27,6 +27,7 @@ agents-skills/
 │   ├── docker-test-image/  ← E2E/CI test image: environment-only, browser version from the lockfile
 │   ├── generated-docs/      ← documentation generated from a source of truth, checked for drift
 │   ├── ghcr-visibility/  ← Container package visibility and pull authorisation: private-package pull failure, too-late login, PATCH-404 trap, fork PRs
+│   ├── git-issue-agent/  ← trusted issue queue: provider-neutral triage, one-at-a-time implementation, before/after evidence gate, merge
 │   ├── github-ci-filters/   ← GitHub Actions `paths-ignore`: docs-only commits skip the pipeline
 │   ├── laravel/             ← Laravel PHP backend conventions (11+, PHP 8.4+, JWT cookie, PHPUnit, Pint)
 │   ├── update-models/       ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
@@ -132,9 +133,11 @@ Why the rules in `AGENTS.md` read the way they do — kept out of that file on p
   and the machine is a copy that rots. The failure it catches: a rule file whose
   changed *duty* was not re-inlined into an `AGENTS.md` (no config key delivers
   rule text, so it delivers nothing) and a new skill that does not resolve.
-- **Markdown-only, no CodeGraph.** The `codegraph sync` hook was removed
-  2026-10-08 because it warned on every commit while indexing nothing. CodeGraph
-  stays a per-*code*-project tool.
+- **Skills, docs and helper scripts, no CodeGraph.** The `codegraph sync` hook
+  was removed 2026-10-08 because it warned on every commit while indexing
+  nothing. Small versioned helper scripts and templates belong to their skill
+  (`.agents/skills/<id>/scripts/`, `templates/`); this is still not an
+  application-code repository. CodeGraph stays a per-*code*-project tool.
 - **Ratchet owns the skill-budget baseline and direction; the script counts.**
   The old script held both counting and baseline handling.
 - **GitHub Issues are the only open-work list.** A PR closes an issue; a file

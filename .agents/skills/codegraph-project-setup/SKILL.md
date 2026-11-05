@@ -16,10 +16,11 @@ CLI tools work immediately and the index stays fresh:
 4. `AGENTS.skills.md` → which state of the central skills repo this project consumes
 5. Skill registration → available in every project, not just the one holding it
 
-**Scope: code projects.** A markdown-only repo gains nothing from an index —
-the hook warns on every commit while indexing no symbols. `agents-skills` itself
-is exactly that case: no `.codegraph/`, no `.githooks/` (hook removed 2026-10-08,
-reasoning in its `AGENTS.md`). Do not bootstrap it there.
+**Scope: code projects.** A repo without application code gains nothing from an
+index — the hook warns on every commit while indexing no symbols. `agents-skills`
+itself is that case (skills, docs and versioned helper scripts): no `.codegraph/`,
+no `.githooks/` (hook removed 2026-10-08, reasoning in its `AGENTS.md`). Do not
+bootstrap it there.
 
 ## 1. Why per-project init is required
 
@@ -61,7 +62,7 @@ reasoning in its `AGENTS.md`). Do not bootstrap it there.
 4. **Design: fails open.** Missing CLI or sync error ⇒ warning to stderr, exit 0.
    Index freshness is a convenience, not a commit gate (matches codegraph's own
    hook design: "never block git"). Repos without a `.codegraph/` index (e.g.
-   doc/markdown-only repos) skip the sync silently via a `[ -d "$repo_root/.codegraph" ]` guard.
+   docs-only repos) skip the sync silently via a `[ -d "$repo_root/.codegraph" ]` guard.
 5. Do **not** use codegraph's built-in post-* hook installer
    (`installGitSyncHook` for `post-commit`/`post-merge`/`post-checkout`): it
    writes into `.git/hooks/`, which git **ignores** once `core.hooksPath` is set.
