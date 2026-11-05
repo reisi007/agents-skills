@@ -66,11 +66,11 @@ After pulling, run the drift check from the hidden skill `agent-config` (load it
 by exact ID) §8 (rule files vs. the text inlined into `AGENTS.md`, skills
 registration, command templates, MCP wiring, hooks) and re-apply setup locally.
 
-## Markdown-only — no CodeGraph here
+## Skills, docs and helper scripts — no CodeGraph here
 
-This repo holds skills and docs (markdown), no code: **no `.codegraph/` index and
-no pre-commit hook**. Do not re-add the hook or run `codegraph init` here.
-CodeGraph remains a per-*code*-project tool (`codegraph-project-setup` skill).
+This repo holds skills, docs and versioned helper scripts/templates, not
+application code: **no `.codegraph/` index and no pre-commit hook**. Do not
+re-add the hook or run `codegraph init` here; CodeGraph stays a per-*code*-project tool.
 
 ## What does not belong here
 
