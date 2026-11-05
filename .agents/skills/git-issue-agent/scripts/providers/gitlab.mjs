@@ -12,7 +12,7 @@ function encodePath(filePath) {
 export const gitlab = {
   name: 'gitlab',
   changeRequestTerm: 'MR',
-  switchAccount: () => slot('switchAccount'),
+  verifyAccount: () => slot('verifyAccount'),
   listIssues: () => slot('listIssues'),
   viewIssue: () => slot('viewIssue'),
   addLabel: () => slot('addLabel'),

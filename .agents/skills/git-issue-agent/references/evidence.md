@@ -1,11 +1,13 @@
 # Evidence — a human must be able to compare before and after
 
-The merge gate is human-verifiable, not "the agent says it works". Every issue
-gets one PR comment with **before** and **after** artifacts from the **same
-scenario**, plus the marker `<!-- git-issue-agent:evidence -->`.
+The merge gate requires a human-verifiable before/after record from the same
+scenario. The publisher binds an evidence manifest to the configured project,
+issue, PR number and exact source head SHA; the PR comment carries that evidence
+commit SHA in its machine marker.
 
 There is no opt-out: if no artifact can be produced, the issue is blocked, not
-merged on a promise.
+merged on a promise. Artifacts must be non-empty under both `before/` and
+`after/` directories.
 
 ## 1. Choose the evidence class
 
@@ -65,17 +67,23 @@ node "$SKILL_DIR/scripts/agent.mjs" evidence <owner/repo> <issue> --dir /tmp/ope
 The CLI:
 
 1. hashes the artifacts and builds an **orphan** commit (no worktree is touched),
-2. refuses secret-like names (`.env`, keys, tokens — override only with
-   `--allow-secret-like` after redaction), more than 50 MB per file and more
-   than 100 MB in total,
-3. force-pushes it to `agent-evidence-issue-<n>` (never merged),
-4. asks the provider adapter for the raw URL of each file and prints them
-   pinned to the evidence **commit SHA** (GitHub: `raw.githubusercontent.com`;
+2. rejects hidden/credential-like names, common key/token/password patterns in
+   content, malformed common image/video formats, more than 50 MB per file and
+   more than 100 MB total. There is no bypass flag,
+3. verifies `origin` identifies the configured GitHub project, then pushes to
+   that project's canonical HTTPS URL using the operator's normal Git credential
+   setup. It creates a unique branch; it never force-pushes,
+4. writes `manifest.json` containing the project, issue, PR, source head SHA and
+   each artifact's Git blob SHA/size, then prints raw URLs pinned to the
+   evidence **commit SHA** (GitHub: `raw.githubusercontent.com`;
    GitLab: `/-/raw/`), so a later branch refresh cannot alter a posted comment.
 
 Private-project URLs need the viewer's host session; the owner can still see
-them. If the artifacts contain customer data, replace it with a fixture and
-redact tokens **before** publishing.
+them. If artifacts contain customer data, replace it with a fixture and redact
+tokens **before** publishing. Pattern scanning is only a guardrail: binary
+screenshots/video may visibly contain secrets or customer data and must be
+inspected manually. Failed Git authentication is a hard error; this skill does
+not read credentials from `gh` or configure Git auth.
 
 ## 5. PR comment template
 
@@ -83,7 +91,7 @@ redact tokens **before** publishing.
 
 ```md
 ## Verification evidence
-<!-- git-issue-agent:evidence -->
+<!-- git-issue-agent:evidence head=<40-char-head-sha> issue=<n> pr=<n> commit=<40-char-evidence-sha> -->
 
 Scenario: <one sentence, from the issue>
 Reproduction: `<exact command / steps>`
@@ -108,7 +116,8 @@ evidence and must be labelled. Screenshots inline where possible.
 - "after" only, no baseline;
 - different scenarios, data or viewport between before and after;
 - a green test run with no failing baseline for a bug;
-- secret-like files (the publisher refuses them) or private customer data;
+- an evidence comment whose manifest does not match the PR's current head;
+- credential-like content (publisher refuses common patterns) or private customer data;
 - an artifact that does not show the issue's acceptance at all.
 
 Insufficient evidence is `CHANGES REQUIRED`, not a merge.
