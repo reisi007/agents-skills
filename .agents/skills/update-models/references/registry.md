@@ -49,9 +49,9 @@ configured `opencode-go/<slug>` into an `opencode/<slug>` twin.
   maintenance role) — so the namespace alone says nothing about price. Check the
   registry, not the prefix.
 
-Price is frequently identical (`effectiveInput: 0` either way). The reason for the
-current `opencode-go-only` decision is the user decision of 2026-10-18 (one model
-family, per-role models on `opencode-go/`), **not** ZDR and not rename durability. A
+Price is frequently identical across the twins. The reason for the current
+`opencode-go-only` decision is the user decision of 2026-10-18 (one model family,
+per-role models on `opencode-go/`), **not** ZDR and not rename durability. A
 slug ending in `-free` says nothing about namespace, price, or privacy; check the
 registry instead of inferring.
 

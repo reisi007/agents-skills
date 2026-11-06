@@ -98,10 +98,20 @@ version tokens; strictly newer ⇒ **UPDATE** (strongest signal: a `model_remove
 `model_added` pair). No downgrades or cross-provider swaps unless asked. **4.
 Price/usage drift.** `usage` is the plan's monthly **dollar allowance for that model**
 (`usage[plan.id]`, e.g. `usage.go`) — **higher is better**: effective price = list ×
-`creditsMonthly / usage` (basis `paid`: list × `priceMonthly / usage`). `usage_changed`
-increase → good **KEEP** reason; never read `usage` as consumption or "credits burned",
-and rank by **effective** price, not list price. Price increase → note it, check
-siblings. **5. Context.** Below `minUsableContext` with a same-family
+`priceMonthly / usage` (basis `paid`, what the subscription charges; the
+credit-value `full` basis is list × `creditsMonthly / usage`). A `usage_changed`
+increase is a good **KEEP** reason **for that plan**: the event's `plans[]` is
+plan-scoped, so quote only the active plan's `from`/`to` — a Go-Plus-only change is
+not a Go improvement. For multiple `tier` rows (e.g. Peak/Off-Peak), preserve and
+report the tier: map a known workload time through each model's rules, or use its
+matching row when the tier is known. If unknown/unmappable, use the highest paid
+effective input across tiers for input-price comparisons and the cap, labeled as a
+worst case—not actual price; use each other metric's own maximum. Never assume `Peak`
+is highest. Compare paid with paid (`full` is separate credit-value context), never
+read `usage` as consumption or "credits burned", and rank by **effective** price, not
+list price. See `references/pricing.md` for the complete tier procedure.
+Price increase → note it, check siblings. **5. Context.** Below `minUsableContext`
+with a same-family
 alternative meeting it → **UPDATE**. **6. New candidates.** Surface 1–3 unconfigured,
 preference-meeting models as "worth trying" — all gates apply. Cross-check CC for
 shared families. Inputs (config + `jq` recipe, preferences schema) and the full

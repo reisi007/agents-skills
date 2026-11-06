@@ -47,8 +47,11 @@ only privacy signal that may still drive a decision is `privacy.validUntil`
   (e.g. `<Family>-<oldver>` → `<Family>-<newver>`).
 - **Usage is a budget, not consumption.** `usage` is the plan's monthly dollar
   allowance *for one model* (`usage.go`); the effective price is list ×
-  `creditsMonthly / usage`. So a `usage_changed` increase (e.g. `15→60`, `60→480`)
-  lowers the effective price — a good KEEP reason. Measured 2026-10-25: a decision
+  `priceMonthly / usage` (paid basis; the credit-value full basis is list ×
+  `creditsMonthly / usage`). A `usage_changed` increase (e.g. `15→60`, `60→480`)
+  lowers the effective price — a good KEEP reason for that plan; read the
+  event's plan-scoped `plans[]` entry and never apply another plan's numbers.
+  Measured 2026-10-25: a decision
   run read DeepSeek V4.1 Flash's `usage.go = 80` as consumption and called it the
   more expensive model; against GPT-6 Luna (`usage.go = 15`) the real effective
   input price is **$0.0187 vs $0.0667** per MTok (Go, paid basis, off-peak) and
