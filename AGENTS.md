@@ -68,9 +68,9 @@ registration, command templates, MCP wiring, hooks) and re-apply setup locally.
 
 ## Skills, docs and helper scripts — no CodeGraph here
 
-This repo holds skills, docs and versioned helper scripts/templates, not
-application code: **no `.codegraph/` index and no pre-commit hook**. Do not
-re-add the hook or run `codegraph init` here; CodeGraph stays a per-*code*-project tool.
+This repo holds skills, docs, helpers and tests; tests live outside `.agents/`
+under `tests/<skill>/`. No `.codegraph/` index or pre-commit hook: do not add
+one or run `codegraph init` here; CodeGraph is for code projects.
 
 ## What does not belong here
 

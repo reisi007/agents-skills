@@ -271,6 +271,124 @@ export function writeState(state, configFile) {
   writeAtomic(statePath(configFile), state);
 }
 
+// Watcher cursor: separate from state.json so `agent.mjs` writes cannot race
+// with the polling script, and a corrupt cursor never blocks a manual run.
+export function watchStatePath(configFile) {
+  return statePath(configFile).replace(/\.json$/, '.watch.json');
+}
+
+export function readWatchState(configFile) {
+  const file = watchStatePath(configFile);
+  if (!fs.existsSync(file)) return { version: 1, projects: {} };
+  let state;
+  try {
+    state = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    throw new Error(`Watch state is corrupt: ${file}`);
+  }
+  if (!state || typeof state !== 'object' || Array.isArray(state) ||
+      !state.projects || typeof state.projects !== 'object' || Array.isArray(state.projects)) {
+    throw new Error(`Watch state is corrupt: ${file}`);
+  }
+  if (state.pending !== undefined && (!state.pending || typeof state.pending !== 'object' ||
+      typeof state.pending.id !== 'string' || !state.pending.id ||
+      !Array.isArray(state.pending.events) || state.pending.events.length === 0 ||
+      !state.pending.projects || typeof state.pending.projects !== 'object' ||
+      Array.isArray(state.pending.projects))) {
+    throw new Error(`Watch state is corrupt: ${file}`);
+  }
+  return state;
+}
+
+export function writeWatchState(state, configFile) {
+  writeAtomic(watchStatePath(configFile), state);
+}
+
+// Serialize the entire watcher transaction (state read, provider scan, and
+// state write) without relying on `flock`, which is not installed by default
+// on macOS. A killed process can leave a stale lock; recovery is deliberately
+// manual rather than risking removal of a live process's lock.
+export function withWatchStateLock(configFile, operation, timeoutMs = 30_000) {
+  const file = `${watchStatePath(configFile)}.lock`;
+  fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  const token = randomUUID();
+  const deadline = Date.now() + timeoutMs;
+  let fd;
+
+  while (fd === undefined) {
+    try {
+      fd = fs.openSync(file, 'wx', 0o600);
+      fs.writeFileSync(fd, `${JSON.stringify({ pid: process.pid, token })}\n`);
+      fs.fsyncSync(fd);
+    } catch (error) {
+      if (fd !== undefined) {
+        try { fs.closeSync(fd); } catch { /* already closed */ }
+        fd = undefined;
+        try { fs.unlinkSync(file); } catch { /* another process may have removed it */ }
+      }
+      if (error.code !== 'EEXIST') throw error;
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Watcher lock is busy: ${file}; if its process stopped, inspect and remove the stale lock before retrying`,
+        );
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
+    }
+  }
+
+  try {
+    return operation();
+  } finally {
+    try { fs.closeSync(fd); } catch { /* already closed */ }
+    try {
+      const owner = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (owner.token === token) fs.unlinkSync(file);
+    } catch { /* never remove a lock we cannot prove is ours */ }
+  }
+}
+
+// One delivery helper owns the queue -> acknowledgement transaction at a
+// time. This lock is shared across watcher configs in the same runtime home;
+// stale ownership is manual so a live enqueue is never mistaken for a crash.
+export function withDeliveryLock(operation, timeoutMs = 30_000) {
+  const file = path.join(configDir(), 'delivery.watch.lock');
+  fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  const token = randomUUID();
+  const deadline = Date.now() + timeoutMs;
+  let fd;
+
+  while (fd === undefined) {
+    try {
+      fd = fs.openSync(file, 'wx', 0o600);
+      fs.writeFileSync(fd, `${JSON.stringify({ pid: process.pid, token })}\n`);
+      fs.fsyncSync(fd);
+    } catch (error) {
+      if (fd !== undefined) {
+        try { fs.closeSync(fd); } catch { /* already closed */ }
+        fd = undefined;
+        try { fs.unlinkSync(file); } catch { /* another process may have removed it */ }
+      }
+      if (error.code !== 'EEXIST') throw error;
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Delivery lock is busy: ${file}; if its process stopped, inspect and remove the stale lock before retrying`,
+        );
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
+    }
+  }
+
+  try {
+    return operation();
+  } finally {
+    try { fs.closeSync(fd); } catch { /* already closed */ }
+    try {
+      const owner = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (owner.token === token) fs.unlinkSync(file);
+    } catch { /* never remove a lock we cannot prove is ours */ }
+  }
+}
+
 export function readLock(file = lockPath()) {
   if (!fs.existsSync(file)) return null;
   return JSON.parse(fs.readFileSync(file, 'utf8'));

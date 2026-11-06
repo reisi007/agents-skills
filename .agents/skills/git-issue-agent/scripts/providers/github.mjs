@@ -1,17 +1,46 @@
 import { spawnSync } from 'node:child_process';
 
+const GH_MAX_BUFFER_BYTES = 8 * 1024 * 1024;
+const ISSUE_PAGE_SIZE = 100;
+const ISSUE_PAGE_QUERY = `[
+  .[] | {
+    number,
+    title,
+    author: (if .user == null then null else {login: .user.login} end),
+    labels: [(.labels // [])[] | .name],
+    createdAt: .created_at,
+    updatedAt: .updated_at,
+    url: .html_url,
+    isPullRequest: (.pull_request != null)
+  }
+]`;
+
+function outputText(value) {
+  if (typeof value === 'string') return value;
+  if (Buffer.isBuffer(value)) return value.toString('utf8');
+  return String(value ?? '');
+}
+
 function gh(args, { input, allowFail = false, env } = {}) {
   const childEnv = { ...process.env, ...(env ?? {}) };
-  const result = spawnSync('gh', args, { input, encoding: 'utf8', env: childEnv });
+  const result = spawnSync('gh', args, {
+    input,
+    encoding: 'utf8',
+    env: childEnv,
+    maxBuffer: GH_MAX_BUFFER_BYTES,
+  });
+  if (result.error?.code === 'ENOBUFS') {
+    throw new Error(`gh ${args.join(' ')} exceeded the ${GH_MAX_BUFFER_BYTES / 1024 / 1024} MiB output limit`);
+  }
   if (result.error) throw result.error;
   if (result.status !== 0 && !allowFail) {
-    const detail = (result.stderr || result.stdout || '').trim();
+    const detail = outputText(result.stderr || result.stdout).trim();
     throw new Error(`gh ${args.join(' ')} failed (${result.status}): ${detail}`);
   }
   return {
     status: result.status,
-    stdout: (result.stdout || '').trim(),
-    stderr: (result.stderr || '').trim(),
+    stdout: outputText(result.stdout).trim(),
+    stderr: outputText(result.stderr).trim(),
   };
 }
 
@@ -34,17 +63,55 @@ export const github = {
     return active;
   },
 
-  listIssues({ project, limit = 100 }) {
-    return json([
-      'issue', 'list', '--repo', project, '--state', 'open', '--limit', String(limit),
-      '--json', 'number,title,author,labels,createdAt,updatedAt,url',
-    ]);
+  listIssues({ project, limit, includeTruncation = false }) {
+    // Preserve the agent CLI's bounded-list behavior. Watcher scans request
+    // truncation metadata and use the page-by-page REST path below.
+    if (limit !== undefined && !includeTruncation) {
+      return json([
+        'issue', 'list', '--repo', project, '--state', 'open', '--limit', String(limit),
+        '--json', 'number,title,author,labels,createdAt,updatedAt,url',
+      ]);
+    }
+
+    if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1)) {
+      throw new Error('issue limit must be a positive safe integer');
+    }
+
+    // Keep a fixed per_page value across requests: changing it between pages
+    // changes GitHub's offset and can skip or repeat issues. For a bounded scan,
+    // one extra normalized issue proves whether the cap actually truncated.
+    const pageSize = limit === undefined ? ISSUE_PAGE_SIZE : Math.min(ISSUE_PAGE_SIZE, limit + 1);
+    const issues = [];
+    let truncated = false;
+    for (let page = 1; ; page++) {
+      const rows = json([
+        'api',
+        `repos/${project}/issues?state=open&per_page=${pageSize}&page=${page}`,
+        '--jq', ISSUE_PAGE_QUERY,
+      ]);
+      if (!Array.isArray(rows)) {
+        throw new Error(`gh api returned invalid issue page ${page} for ${project}`);
+      }
+      for (const issue of rows) {
+        if (issue && typeof issue === 'object' && !issue.isPullRequest) {
+          if (limit !== undefined && issues.length === limit) {
+            truncated = true;
+            break;
+          }
+          const normalized = { ...issue };
+          delete normalized.isPullRequest;
+          issues.push(normalized);
+        }
+      }
+      if (truncated || rows.length < pageSize) break;
+    }
+    return includeTruncation ? { issues, truncated } : issues;
   },
 
   viewIssue({ project, number }) {
     return json([
       'issue', 'view', String(number), '--repo', project,
-      '--json', 'number,title,body,author,labels,comments,url,state',
+      '--json', 'number,title,body,author,labels,comments,url,state,updatedAt',
     ]);
   },
 

@@ -117,7 +117,13 @@ cron entry (verify `opencode run` flags on the installed version):
 
 The shared lock makes overlapping timers harmless: a second invocation exits
 before a tracker write. Keep logs private because the initial claim returns an
-owner token. `flock` (util-linux) is required for cross-process serialization.
+owner token. Agent mutations use `flock` (util-linux); watcher polling instead
+uses its built-in Node exclusive-file lock and does not require `flock` on macOS.
+
+To avoid a model turn when the queue is empty, gate the schedule on
+`scripts/deliver.mjs` (exit 1 = nothing new), which queues a pending batch and
+acknowledges its cursor only after the OpenCode API confirms enqueue. Delivery
+recipes and the at-least-once limitation are in `references/dispatcher.md`.
 
 ## 7. Markers
 
@@ -147,10 +153,12 @@ reviewer (not the PR author) to have approved the exact head SHA.
 
 ## 9. Self-test
 
-`node "$SKILL_DIR/scripts/test-e2e.mjs"` runs synthetic CLI integration tests:
+`node tests/git-issue-agent/test-e2e.mjs` runs synthetic CLI integration tests:
 fake `gh`, a local bare Git remote and no network. It covers concurrent ownership,
 stale-owner rotation, account identity checks, untrusted issues, config
 isolation, merge refusals, SHA-bound review/evidence/checks, idempotent change
 creation and evidence secret/remote guards. It does not run OpenCode, a model,
 real GitHub, real screenshots or human review. CI runs it in `budget`; rerun it
-after any CLI/adapter change.
+after any CLI/adapter change. `node tests/git-issue-agent/test-watch.mjs` covers
+watcher baselining, trusted comment identity/edit detection, pending replay and
+post-ack silence, concurrent polling/delivery, and the event-to-PR fake CI path.

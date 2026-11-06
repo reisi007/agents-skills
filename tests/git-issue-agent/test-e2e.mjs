@@ -7,16 +7,17 @@
 // merge refusals, checks, evidence publishing and forced release — and exits
 // non-zero on the first broken expectation.
 //
-// Usage: node "$SKILL_DIR/scripts/test-e2e.mjs"
+// Usage: node tests/git-issue-agent/test-e2e.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseJsonc } from './config.mjs';
+import { parseJsonc } from '../../.agents/skills/git-issue-agent/scripts/config.mjs';
 
-const SKILL_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const SKILL_DIR = path.join(REPO_ROOT, '.agents', 'skills', 'git-issue-agent');
 const AGENT = path.join(SKILL_DIR, 'scripts', 'agent.mjs');
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'gia-e2e-'));
 const BIN = path.join(TMP, 'bin');
