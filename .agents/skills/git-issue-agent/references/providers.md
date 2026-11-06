@@ -20,7 +20,7 @@ A provider module exports one object with these methods:
 | Method | Input | Output / behaviour |
 |---|---|---|
 | `verifyAccount(user)` | configured account name | confirms the already-authenticated host CLI identity; must not change global auth state |
-| `listIssues({project, limit})` | project id | `[{number,title,author:{login},labels:[{name}],createdAt,updatedAt,url}]` |
+| `listIssues({project, limit, includeTruncation})` | project id; optional positive cap and truncation metadata flag | issue array; with `includeTruncation: true`, returns `{issues, truncated}` |
 | `viewIssue` | `{project, number}` | `{number,title,body,author:{login},labels,url,state,comments:[{author:{login},body,createdAt}]}` |
 | `addLabel` / `removeLabel` | `{project, number, label}` | creates/removes the label on the issue |
 | `comment` | `{project, number, body, kind}` | posts an issue (`kind: issue`) or change-request (`kind: change`) comment |
@@ -39,7 +39,7 @@ Terminology: the interface says **change**; GitHub renders it PR, GitLab MR.
 | Contract | Implementation |
 |---|---|
 | account | `gh api user --jq .login` must match configured account; no global switch or token extraction |
-| issues | `gh issue list --json number,title,author,labels,createdAt,updatedAt,url` |
+| issues | Watcher: request `gh api repos/<owner>/<repo>/issues?state=open&per_page=<size>&page=<n>` page-by-page with a `--jq` field projection, excluding pull requests and normalizing fields. Bounded scans stop at the cap after checking one extra issue to report `truncated` accurately; the same page size is used throughout pagination. Each `gh` response is capped at 8 MiB with an explicit error. Bounded agent CLI lists use `gh issue list --limit <n>`. |
 | issue view | `gh issue view --json number,title,body,author,labels,comments,url,state` |
 | labels | `gh issue edit --add-label` / `--remove-label` |
 | comments | `gh issue comment` / `gh pr comment` |

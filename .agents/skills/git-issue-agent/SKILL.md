@@ -11,7 +11,8 @@ metadata:
 > remain inline because call order is safety-critical; schema and deep details
 > live in references: config (`references/config.md`), provider (`references/providers.md`),
 > triage (`references/triage.md`), evidence (`references/evidence.md`), subagent
-> briefs (`references/subagents.md`), CLI/exit codes (`references/operations.md`).
+> briefs (`references/subagents.md`), CLI/exit codes (`references/operations.md`),
+> script-driven dispatcher (`references/dispatcher.md`).
 
 Turns open issues on enabled projects into reviewed and evidenced change
 requests (PR/MR) — **one issue at a time per runtime home**. Auto-merge is on
@@ -85,6 +86,7 @@ installs or edits a timer. See `references/operations.md` §6.
 | Mode | Action |
 |---|---|
 | `run` | one full pass, at most one issue |
+| `dispatcher` | process every event in the supplied watcher batch serially, one active issue at a time (`references/dispatcher.md`) |
 | `setup` | create/repair the config dir, capture the model, labels, auth; never asks |
 | `update` | re-capture the subagent model, refresh labels, validate |
 | `status` | print config/lock/state (no tracker writes) |
@@ -103,17 +105,37 @@ does not install credentials or switch accounts.
 
 ## Stage 1 — discover, never assume
 
+A script may pre-filter discovery: use `scripts/deliver.mjs` to queue the
+complete pending watcher batch and acknowledge its cursor only after successful
+enqueue (`references/dispatcher.md`). Start dispatcher mode with that supplied
+batch instead of polling again; if delivery fails, the watcher replays it.
+
+**Batch contract:** `dispatcher` mode processes **every** event in the supplied
+`events` array, in array order. For each event, execute Stages 2–10 through a
+named outcome and release its owned issue lock before starting the next event.
+Never process events concurrently, and never stop after the first event merely
+because manual `run` mode selects one issue. If an event is now closed, blocked,
+untrusted, or otherwise ineligible, record/confirm that per-issue outcome and
+continue. If no valid batch is supplied, stop without claiming work or falling
+back to a one-issue list. Stop a batch only for a global failure (for example,
+invalid config or unavailable provider); report which events were completed and
+which remain.
+
 1. `node "$SKILL_DIR/scripts/agent.mjs" status`. Continue a live lock only with
    its owner token. After a crash, use `resume-lock ... --confirm-stale` only
    after confirming the prior OpenCode run stopped; raw Git processes cannot be
    revoked by the CLI.
-2. For each enabled project, run
-   `node "$SKILL_DIR/scripts/agent.mjs" account <user>` to verify the already
-   authenticated provider CLI identity, then `list`. The CLI never changes
-   global auth state; a mismatch is a hard stop.
-3. Drop `working`, `done`, `review`, `blocked`, `needs-info`; keep trusted
-   authors. Order by severity (critical → info), then oldest.
-4. Pick exactly one. If none qualifies, say so and stop.
+2. Verify the already-authenticated provider CLI identity with
+   `node "$SKILL_DIR/scripts/agent.mjs" account <user>`; a mismatch is a hard
+   stop. In `run` mode, verify/list each enabled project. In `dispatcher` mode,
+   verify the projects represented in the supplied batch and do not list again
+   to choose replacement work.
+3. In `run` mode, drop `working`, `done`, `review`, `blocked`, `needs-info`, keep
+   trusted authors, and order by severity (critical → info), then oldest. In
+   `dispatcher` mode, the batch is the work set; re-read each issue and its
+   current labels/trusted comments before acting.
+4. `run` mode picks exactly one issue; if none qualifies, say so and stop.
+   `dispatcher` mode iterates every event as specified in the batch contract.
 
 ## Stage 2 — claim, then triage before any code
 
@@ -142,7 +164,8 @@ Comment and label templates: `references/triage.md`. Pass the owner token to
 every write. Actionable: reply with plan/acceptance and keep the lock. Not
 actionable: comment, then `release --result needs-info --owner-token
 "$OWNER_TOKEN"` — the issue stays out of the queue until a trusted author
-answers and removes the label.
+answers and removes the label. In dispatcher mode, record this outcome for the
+current event, release its lock, then continue with the next event in the batch.
 
 ## Stage 3 — isolate
 
@@ -250,8 +273,9 @@ owner token.
   do **not** merge. Set `review`/`blocked`, comment what the human must do,
   `release --result review|blocked --owner-token "$OWNER_TOKEN"`.
 - Out of scope mid-flight (missing decision, credential, third-party break) →
-  stop, comment precisely, then
-  `release --result blocked --owner-token "$OWNER_TOKEN"`.
+  stop this issue, comment precisely, then
+  `release --result blocked --owner-token "$OWNER_TOKEN"`. In dispatcher mode,
+  continue to the next event after this issue is released.
 
 The merge CLI verifies evidence manifest identity/artifact hashes, exact-head
 markers, native approval, checks and lock ownership, then passes the expected
@@ -263,7 +287,9 @@ branch protection. A `review` label keeps the issue out of the next queue.
 Post the final change-request/blocker comment with the owner token, then run
 `node "$SKILL_DIR/scripts/agent.mjs" release --result done|blocked|review|needs-info|none --owner-token "$OWNER_TOKEN"`.
 Release removes `working`, sets the outcome label and updates `state.json`. A
-run ends with **zero** active locks and one named outcome.
+manual `run` ends with **zero** active locks and one named outcome. Dispatcher
+mode ends with zero active locks and a named outcome for **every** event in its
+batch.
 
 ## Code Mode and delegation
 
@@ -271,7 +297,9 @@ Repeated provider work runs through the versioned CLI in `scripts/`
 (`agent.mjs`, `config.mjs`, `providers/`) — via `execute` or the shell, never a
 new ad-hoc one-liner per turn. When a step repeats and the CLI cannot do it, add
 a small script beside the others. `jq` is **not** installed on this host. Every
-CLI change runs the synthetic suite: `node "$SKILL_DIR/scripts/test-e2e.mjs"`.
+CLI change runs the synthetic suites from the repository root:
+`node tests/git-issue-agent/test-e2e.mjs` and
+`node tests/git-issue-agent/test-watch.mjs`.
 
 Every stage that reasons about code goes to an expert `general` subagent in a
 **fresh** session unless `local_only` is true (except the verifier's matching
