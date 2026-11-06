@@ -12,15 +12,49 @@ RAW=https://ocgo-pricing.all-the.rest
 
 # Current snapshot, slimmed to what the skill needs:
 curl -sL $RAW/data/latest.json | jq '{
-  fetchedAt, monthlyCredit, monthlyCost,
+  fetchedAt,
+  peakRules,
+  plans:  [ .plans[] | {id, priceMonthly, creditsMonthly} ],
   models: [ .models[] | {id, name, tier, provider, contextWindow, usage,
-                          effectiveInput, effectiveOutput, caps: .capabilities} ],
-  free:   [ .freeModels[] | {id, name, contextWindow, caps: .capabilities} ]
+                          input, output, cachedRead, cachedWrite, pattern,
+                          caps: .capabilities.input} ],
+  free:   [ .freeModels[] | {id, name, contextWindow, caps: .capabilities.input} ]
 }'
 
-# Changelog — last 15 entries:
-curl -sL https://raw.githubusercontent.com/all-the-rest/ocgo-price-tracker/main/CHANGELOG.json | jq '.entries[:15]'
+# Example: print effective input prices for every tier of one model and plan.
+# For a known workload, use the row mapped by that model's peakRules; if unknown,
+# use the highest paid value as the conservative comparison/cap value.
+#   paid basis: input × priceMonthly  / usage[plan]   ← what the subscription charges
+#   full basis: input × creditsMonthly / usage[plan]  ← credit value at list rate
+curl -sL $RAW/data/latest.json | jq -r '
+  (.plans[] | select(.id == "go")) as $p
+  | .models[]
+  | select(.id == "opencode-go/deepseek-v4.1-flash" and .usage.go != null)
+  | "\(.id) [\(.tier)]\tpaid=\(.input * $p.priceMonthly / .usage.go)\tfull=\(.input * $p.creditsMonthly / .usage.go)"'
+
+# Changelog — last 15 entries with their typed changes flattened:
+curl -sL https://raw.githubusercontent.com/all-the-rest/ocgo-price-tracker/main/CHANGELOG.json \
+  | jq '[.entries[:15][] | .date as $d | .changes[] | . + {date: $d}]'
 ```
+
+### No precomputed effective prices
+
+The snapshot carries list prices plus the plan's `priceMonthly`/`creditsMonthly`
+and per-model `usage`; it deliberately ships **no** `effectiveInput`/
+`effectiveOutput` and no `monthlyCredit`/`monthlyCost` (those fields no longer
+exist). A recipe that selects them prints `null`. This does not mean every snapshot
+field is non-null: source prices such as `cachedWrite` may be `null` when the tracker
+has no documented price. Compute the basis you need with the snippet above; the
+tracker's math lives in `ocgo-price-tracker/src/weighted.ts`.
+
+### Nullable cached-write price
+
+Keep `cachedWrite` visible as `null` when the source has no documented cached-write
+price; do not treat that value as zero. For request-cost estimates only, both trackers
+fall back to the model's `input` price when `cachedWrite` is null
+(`writeRaw ?? input` in `ocgo-price-tracker/src/weighted.ts` and
+`cc-price-tracker/src/weighted.ts`). The raw snapshot field remains null, and this
+fallback does not change direct price comparisons or the paid-basis cap.
 
 ### `capabilities` is an object — check `.input`
 
@@ -42,9 +76,11 @@ RAW=https://raw.githubusercontent.com/all-the-rest/cc-price-tracker/main
 
 curl -sL $RAW/data/latest.json | jq '{
   fetchedAt,
-  models: [ .models[] | {id, name, provider, contextWindow, usage: .allowances,
-                          effectiveInput, effectiveOutput, caps: .capabilities} ],
-  free:   [ .freeModels[] | {id, name, contextWindow, caps: .capabilities} ]
+  plans:  [ .plans[] | {id, priceMonthly, creditsMonthly} ],
+  models: [ .models[] | {id, name, tier, provider, contextWindow, allowances,
+                          input, output, cachedRead, cachedWrite, pattern,
+                          caps: .capabilities.input} ],
+  free:   [ .freeModels[] | {id, name, caps: .capabilities.input} ]
 }'
 
 curl -sL $RAW/CHANGELOG.json | jq '.entries[:15]'
