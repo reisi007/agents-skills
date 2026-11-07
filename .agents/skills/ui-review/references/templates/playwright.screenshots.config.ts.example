@@ -15,9 +15,9 @@ export default defineConfig({
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    // A modest worker count keeps the screenshot set under the backend's
-    // per-IP login throttle: every test seeds data AND logs in through the
-    // UI, so high concurrency bursts past the budget (HTTP 429).
+    // For projects with a per-IP login throttle, modest concurrency helps
+    // avoid bursts. Only routes with login-bearing seeds or UI auth consume
+    // that budget; adjust workers to the project's limit.
     workers: process.env.CI ? 2 : 2,
     timeout: 120000,
     reporter: [
@@ -31,6 +31,6 @@ export default defineConfig({
     outputDir: '<outputDir>',
     projects: [
         { name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 950 } } },
-        { name: 'Mobile Chrome', use: { ...devices['Galaxy A55'] } },
+        { name: 'Mobile Chrome', use: { ...devices['Galaxy A55'], viewport: { width: 412, height: 915 } } },
     ],
 });

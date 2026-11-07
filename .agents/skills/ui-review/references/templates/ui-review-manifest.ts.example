@@ -6,15 +6,27 @@
 //                 spec builds absolute screenshot paths from process.cwd()).
 //
 // Seeds resolve dynamic ids / credentials from seeded data at runtime so
-// routes with `:params` never hard-code ids. Seeds that authenticate
-// (admin logins) should be wrapped in a per-worker cache — the backend
-// throttles logins per IP, so "one login per worker" keeps parallel runs
-// under the budget.
+// routes with `:params` never hard-code ids. For projects with a per-IP login
+// throttle, wrap login-bearing seeds in a per-worker cache to keep parallel
+// runs under the budget.
+
+import type { Page } from '@playwright/test';
 
 export type UiReviewState = 'filled' | 'empty';
 export type UiReviewViewport = 'desktop' | 'mobile';
 export type UiReviewAuth = 'guest' | 'admin' | 'user' | 'none';
-export type UiReviewTenant = 'primary' | 'empty';
+export type UiReviewTenant = string;
+
+export interface UiReviewViewportSize {
+    width: number;
+    height: number;
+}
+
+export interface UiReviewTenantConfig {
+    origin: string;
+    /** Optional idempotent project setup, run before each route/state/viewport capture. */
+    prepare?: () => Promise<void>;
+}
 
 export interface UiReviewClickStep {
     kind: 'click';
@@ -29,7 +41,7 @@ export interface UiReviewClickStep {
 
 export interface UiReviewGotoStep {
     kind: 'goto';
-    /** May contain `:param` placeholders resolved from the seed result. */
+    /** Relative paths resolve against the selected tenant origin; absolute URLs are preserved. May contain seed `:param`s. */
     path: string;
     /** Why a direct URL load is justified (deep link / dynamic detail page / no UI link). */
     reason: string;
@@ -41,35 +53,69 @@ export type UiReviewSeed = () => Promise<Record<string, unknown>>;
 
 export interface UiReviewRoute {
     name: string;
-    /** Route pattern; `:param` tokens are resolved from the seed result where used. */
+    /** Route pattern; relative paths use the selected tenant origin, and `:param` tokens resolve from the seed. */
     path: string;
     states: UiReviewState[];
     auth?: UiReviewAuth;
     viewports?: UiReviewViewport[];
-    /** Tenant per state; default: filled → primary, empty → empty. */
+    /** Tenant key per state; omitted states use the primary origin. */
     tenant?: Partial<Record<UiReviewState, UiReviewTenant>>;
     note?: string;
-    /** Static <title> of the app — the spec asserts it so a foreign dev-server
-     *  on the port can never be silently screenshotted. Required when the app
-     *  has a stable title. */
-    expectedTitle?: string;
+    /** Required static <title>; the spec asserts it before capturing this route. */
+    expectedTitle: string;
+    /** Why a mobile route needs a direct load because header navigation is unavailable. */
+    mobileDirectLoadReason?: string;
     /** Seed per state — only states that need deterministic data define one. */
     seeds?: Partial<Record<UiReviewState, UiReviewSeed>>;
+    /** Number of leading scroll positions to capture (default 4). */
+    leadingSections?: number;
+    /** Number of trailing scroll positions to capture (default 2). */
+    trailingSections?: number;
+    /** CSS selector for this route's intended inner scroll container, if any. */
+    scrollContainerSelector?: string;
+    /** Wait for app-specific lazy content after scrolling; needed to claim a settled footer. */
+    waitForContentReady?: (page: Page) => Promise<void>;
     nav?: UiReviewNavStep[];
 }
 
 export interface UiReviewConfig {
     /** Mirrors `outputDir` in playwright.screenshots.config.ts. */
     outputDir: string;
+    /** Origin used when a route does not select a configured tenant. */
+    primaryOrigin: string;
+    /** Non-primary origins; add only the tenants this project actually needs. */
+    tenants?: Record<string, UiReviewTenantConfig>;
+    /** Must match the actual Playwright project viewports; labels are resolved from dimensions. */
+    viewportSizes: Record<UiReviewViewport, UiReviewViewportSize>;
+    /** App-wide selector for its intended inner scroll container, when applicable. */
+    scrollContainerSelector?: string;
     routes: UiReviewRoute[];
 }
 
 export const uiReviewConfig: UiReviewConfig = {
     outputDir: '<outputDir>',
+    primaryOrigin: '<baseURL>',
+    // Keep these dimensions in sync with the screenshot projects in Playwright config.
+    viewportSizes: {
+        desktop: { width: 1920, height: 950 },
+        mobile: { width: 412, height: 915 },
+    },
+    // Optional: omit for a single-tenant app. A configured tenant's `prepare`
+    // callback is the explicit place for project-specific fixture setup.
+    // tenants: {
+    //     'empty-fixture': {
+    //         origin: '<fixtureTenantURL>',
+    //         prepare: async () => {
+    //             // Call the project's idempotent fixture setup here, if needed.
+    //         },
+    //     },
+    // },
+    // scrollContainerSelector: 'main[data-scroll-container]',
     routes: [
         // {
         //     name: 'home',
         //     path: '/',
+        //     expectedTitle: '<app title>',
         //     states: ['filled', 'empty'],
         //     auth: 'guest',
         //     seeds: { filled: () => seedHomeFilled() },
@@ -81,7 +127,11 @@ export const uiReviewConfig: UiReviewConfig = {
         //     auth: 'admin',
         //     nav: [{ kind: 'click', scope: 'complementary', role: 'link', name: 'Users' }],
         //     seeds: { filled: () => seedAdminUsersFilled() },
-        //     note: 'Empty state rendered on the fixture tenant with no users.',
+        //     tenant: { empty: 'empty-fixture' },
+        //     note: 'Empty state rendered on the configured fixture tenant.',
+        //     waitForContentReady: async (page) => {
+        //         await page.getByRole('progressbar').waitFor({ state: 'hidden' });
+        //     },
         // },
     ],
 };

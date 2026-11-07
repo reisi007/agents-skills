@@ -1,24 +1,24 @@
 ---
 name: UI Review
-description: 'TRIGGER on UI review/improvement/screenshot requests or when the user wants to check the visual state of a web app: Playwright screenshots of every page (empty/filled states), analyzed against a checklist.'
+description: 'TRIGGER on UI review/improvement/screenshot requests or when the user wants to check the visual state of a web app: Playwright screenshots of manifest-configured routes and states, analyzed against a checklist.'
 ---
 
 # UI Review — repeatable visual QA loop
 
 This skill turns a web app's visual state into a repeatable, reviewable artifact:
-Playwright captures screenshots of every page in both **filled** and **empty**
-states, you analyze them against a checklist (the configured model is
-vision-capable — no vision subagent needed), and the resulting findings drive
-targeted UI fixes.
+Playwright captures the routes and states configured in the project's manifest
+(a route may include **filled**, **empty**, or both), you analyze them against a
+checklist (the configured model is vision-capable — no vision subagent needed),
+and the resulting findings drive targeted UI fixes.
 
-Each route/state/viewport combo produces a **full-page PNG** **plus viewport-
-height SECTION captures** (`<name>-secN.png`) that scroll the whole page in
-80 % steps. Long pages must not rely on the full-page PNG alone: a full-page
-image of a page >2000 px tall gets downscaled for the vision model and regions
-below the fold become unreadable (regression: a clipped badge in a table far
-down the page). Sections keep every region at readable resolution. Apps that
-scroll in an inner overflow container (100vh layout with `<main …overflow-auto>`)
-are handled by scrolling that container — see `references/harness.md`.
+Each route/state/viewport combo produces readable, viewport-height section
+captures. To keep large galleries from overwhelming review, the harness samples
+the page top and current end by default, and claims the end as a settled footer
+only when the manifest's readiness hook is configured; see
+`references/harness.md` for the policy and short-page full-page overviews. Long
+full-page images are not evidence by themselves: they are downscaled and can make
+regions below the fold unreadable. The harness also supports apps that scroll in
+an inner overflow container (see `references/harness.md`).
 
 > For a **full live-site audit** (SEO, image quality, performance, content) rather
 > than an in-app visual pass, load the hidden `web-audit` skill by exact ID.
@@ -40,36 +40,43 @@ human or you can judge the design. Nothing here gates CI.
 
 ## Step 1 — Capture
 
-Run the screenshot set with the consuming project's script (in `portal.reisinger.pictures`):
+Run the screenshot set with the consuming project's configured script, from the
+directory containing its package scripts:
 
 ```bash
-cd frontend && pnpm test:screenshots
+<package-manager> run test:screenshots
 ```
 
-Equivalent in other projects: `playwright test -c playwright.screenshots.config.ts`
-(or the configured `test:screenshots` npm script). The dedicated config means the
+Alternatively, run `playwright test -c playwright.screenshots.config.ts` (or the
+project's equivalent command). The dedicated config means the
 standard suite (`playwright test`) stays untouched — the screenshot set never
 runs in CI's normal E2E pipeline.
 
-PNGs land under the config's `outputDir` (in `portal.reisinger.pictures`:
-`frontend/test-results/ui-screenshots/`), organized as:
+Screenshots and coverage files land under the config's `outputDir`, organized as:
 
 ```
-<outputDir>/<state>/<viewport>/<name>.png        # full-page
-<outputDir>/<state>/<viewport>/<name>-secN.png   # viewport-height sections (N = 0,1,2,…)
-  filled/desktop/home.png
+<outputDir>/<state>/<viewport>/<name>.png        # full-page — only for short pages (see below)
+<outputDir>/<state>/<viewport>/<name>-secN.png   # viewport-height sections, sampled (N = 0,1,2,…)
+<outputDir>/<state>/<viewport>/<name>.json       # capture coverage metadata
   filled/desktop/home-sec0.png
   filled/desktop/home-sec1.png
-  empty/desktop/home.png
-  filled/mobile/admin-users.png
+  filled/desktop/home-sec18.png   # end candidate; confirmed footer is recorded in JSON
+  empty/desktop/home-sec0.png
+  filled/mobile/admin-users-sec0.png
   ...
 ```
 
-Long pages produce **multiple** `-secN` files; a short page only `-sec0`. The
-manifest (in `portal.reisinger.pictures`:
-`frontend/tests/screenshots/ui-review.config.ts`) defines which routes ×
-states × viewports are captured. A failed screenshot test means the harness (or
-the page) is broken — fix it before moving on.
+Sections are **sampled, not exhaustive**: by default the page top and current end
+are written, while the middle may be skipped; the end is only reported as a footer
+when readiness is configured. `secN` indexes are therefore not always
+contiguous. Each capture also writes a `.json` coverage record, so the files show
+what was and was not looked at. Short pages additionally get a full-page overview
+where the page's scroll layout supports it; see `references/harness.md` for the
+exact thresholds and coverage fields.
+
+The consuming project's manifest defines which routes × states × viewports are
+captured, and may override the sampling windows per route. A failed screenshot
+test means the harness (or the page) is broken — fix it before moving on.
 
 ## Step 2 — Vision analysis
 
@@ -77,7 +84,8 @@ Read the generated PNGs from disk and analyze them yourself — you are
 vision-capable, so there is no vision subagent in the loop. Stay within **~10
 images per read** — always split into batches:
 
-1. **By state** first: analyze all `filled` screenshots, then all `empty`.
+1. **By configured state** first: analyze each state present in the manifest
+   (for example, `filled` and then `empty`).
 2. **By viewport** within each state: desktop batch, then mobile batch.
 3. **By route** when a batch is still too large: chunk routes alphabetically.
 
@@ -119,23 +127,16 @@ separate verifier). After a change:
 
 ## Adding routes / states
 
-Edit the manifest (in `portal.reisinger.pictures`: `frontend/tests/screenshots/ui-review.config.ts`): add one entry per
-route to the `routes` array. Each entry declares the route pattern, the states
-(`filled`/`empty`), the required auth, the viewports, and — for dynamic params —
-a `seeds` map (per state) that resolves real ids/credentials from the seeded
-data at runtime. The generic spec picks the new route up automatically; nothing
-else changes. Keep login-bearing seeds per-worker-cached (see
-`references/harness.md`) so the backend login throttle is not exhausted.
-
-### The Caddy-per-mandant static-file fallback idea
-
-In `portal.reisinger.pictures`, the app renders mandant branding from `frontend/public/brands/`. The long-term
-goal is a web-server layer (Caddy) that overrides those static brand assets per
-mandant host (Caddy serves the per-mandant file if present), while the React
-files in `frontend/public/` remain the **fallback**. The `ui-review` harness
-dovetails with this: the "empty mandant" tenant (see `references/harness.md`)
-is also the natural fixture for verifying the brand fallback — capture the empty
-tenant's pages and confirm the fallback brand shows where no override exists.
+Edit the consuming project's manifest: add one entry per route to the `routes`
+array. Each entry declares the route pattern, the states
+(`filled`/`empty`), and the required `expectedTitle`; entries may also include
+auth, viewports, nav steps, notes, per-state seeds, and per-state `tenant` keys
+for configured origins.
+For dynamic params, seeds resolve real ids/credentials from seeded data at
+runtime. The generic spec picks the new route up automatically; nothing else
+changes. Single-tenant apps can omit `tenant` and fixture setup. Where the
+backend enforces a login throttle, keep login-bearing seeds per-worker-cached
+(see `references/harness.md`) to stay within its limit.
 
 ## Reference files
 

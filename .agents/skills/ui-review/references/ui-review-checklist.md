@@ -4,12 +4,11 @@ Apply this checklist to every screenshot. Report findings per image, referencing
 the file name. Keep it factual: name the element and the visual defect; propose
 a concrete fix.
 
-Before fixing a finding, confirm **which element actually renders it**. A pattern
-is often duplicated — in `portal.reisinger.pictures` the mobile brand lockup (logo + portal name)
-existed in three dashboard headers, and a fix applied to the copy you happened to
-open first left the defect visible on the screen you were reviewing. `grep` for
-the class or component before editing, fix **every** copy, and prefer extracting a
-shared component over repairing copies one by one so they cannot drift apart again.
+Before fixing a finding, confirm **which element actually renders it**. Similar
+elements may be duplicated across routes or states, so search the source for the
+relevant component or repeated element before editing. Fix **every** affected copy,
+and prefer a shared component where that fits the project so the copies cannot
+drift apart again.
 
 ## 1. Contrast & readability
 
@@ -22,12 +21,10 @@ shared component over repairing copies one by one so they cannot drift apart aga
 
 - Consistent spacing rhythm (gaps, paddings, margins) within and between sections.
 - Elements align on a grid; no arbitrary offsets or ragged edges.
-- **A flex row whose left cell holds a label above a tall status block must put the
-  action on the label's line, not vertically centred against the tall block.**
-  `items-center` in that shape is the single most common own goal: the label reads
-  as the row's title, the action is expected on the same line, and a centred
-  button floats against the alert. Check the action's baseline against the label,
-  not against the sibling's middle.
+- In a flex row where one cell holds a label above a tall status block, check
+  whether the action belongs on the label's line rather than vertically centred
+  against the block. If the label reads as the row's title, a centred button may
+  float against the status content; compare the action's baseline with the label.
 - No cramped or overflowing content; card/table content has comfortable padding.
 - Fixed/sticky elements do not overlap content.
 
@@ -71,10 +68,10 @@ shared component over repairing copies one by one so they cannot drift apart aga
 
 ## 8. Design system consistency
 
-- Components use the design system's primitives (in `portal.reisinger.pictures`: daisyUI classes —
-  `btn`, `card`, `badge`, `alert`, `table`, `menu`, etc.); no hand-rolled
-  look-alikes.
-- Colors come from the theme palette, not ad-hoc hex values.
+- Where the project has a design system, components use its established
+  primitives (for example, buttons, cards, badges, alerts, tables, and menus)
+  rather than one-off look-alikes.
+- Where a theme palette exists, colors use its tokens rather than ad-hoc values.
 - Consistent border radius, shadows, and hover states across components.
 
 ## 9. Layout bugs / overflow
@@ -85,35 +82,24 @@ shared component over repairing copies one by one so they cannot drift apart aga
 
 ## 10. Branding
 
-- Logo/header/footer of the tenant/app are present and correct.
+- App branding, header, and footer are present and correct.
 - No missing/duplicate logo or header on any state.
 - Brand assets are not pixelated or stretched; fallback branding is coherent.
 
-## 11. Color contrast matrix (automated)
+## 11. Automated contrast checks (when available)
 
-The screenshot review catches contrast regressions by eye, but every daisyUI
-semantic color combination is also asserted automatically — in **both** the
-light and the dark theme. Run it and treat failures as blocking (same severity
-as a `critical`/`high` finding):
+The screenshot review catches contrast regressions by eye. If the project has
+automated contrast tests, run them using the project's documented command and
+evaluate failures against its accessibility criteria; do not assume a particular
+framework, test location, or command. If there are no such tests, use the visual
+checks above without treating a missing test suite as a defect.
 
-```bash
-pnpm test:contrast
-```
-
-- The spec (`tests/contrast/contrast.spec.ts` in the consuming project, driven by
-  its `playwright.contrast.config.ts`) asserts WCAG AA for:
-  - every `badge-{color}` foreground vs its own background,
-  - every `alert-{color}` foreground vs its background **composited over the
-    page surface** (alerts are translucent, so the rendered (surface-composited)
-    color is what matters),
-  - body text and `link link-primary` vs `bg-base-100`.
-- Colors are resolved via a canvas (daisyUI v5 uses `oklch`, which the browser
-  composites for us) so the measured ratio matches what a user actually sees.
-- Coverage must hold for **dark AND light** — a badge that reads fine on light
-  but washes out on dark (or vice-versa) is a real defect. The matrix guards
-  against theme/color-token regressions that would make status badges (e.g. the
-  red "Modell training" privacy badge) or notice text unreadable.
-- When adding a new semantic color, a new badge/alert variant, or changing a
-  theme token, re-run `pnpm test:contrast` and confirm it still passes in both
-  themes before merging.
-
+- For projects with semantic theme colors, useful coverage checks the foreground
+  and background pairs actually used by the UI (for example, body text, links,
+  badges, and alerts) in each supported theme.
+- Measure rendered colors when browser color functions, opacity, or translucent
+  backgrounds affect the result; for translucent content, include the surface it
+  is composited over.
+- Apply the project's chosen contrast standard and acceptance criteria. When
+  adding a semantic color or changing a theme token, rerun relevant checks for
+  the affected combinations and supported themes.
