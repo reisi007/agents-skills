@@ -10,7 +10,7 @@ APPROVED when no `critical` or `high` findings remain unresolved (`open` or
 ```markdown
 # UI Review Findings — <app> — <date>
 
-Capture: `pnpm test:screenshots` · output: `test-results/ui-screenshots/`
+Capture: `<configured screenshot command>` · output: `<configured output directory>`
 Verdict: `APPROVED` | `CHANGES REQUIRED`
 
 ## Filled · Desktop

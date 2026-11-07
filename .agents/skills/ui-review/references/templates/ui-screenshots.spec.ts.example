@@ -1,61 +1,84 @@
 // Generic manifest-driven screenshot spec for the ui-review skill.
 //
-// Reads the route/state/viewport matrix from the manifest and captures a
-// full-page PNG PER COMBO **plus** viewport-height SECTION captures of the
-// whole page (see `captureSections`). This file is intentionally generic —
-// route specifics (seeds, nav steps, auth) live in the manifest.
+// Reads the route/state/viewport matrix from the manifest and captures
+// viewport-height SECTION captures (see `captureSections`), plus a full-page PNG
+// for short pages that scroll the window. This file is intentionally generic —
+// route specifics (origins, seeds, nav steps, auth, and scroller selectors) live
+// in the manifest.
 //
 // WHY SECTIONS: Full-page PNGs of long pages get downscaled to ~2000 px for the
 // vision model — regions below the fold become unreadable and bugs there are
 // missed (regression: a clipped badge in a table far down the page). `captureSections`
-// therefore scrolls the ENTIRE page in 80 %-viewport steps (20 % overlap) and saves
-// `<name>-secN.png` files. It detects the REAL scroll container: the window normally,
-// but if the app scrolls in an inner overflow container (e.g. a 100vh layout with
-// `<main class="…overflow-auto">`), that container is scrolled instead — otherwise
-// long pages would only ever produce `sec0`.
+// therefore walks the page in 80 %-viewport steps (20 % overlap) and saves
+// `<name>-secN.png` files. It honors a configured inner scroll selector, otherwise
+// prefers a visible inner overflow container over the window so incidental document
+// overflow does not mask the app's actual scroller.
 //
-// The manifest's `expectedTitle` is asserted so a foreign dev-server on the port
-// can never be silently screenshotted.
+// SAMPLING: capture only the page top (`leadingSections`, default 4) and footer
+// (`trailingSections`, default 2), skipping the middle on long pages. Short pages
+// (at most FULL_PAGE_MAX_SECTIONS scroll positions) capture every section. A
+// full-page overview is only valid for window-scrolling pages because Playwright's
+// page-level fullPage screenshot omits offscreen content in inner scrollers.
+// Every route/state/viewport also gets a .json coverage record.
+//
+// Every route's required `expectedTitle` is asserted so a foreign dev-server on
+// the port can never be silently screenshotted.
 //
 // Conventions (adjust to the target project's test policy):
 // - SPA navigation happens via UI clicks (`nav` steps). `page.goto` is only
-//   used where justified and documented:
-//   1. the LOGIN page is loaded by direct URL (route-guard / direct-URL
-//      semantics; in this app the header "Anmelden" link is off-viewport in
-//      the mobile navbar, so login is only reachable there as a deep link);
-//   2. per-route `goto` nav steps for dynamic detail pages (reason in the
-//      manifest);
-//   3. on the mobile viewport, routes whose nav starts with a HEADER click
-//      are loaded by direct URL instead — a narrow-viewport navbar overflow
-//      makes header nav clicks unreliable at 360px (and the overflow itself
-//      is exactly what the screenshots should capture).
+//   used where justified and documented (e.g. a login deep link, dynamic detail
+//   page, or navigation unavailable at a narrow viewport).
 // - Login flows through the real UI form, never localStorage injection.
 // - All tests are tagged so the set is groupable and separate from the
 //   functional E2E tags.
 
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { routes, uiReviewConfig } from './ui-review.config';
 import type { UiReviewNavStep, UiReviewRoute, UiReviewState, UiReviewViewport } from './ui-review.config';
 
-const PRIMARY_ORIGIN = '<baseURL>';
-const FIXTURE_TENANT_ORIGIN = '<fixtureTenantURL>'; // e.g. the data-less tenant
 const ADMIN_EMAIL = '<adminEmail>';
 const ADMIN_PASSWORD = '<adminPassword>';
-const SCREENSHOT_OUTPUT_DIR = '<outputDir>'; // must mirror the config outputDir
+const LOGIN_EMAIL_LABEL = '<email field label>';
+const LOGIN_PASSWORD_LABEL = '<password field label>';
+const LOGIN_SUBMIT_LABEL = '<sign-in button label>';
+const SCREENSHOT_OUTPUT_DIR = uiReviewConfig.outputDir; // must mirror the config outputDir
+const DEFAULT_LEADING_SECTIONS = 4;
+const DEFAULT_TRAILING_SECTIONS = 2;
+const FULL_PAGE_MAX_SECTIONS = 8;
 
 const out = (state: UiReviewState, viewport: UiReviewViewport, file: string) =>
     path.resolve(process.cwd(), SCREENSHOT_OUTPUT_DIR, state, viewport, file);
 
-function viewportForProject(projectName: string): UiReviewViewport {
-    return projectName === 'Mobile Chrome' ? 'mobile' : 'desktop';
+function viewportForPage(page: Page): { label: UiReviewViewport; width: number; height: number } {
+    const size = page.viewportSize();
+    if (!size) throw new Error('UI-review screenshot projects must use a fixed viewport');
+    const matches = (Object.keys(uiReviewConfig.viewportSizes) as UiReviewViewport[]).filter((label) => {
+        const configured = uiReviewConfig.viewportSizes[label];
+        return configured.width === size.width && configured.height === size.height;
+    });
+    if (matches.length !== 1) {
+        throw new Error(`Actual viewport ${size.width}x${size.height} must match exactly one configured viewport label`);
+    }
+    return { label: matches[0] as UiReviewViewport, ...size };
 }
 
-function tenantOrigin(route: UiReviewRoute, state: UiReviewState): string {
-    const tenant = route.tenant?.[state] ?? (state === 'empty' ? 'empty' : 'primary');
-    return tenant === 'empty' ? FIXTURE_TENANT_ORIGIN : PRIMARY_ORIGIN;
+function tenantFor(
+    route: UiReviewRoute,
+    state: UiReviewState,
+): { name: string; origin: string; prepare?: () => Promise<void> } {
+    const name = route.tenant?.[state] ?? 'primary';
+    if (name === 'primary') {
+        return { name, origin: uiReviewConfig.primaryOrigin };
+    }
+    const tenant = uiReviewConfig.tenants?.[name];
+    if (!tenant) {
+        throw new Error(`Route "${route.name}" selects unconfigured tenant "${name}"`);
+    }
+    return { name, ...tenant };
 }
 
 function resolvePath(pattern: string, params: Record<string, unknown>): string {
@@ -68,73 +91,311 @@ function resolvePath(pattern: string, params: Record<string, unknown>): string {
     });
 }
 
+function resolveUrl(path: string, origin: string): string {
+    return new URL(path, origin).toString();
+}
+
 /** Let the SPA + i18n settle so later clicks never race a layout shift. */
-async function waitForAppSettled(page: Page, expectedTitle?: string): Promise<void> {
+async function waitForAppSettled(page: Page): Promise<void> {
     await page.waitForLoadState('networkidle');
-    if (expectedTitle) {
-        // Guard: makes sure this app is really what got rendered — not a
-        // foreign dev-server that happens to occupy the port (prevents silent mis-captures).
-        await expect(page).toHaveTitle(expectedTitle);
-    }
     await page.waitForTimeout(300);
 }
 
+/** Temporarily disable CSS smooth scrolling while screenshots are positioned. */
+async function withInstantScrollBehavior(page: Page, capture: () => Promise<void>): Promise<void> {
+    const override = await page.addStyleTag({
+        content: 'html, body, * { scroll-behavior: auto !important; }',
+    });
+    try {
+        await capture();
+    } finally {
+        await override.evaluate((style) => style.remove());
+    }
+}
+
 /**
- * Captures the whole page in readable viewport-height sections (80 % step,
- * 20 % overlap). Detects the real scroll container: prefers the window
- * (document.scrollingElement); if the app scrolls in an INNER overflow
- * container (100vh layout, `<main class="…overflow-auto">`), that container
- * is scrolled instead — otherwise long pages only ever produce sec0.
+ * Captures readable viewport-height sections (80 % step, 20 % overlap), sampling
+ * the top and footer on long pages. Detects an explicitly configured inner
+ * container first, then a visible inner overflow container, and finally the
+ * window. Inner containers take precedence over incidental document overflow;
+ * a selector is available for app-specific layouts.
  */
 async function captureSections(
     page: Page,
     state: UiReviewState,
     viewport: UiReviewViewport,
-    name: string,
+    route: UiReviewRoute,
 ): Promise<void> {
-    const scroller = await page.evaluate(() => {
+    const scroller = await page.evaluate((configuredSelector) => {
         const doc = document.scrollingElement;
         const winH = window.innerHeight;
-        if (doc && doc.scrollHeight > winH + 4) {
-            return { kind: 'window', max: doc.scrollHeight - winH, step: Math.round(winH * 0.8) };
+        const innerScroller = (element: HTMLElement, selector: string) => ({
+            kind: 'inner' as const,
+            selector,
+            viewportHeight: element.clientHeight,
+            step: Math.max(1, Math.round(element.clientHeight * 0.8)),
+        });
+        const elementPath = (element: HTMLElement): string => {
+            const segments: string[] = [];
+            let current: HTMLElement | null = element;
+            while (current && current !== document.body) {
+                const tag = current.tagName.toLowerCase();
+                const parent = current.parentElement;
+                if (!parent) break;
+                const sameTagSiblings = Array.from(parent.children).filter(
+                    (sibling) => sibling.tagName === current!.tagName,
+                );
+                segments.unshift(`${tag}:nth-of-type(${sameTagSiblings.indexOf(current) + 1})`);
+                current = parent;
+            }
+            return `body > ${segments.join(' > ')}`;
+        };
+
+        if (configuredSelector) {
+            const element = document.querySelector<HTMLElement>(configuredSelector);
+            if (!element) throw new Error(`Scroll container selector "${configuredSelector}" matched no element`);
+            return innerScroller(element, configuredSelector);
         }
-        const main = document.querySelector('main');
-        if (main && main.scrollHeight > main.clientHeight + 4) {
-            return {
-                kind: 'main',
-                max: main.scrollHeight - main.clientHeight,
-                step: Math.round(main.clientHeight * 0.8),
-            };
-        }
-        return { kind: 'window', max: 0, step: Math.round(winH * 0.8) };
-    });
-    const scroll = (y: number) =>
-        page.evaluate(
-            ({ kind, y }) => {
-                if (kind === 'main') {
-                    const el = document.querySelector('main');
-                    if (el) el.scrollTop = y;
-                } else {
-                    window.scrollTo(0, y);
+
+        const candidates = Array.from(document.querySelectorAll<HTMLElement>('body *'))
+            .filter((element) => {
+                if (element === doc || element.clientHeight < 1 || element.scrollHeight <= element.clientHeight + 4) {
+                    return false;
                 }
-            },
-            { kind: scroller.kind, y },
-        );
-    let y = 0;
-    let i = 0;
-    for (;;) {
-        await scroll(y);
+                const style = getComputedStyle(element);
+                if (!['auto', 'scroll', 'overlay'].includes(style.overflowY) || style.display === 'none' || style.visibility === 'hidden') {
+                    return false;
+                }
+                const rect = element.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < winH;
+            })
+            .sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                const visibleAreaA = Math.max(0, Math.min(rectA.right, window.innerWidth) - Math.max(rectA.left, 0))
+                    * Math.max(0, Math.min(rectA.bottom, winH) - Math.max(rectA.top, 0));
+                const visibleAreaB = Math.max(0, Math.min(rectB.right, window.innerWidth) - Math.max(rectB.left, 0))
+                    * Math.max(0, Math.min(rectB.bottom, winH) - Math.max(rectB.top, 0));
+                return visibleAreaB - visibleAreaA
+                    || (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight);
+            });
+        if (candidates.length > 0) {
+            return innerScroller(candidates[0], elementPath(candidates[0]));
+        }
+        return {
+            kind: 'window' as const,
+            selector: null,
+            viewportHeight: winH,
+            step: Math.max(1, Math.round(winH * 0.8)),
+        };
+    }, route.scrollContainerSelector ?? uiReviewConfig.scrollContainerSelector);
+    const scroll = (y: number) =>
+        page.evaluate(({ kind, selector, y }) => {
+            if (kind === 'inner') {
+                if (!selector) throw new Error('The detected inner scroll container has no selector');
+                const element = document.querySelector<HTMLElement>(selector);
+                if (!element) throw new Error(`Scroll container selector "${selector}" no longer matches an element`);
+                element.scrollTop = y;
+                return;
+            }
+            if (document.scrollingElement) document.scrollingElement.scrollTop = y;
+        }, { kind: scroller.kind, selector: scroller.selector, y });
+    const waitForScrollPaint = async () => {
         await page.waitForTimeout(150);
-        await page.screenshot({ path: out(state, viewport, `${name}-sec${i}.png`), fullPage: false });
-        if (y >= scroller.max) break;
-        i += 1;
-        y = Math.min(scroller.max, y + scroller.step);
+        await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    };
+    const readScrollState = () =>
+        page.evaluate(({ kind, selector }) => {
+            if (kind === 'inner') {
+                if (!selector) throw new Error('The detected inner scroll container has no selector');
+                const element = document.querySelector<HTMLElement>(selector);
+                if (!element) throw new Error(`Scroll container selector "${selector}" no longer matches an element`);
+                return {
+                    max: Math.max(0, element.scrollHeight - element.clientHeight),
+                    scrollY: element.scrollTop,
+                };
+            }
+            const doc = document.scrollingElement;
+            return {
+                max: doc ? Math.max(0, doc.scrollHeight - window.innerHeight) : 0,
+                scrollY: window.scrollY,
+            };
+        }, { kind: scroller.kind, selector: scroller.selector });
+    const sectionOffsetsFor = (max: number) => {
+        const offsets = [0];
+        while (offsets[offsets.length - 1] < max) {
+            offsets.push(Math.min(max, offsets[offsets.length - 1] + scroller.step));
+        }
+        return offsets;
+    };
+
+    const leadingSections = route.leadingSections ?? DEFAULT_LEADING_SECTIONS;
+    const trailingSections = route.trailingSections ?? DEFAULT_TRAILING_SECTIONS;
+    if (!Number.isInteger(leadingSections) || leadingSections < 1) {
+        throw new Error(`Route "${route.name}" leadingSections must be a positive integer`);
     }
+    if (!Number.isInteger(trailingSections) || trailingSections < 1) {
+        throw new Error(`Route "${route.name}" trailingSections must be a positive integer`);
+    }
+
+    const scrollTolerance = 1;
+    const settleAtLiveEnd = async (): Promise<number> => {
+        let max = (await readScrollState()).max;
+        let stableChecks = 0;
+        for (let check = 0; check < 20; check += 1) {
+            await scroll(max);
+            await route.waitForContentReady?.(page);
+            await waitForScrollPaint();
+            const live = await readScrollState();
+            if (
+                Math.abs(live.max - max) <= scrollTolerance
+                && Math.abs(live.scrollY - live.max) <= scrollTolerance
+            ) {
+                stableChecks += 1;
+            } else {
+                stableChecks = 0;
+            }
+            max = live.max;
+            if (stableChecks >= 2) return live.max;
+        }
+        throw new Error(`Route "${route.name}" scroll range did not stabilize at its live end`);
+    };
+
+    let finalCapture: {
+        sectionOffsets: number[];
+        capturedSectionIndexes: number[];
+        capturedSections: Array<{ index: number; scrollY: number; image: Buffer }>;
+        fullPageOverview: boolean;
+        fullPageImage?: Buffer;
+        finalMax: number;
+    } | undefined;
+
+    // Re-plan if scrolling or capturing causes lazy content to extend the range.
+    // Keep screenshots in memory until the range and the sampled offsets agree.
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+        const plannedMax = await settleAtLiveEnd();
+        const sectionOffsets = sectionOffsetsFor(plannedMax);
+        const captureAllSections = sectionOffsets.length <= FULL_PAGE_MAX_SECTIONS;
+        const fullPageOverview = captureAllSections && scroller.kind === 'window';
+        const leadingIndexes = Array.from(
+            { length: Math.min(leadingSections, sectionOffsets.length) },
+            (_value, index) => index,
+        );
+        const trailingCount = Math.min(trailingSections, sectionOffsets.length);
+        const trailingIndexes = Array.from(
+            { length: trailingCount },
+            (_value, index) => sectionOffsets.length - trailingCount + index,
+        );
+        const capturedSectionIndexes = captureAllSections
+            ? sectionOffsets.map((_offset, index) => index)
+            : Array.from(new Set([...leadingIndexes, ...trailingIndexes])).sort((a, b) => a - b);
+
+        const capturedSections: Array<{ index: number; scrollY: number; image: Buffer }> = [];
+        let rangeChanged = false;
+        for (const index of capturedSectionIndexes) {
+            const targetY = sectionOffsets[index];
+            await scroll(targetY);
+            await route.waitForContentReady?.(page);
+            await waitForScrollPaint();
+            const beforeCapture = await readScrollState();
+            if (
+                Math.abs(beforeCapture.max - plannedMax) > scrollTolerance
+                || Math.abs(beforeCapture.scrollY - targetY) > scrollTolerance
+            ) {
+                rangeChanged = true;
+                break;
+            }
+            const image = await page.screenshot({ fullPage: false });
+            const afterCapture = await readScrollState();
+            if (
+                Math.abs(afterCapture.max - plannedMax) > scrollTolerance
+                || Math.abs(afterCapture.scrollY - targetY) > scrollTolerance
+            ) {
+                rangeChanged = true;
+                break;
+            }
+            capturedSections.push({ index, scrollY: beforeCapture.scrollY, image });
+        }
+        if (rangeChanged) continue;
+
+        const beforeFullPage = await readScrollState();
+        const fullPageImage = fullPageOverview
+            ? await page.screenshot({ fullPage: true })
+            : undefined;
+        const afterFullPage = await readScrollState();
+        const lastCaptured = capturedSections[capturedSections.length - 1];
+        if (
+            Math.abs(afterFullPage.max - plannedMax) > scrollTolerance
+            || Math.abs(afterFullPage.scrollY - beforeFullPage.scrollY) > scrollTolerance
+            || (lastCaptured && Math.abs(beforeFullPage.scrollY - lastCaptured.scrollY) > scrollTolerance)
+        ) {
+            continue;
+        }
+        const finalMax = await settleAtLiveEnd();
+        const liveAtEnd = await readScrollState();
+        const finalOffsets = sectionOffsetsFor(liveAtEnd.max);
+        if (
+            Math.abs(finalMax - plannedMax) > scrollTolerance
+            || Math.abs(liveAtEnd.max - plannedMax) > scrollTolerance
+            || Math.abs(liveAtEnd.scrollY - liveAtEnd.max) > scrollTolerance
+            || finalOffsets.length !== sectionOffsets.length
+        ) {
+            continue;
+        }
+
+        finalCapture = {
+            sectionOffsets: finalOffsets,
+            capturedSectionIndexes,
+            capturedSections,
+            fullPageOverview,
+            fullPageImage,
+            finalMax: liveAtEnd.max,
+        };
+        break;
+    }
+
+    if (!finalCapture) {
+        throw new Error(`Route "${route.name}" scroll range kept changing while capturing`);
+    }
+    const capture = finalCapture;
+
+    const outputDirectory = path.dirname(out(state, viewport, `${route.name}.json`));
+    await mkdir(outputDirectory, { recursive: true });
+    if (capture.fullPageImage) {
+        await writeFile(out(state, viewport, `${route.name}.png`), capture.fullPageImage);
+    }
+    for (const section of capture.capturedSections) {
+        await writeFile(out(state, viewport, `${route.name}-sec${section.index}.png`), section.image);
+    }
+
+    const { width, height } = viewportForPage(page);
+    const coverage = {
+        route: route.name,
+        state,
+        viewport,
+        viewportSize: { width, height },
+        scrollContainer: {
+            kind: scroller.kind,
+            selector: scroller.selector,
+            maxScrollY: capture.finalMax,
+            viewportHeight: scroller.viewportHeight,
+        },
+        sections: capture.sectionOffsets.length,
+        capturedSectionIndexes: capture.capturedSectionIndexes,
+        capturedSections: capture.capturedSections.map(({ index, scrollY }) => ({ index, scrollY })),
+        footerReady: Boolean(route.waitForContentReady),
+        footerSectionIndex: route.waitForContentReady && capture.capturedSections.some(
+            (section) => section.index === capture.sectionOffsets.length - 1
+                && Math.abs(section.scrollY - capture.finalMax) <= scrollTolerance,
+        ) ? capture.sectionOffsets.length - 1 : null,
+        fullPageOverview: capture.fullPageOverview,
+    };
+    await writeFile(out(state, viewport, `${route.name}.json`), `${JSON.stringify(coverage, null, 2)}\n`, 'utf8');
     await scroll(0);
 }
 
 /**
- * UI login. The login page is loaded by direct URL (see the module comment).
+ * UI login. Adapt the login URL and accessible names to the consuming app.
  * After the submit the auth redirect chain must finish before any nav step
  * runs — a regular user lands on "/", an admin on "/admin/*".
  */
@@ -142,18 +403,19 @@ async function loginViaUi(page: Page, origin: string, email: string, password: s
     await page.goto(`${origin}/login`);
     await expect(page).toHaveURL(/\/login$/);
     const main = page.getByRole('main');
-    await main.getByLabel('E-Mail', { exact: true }).fill(email);
-    await main.getByLabel('Passwort', { exact: true }).fill(password);
-    await main.getByRole('button', { name: 'Anmelden', exact: true }).click();
+    await main.getByLabel(LOGIN_EMAIL_LABEL, { exact: true }).fill(email);
+    await main.getByLabel(LOGIN_PASSWORD_LABEL, { exact: true }).fill(password);
+    await main.getByRole('button', { name: LOGIN_SUBMIT_LABEL, exact: true }).click();
     await expect(page).toHaveURL(landing);
     await waitForAppSettled(page);
 }
 
-async function applyNavStep(page: Page, step: UiReviewNavStep, seed: Record<string, unknown>): Promise<void> {
+async function applyNavStep(page: Page, step: UiReviewNavStep, seed: Record<string, unknown>, origin: string): Promise<void> {
     if (step.kind === 'goto') {
         // Direct-URL load — only for justified routes (deep links / dynamic
-        // detail pages); the manifest's `reason` documents each case.
-        await page.goto(resolvePath(step.path, seed));
+        // detail pages); the manifest's `reason` documents each case. Resolve
+        // relative paths against the selected tenant, not Playwright's baseURL.
+        await page.goto(resolveUrl(resolvePath(step.path, seed), origin));
         return;
     }
 
@@ -174,28 +436,25 @@ async function settleAndCapture(
     state: UiReviewState,
     viewport: UiReviewViewport,
 ): Promise<void> {
-    await waitForAppSettled(page, route.expectedTitle);
+    await waitForAppSettled(page);
+    await expect(page).toHaveTitle(route.expectedTitle);
     await expect(page.getByRole('main')).toBeVisible();
-    // page.screenshot resolves relative paths against process.cwd(), not the
-    // config outputDir — build the absolute path explicitly.
-    await page.screenshot({ path: out(state, viewport, `${route.name}.png`), fullPage: true });
-    await captureSections(page, state, viewport, route.name);
+    await withInstantScrollBehavior(page, () => captureSections(page, state, viewport, route));
 }
 
 for (const route of routes) {
     for (const state of route.states) {
         for (const viewport of route.viewports ?? ['desktop', 'mobile']) {
-            test(`screenshot ${route.name} (${state}, ${viewport})`, { tag: ['@screenshot'] }, async ({ page }, testInfo) => {
+            test(`screenshot ${route.name} (${state}, ${viewport})`, { tag: ['@screenshot'] }, async ({ page }) => {
+                const actualViewport = viewportForPage(page);
                 test.skip(
-                    viewportForProject(testInfo.project.name) !== viewport,
-                    `project ${testInfo.project.name} renders the ${viewportForProject(testInfo.project.name)} viewport`,
+                    actualViewport.label !== viewport,
+                    `actual viewport ${actualViewport.width}x${actualViewport.height} maps to ${actualViewport.label}, not ${viewport}`,
                 );
 
-                const origin = tenantOrigin(route, state);
-
-                if (state === 'empty' && origin === FIXTURE_TENANT_ORIGIN) {
-                    await ensureFixtureTenant(); // project helper: idempotent find-or-create
-                }
+                const tenant = tenantFor(route, state);
+                await tenant.prepare?.();
+                const origin = tenant.origin;
                 const seed = route.seeds?.[state] ? await route.seeds[state]() : {};
 
                 // Initial guest load of "/" is the allowed page.goto exception.
@@ -209,15 +468,14 @@ for (const route of routes) {
                 }
 
                 const needsHeaderNav = (route.nav ?? []).some((step) => step.kind === 'click' && step.scope === 'banner');
-                if (viewport === 'mobile' && needsHeaderNav) {
-                    // Narrow-viewport header overflow → header-driven routes
-                    // load by their resolved URL instead; the review still
-                    // captures the exact page.
-                    await page.goto(resolvePath(route.path, seed));
+                if (viewport === 'mobile' && needsHeaderNav && route.mobileDirectLoadReason) {
+                    // Only routes that document unavailable mobile header
+                    // navigation opt into loading the resolved URL directly.
+                    await page.goto(resolveUrl(resolvePath(route.path, seed), origin));
                     await waitForAppSettled(page);
                 } else {
                     for (const step of route.nav ?? []) {
-                        await applyNavStep(page, step, seed);
+                        await applyNavStep(page, step, seed, origin);
                     }
                 }
 
