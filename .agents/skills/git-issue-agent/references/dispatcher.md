@@ -54,6 +54,10 @@ node "$SKILL_DIR/scripts/watch.mjs" --ack <delivery-id> # after successful enque
   which still marks nothing as an instruction).
 - Lifecycle labels (`working`, `done`, `blocked`, `review`, `needs-info`) drop an
   issue before the dispatcher sees it.
+- The issue `updatedAt` is cursor metadata, not a fingerprint gate. Existing
+  eligible issues are viewed each poll so equal/absent timestamps cannot hide
+  body or trusted-comment changes; this trades additional provider reads for
+  reliable detection.
 - A new issue creates a pending event. A later update wakes only when the title
   or body fingerprint changed, or the trusted comment identity/content/update
   snapshot changed; unrelated tracker updates and untrusted comments do not wake.
