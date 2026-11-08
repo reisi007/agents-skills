@@ -29,8 +29,8 @@ CC-only alternatives. Pull the **last ~15–30 changelog entries**.
    credit-value `full` basis), `notes`,
    `namespaceRule` (current standing rule `opencode-go-only` since 2026-10-18; the
    earlier `opencode-go-mixed` and `opencode-free-tier` are retired — history in
-   `notes.md`. Filter *before* scoring, never justify with ZDR), `variants` (default
-   `none` — never propose `variant`; delete a configured line), `privacyDataCaveat`
+    `notes.md`. Filter *before* scoring, never justify with ZDR), `variants` (variants
+    are allowed; only recommend/configure variants supported by the selected model), `privacyDataCaveat`
    (when set, ignore `privacy.training` / `privacy.retentionDays`). `namespaceRule` is
    the standing decision and wins over any default in the namespace rule in `SKILL.md`;
    read it before scoring. Per-role models are configured again (2026-10-18), so score

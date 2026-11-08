@@ -1,6 +1,6 @@
 # Context caps — reduced-window model aliases
 
-Detail for the cap rule in `SKILL.md` § "Variants disabled". A window far larger
+Detail for the cap rule in `SKILL.md` § "Variants". A window far larger
 than the work needs is not free capacity: compaction starts late, the transcript
 drifts, and the prompt grows into room nothing needs. The cap is a **client-side
 budget** — the provider keeps accepting its full window, OpenCode compacts
@@ -35,9 +35,9 @@ same object when it exceeds the new context.
 
 ## Why not a variant, why not a plugin
 
-- **Not `#variant`:** a variant carries only `settings`, `headers` and `body` —
-  `limit` is not part of its shape, so the window cannot be expressed there.
-  `variants: none` stands unchanged.
+- **Not a variant:** variants are valid model settings, but they do not express a
+  context-window cap. A variant carries only `settings`, `headers` and `body` —
+  `limit` is not part of its shape.
 - **Not a plugin:** a server plugin can emit aliases (`ctx.model.transform`) and
   can target selected model IDs. The catalog-wide variant was considered and
   rejected: 27 catalog models were ≥500k on 2026-11-01, so it would flood the

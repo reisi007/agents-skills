@@ -135,12 +135,12 @@ configured):
 Then "Optional new candidates" — vision-capable only, one line each, every reason tied
 to a changelog event or current-price fact.
 
-## Variants disabled — a context cap is an alias, not a variant
+## Variants — allowed, distinct from context-cap aliases
 
-`variants: none`. **Do not propose, keep, or re-add any `variant` field**; a configured
-one is a REPLACE by deletion. `variant` is its own `AgentConfig` field, never a `#max`
-suffix; not every model has variants — check the `models` tool (`query` + `all: true`).
-History in `references/notes.md`.
+Variants are allowed in model configurations. `variant` is its own `AgentConfig`
+field; do not encode it in the model ID (for example, use `model: "openai/gpt-6-luna"`
+and `variant: "xhigh"`, not a `#xhigh` suffix). Not every model has variants — check
+the `models` tool (`query` + `all: true`) before configuring one.
 
 **Capping a window.** A window far larger than the work needs compacts late and lets
 the transcript drift. Cap it with an **alias** — `providers.<provider>.models.<id>-<cap>k`,
@@ -148,14 +148,15 @@ same catalog `modelID`, only `limit.context` lower (recipe, inherited fields and
 measured evidence: `references/context-caps.md`). Only for the models the config
 actually selects; main agents (`plan`, `build`) take the larger cap, subagents the
 smaller one, and a main agent that must also serve as a subagent keeps `mode: all`.
-Downward only — and never as a `#variant`.
+Downward only; a context cap is an alias, not a model variant.
 
 ## Applying changes (only when the user asks)
 
 Update the root `model` and/or the matching `agents.<role>.model` line(s) the user
 named; per-role models are configured again for `plan`/`general`/`build`/`explore`,
-so do not assume the root is the only model line. Never add `variant`, remove one if
-present; namespace rule on every touched line. Refresh the trailing
+so do not assume the root is the only model line. Set or remove `variant` only as
+requested, and verify it is supported by that model; namespace rule on every touched
+line. Refresh the trailing
 `// updated: <date>` comment on a changed line; call out an assignment older than the
 latest relevant changelog entry as stale. Keep JSONC valid (trailing `,` only before
 another property; `//` comments only) and touch nothing but `model` + comment — except
