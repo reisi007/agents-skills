@@ -14,15 +14,34 @@ Declare an alias: same catalog `modelID`, new key, only `limit.context` lower.
 "providers": {
   "opencode-go": {
     "models": {
-      "deepseek-v4.1-flash-500k": {
+      "deepseek-v4.1-flash-440k": {
         "modelID": "deepseek-v4.1-flash",
-        "name": "DeepSeek V4.1 Flash (500k)",
-        "limit": { "context": 500000 }
+        "name": "DeepSeek V4.1 Flash (440k)",
+        "limit": { "context": 440000 }
+      },
+      "deepseek-v4.1-flash-220k": {
+        "modelID": "deepseek-v4.1-flash",
+        "name": "DeepSeek V4.1 Flash (220k)",
+        "limit": { "context": 220000 }
+      },
+      "longcat-2.5-free-440k": {
+        "modelID": "longcat-2.5-free",
+        "name": "LongCat 2.5 Free (440k)",
+        "limit": { "context": 440000 }
+      },
+      "longcat-2.5-free-220k": {
+        "modelID": "longcat-2.5-free",
+        "name": "LongCat 2.5 Free (220k)",
+        "limit": { "context": 220000 }
       }
     }
   }
 }
 ```
+
+The global config exposes DeepSeek V4.1 Flash and LongCat 2.5 Free caps of
+**220,000** and **440,000**. DeepSeek's new limits replace the previous 280,000
+and 500,000 caps.
 
 Measured 2026-11-01 against `opencode api get /api/model`: the alias inherits
 `capabilities`, `cost`, `variants`, `compatibility`, `family`, `package` and every
@@ -68,5 +87,5 @@ shape of model, the alias when the choice must hold per session or per agent.
 ```sh
 opencode reload
 opencode api get /api/model \
-  | jq -r '.data[] | select(.id|endswith("-500k")) | "\(.id) \(.limit.context)/\(.limit.output)"'
+  | jq -r '.data[] | select(.id|test("(deepseek-v4\\.1-flash|longcat-2\\.5-free)-(220|440)k$")) | "\(.id) \(.limit.context)/\(.limit.output)"'
 ```
