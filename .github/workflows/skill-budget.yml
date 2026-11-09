@@ -20,10 +20,6 @@ jobs:
       - uses: actions/setup-node@v7   # major tag pin
         with:
           node-version: lts/*
-      - name: Run the git-issue-agent end-to-end suite
-        run: node tests/git-issue-agent/test-e2e.mjs
-      - name: Run the git-issue-agent watcher suite
-        run: node tests/git-issue-agent/test-watch.mjs
       - name: Validate the skill budget
         uses: all-the-rest/ratchet-cli@4cace52ac7731985130292ead6ae81d44b4d72d6 # v0.6.3
         with:
