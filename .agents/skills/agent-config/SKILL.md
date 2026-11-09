@@ -24,7 +24,7 @@ machine/project online.
 | `~/.config/opencode/AGENTS.md` | Global agent instructions (CodeGraph usage block, …) |
 | `~/dev/agents-skills/` | **Central skills repo** (GitHub `reisi007/agents-skills`) — the only home of own skills |
 | `~/.agents/skills/` | Cross-agent compat source for third-party/official skills (daisyui, find-skills, opentui) — NOT for own skills. Project-specific skills are **not** symlinked in here (symlinks for `blog-beitrag`/`testimonial` removed 2026-10-17): they are found through the project's own `.agents/skills/` and would otherwise load into every unrelated session. |
-| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). The **versioned source/template** for own commands lives in the repo under `.agents/commands/`; the machine files are **created by the agent** from those templates (a copy of the file contents), **not** by the user and **not** via symlink. Three own commands: `update-models`, `security-review` and `git-issue-agent`. New commands still appear only on explicit request (user rule 2026-10-17) — rare flows go through `/skills` (§7) instead. |
+| `~/.config/opencode/commands/` | Slash commands: one file per command, `~/.config/opencode/commands/<name>.md`, filename = command name; body = prompt template, `$ARGUMENTS` = the argument string (templates do **not** expand `@path`). The **versioned source/template** for own commands lives in the repo under `.agents/commands/`; the machine files are **created by the agent** from those templates (a copy of the file contents), **not** by the user and **not** via symlink. Two own commands: `update-models` and `security-review`. New commands still appear only on explicit request (user rule 2026-10-17) — rare flows go through `/skills` (§7) instead. |
 
 ## 2. Skills repo registration (the `skills` array)
 
@@ -204,12 +204,12 @@ footer and the `nach-verify` flag apply as in every other repo.
 
 ### Hidden skills — not advertised, loaded by exact ID
 
-19 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
+18 situational skills carry `metadata.opencode/autoinvoke: false`: they are **not**
 in the model's advertised list, but stay registered and load by exact ID — pick
 them in the `/skills` list, type `@<id>` in a prompt, or call the `skill` tool with
 the exact ID. They are no longer exposed as `/<id>` slash commands by the skill
 system (§1) — the repo's own command templates (`update-models`,
-`security-review`, `git-issue-agent`) are separate files and stay. Reachable from here:
+`security-review`) are separate files and stay. Reachable from here:
 
 | ID | Trigger (one line) |
 |---|---|
@@ -230,7 +230,6 @@ system (§1) — the repo's own command templates (`update-models`,
 | `permissions` | OpenCode permission policy: username isolation, secrets, `.env`, external_directory |
 | `update-models` | stale model list, the models refresh/reload command, reviewing or updating the configured models, a model ID about to be written into `opencode.jsonc` (twin + capability gate) |
 | `github-ci-filters` | GitHub Actions `paths`/`paths-ignore` filters; docs-only commits triggering CI; a PR stuck on a pending check (branch-protection trap) |
-| `git-issue-agent` | headless trusted-issue queue: provider-neutral triage, one issue at a time, before/after evidence gate, merge only after review |
 | `agent-config` | global OpenCode config: `opencode.jsonc`, MCP servers, `skills` array |
 
 ## 8. After pull: setup drift check
