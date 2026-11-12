@@ -147,7 +147,8 @@ the transcript drift. Cap it with an **alias** — `providers.<provider>.models.
 same catalog `modelID`, only `limit.context` lower (recipe, inherited fields and the
 measured evidence: `references/context-caps.md`). Only for the models the config
 actually selects; main agents (`plan`, `build`) take the larger cap, subagents the
-smaller one, and a main agent that must also serve as a subagent keeps `mode: all`.
+smaller one, a single cap for all agents is allowed when the user asks for one
+default, and a main agent that must also serve as a subagent keeps `mode: all`.
 Downward only; a context cap is an alias, not a model variant.
 
 ## Applying changes (only when the user asks)
