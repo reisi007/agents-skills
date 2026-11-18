@@ -43,6 +43,19 @@
         "tier": "fast",
         "description": "the counted scope is the delivered description of every advertised skill; hidden skills are excluded. The count is the length of the longest single description, so one runaway description cannot hide behind the total",
         "count": { "command": ["node", "scripts/skill-budget.mjs", "description-chars-max"] }
+      },
+      // This history gate is a constant limit, not a ratchet: the count is
+      // over the whole history, so it only grows.  A partial override of a
+      // preset rule is a config error — repeat the full definition and only
+      // change `baseline` to `fixed`, then raise the value deliberately.
+      "unverified-commits": {
+        "class": "a commit with no verification evidence",
+        "incident": "eight repositories carry a `Verify:` footer in 20 of 20 commits while ai-10-usd carries it in 3 of 20 — the convention exists, the enforcement does not",
+        "unit": "commits without a `Verify:` footer",
+        "direction": "ceiling",
+        "baseline": "fixed",
+        "description": "counts the commits of the history whose message has no `Verify:` line; a project with tagged releases narrows the window with `since`",
+        "count": { "agent_rule": "unverified-commits" }
       }
     }
   }
