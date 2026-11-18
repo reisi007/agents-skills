@@ -14,43 +14,29 @@ Declare an alias: same catalog `modelID`, new key, only `limit.context` lower.
 "providers": {
   "opencode-go": {
     "models": {
-      "deepseek-v4.1-flash-440k": {
-        "modelID": "deepseek-v4.1-flash",
-        "name": "DeepSeek V4.1 Flash (440k)",
-        "limit": { "context": 440000 }
-      },
-      "deepseek-v4.1-flash-220k": {
-        "modelID": "deepseek-v4.1-flash",
-        "name": "DeepSeek V4.1 Flash (220k)",
-        "limit": { "context": 220000 }
-      },
       "deepseek-v4.1-flash-300k": {
         "modelID": "deepseek-v4.1-flash",
         "name": "DeepSeek V4.1 Flash (300k)",
         "limit": { "context": 300000 }
       },
-      "longcat-2.5-free-440k": {
-        "modelID": "longcat-2.5-free",
-        "name": "LongCat 2.5 Free (440k)",
-        "limit": { "context": 440000 }
-      },
-      "longcat-2.5-free-220k": {
-        "modelID": "longcat-2.5-free",
-        "name": "LongCat 2.5 Free (220k)",
-        "limit": { "context": 220000 }
+      "hy4-flash-free-300k": {
+        "modelID": "hy4-flash-free",
+        "name": "Hy4 Flash Free (300k)",
+        "limit": { "context": 300000 }
       }
     }
   }
 }
 ```
 
-The global config exposes DeepSeek V4.1 Flash caps of **220,000**, **300,000** and **440,000**, plus LongCat 2.5 Free caps of **220,000** and **440,000**. DeepSeek's new limits replace the previous 280,000 and 500,000 caps; the 300,000 alias is the single cap used as the default for all agents.
+The global config exposes exactly two aliases: DeepSeek V4.1 Flash at **300,000** for the root default and main agents (`plan`, `build`), and Hy4 Flash Free at **300,000** for the subagent roles (`general`, `explore`). The DeepSeek cap was raised from 250k on 2026-11-18; both catalog windows stay selectable uncapped in `/models`.
 
 Measured 2026-11-01 against `opencode api get /api/model`: the alias inherits
 `capabilities`, `cost`, `variants`, `compatibility`, `family`, `package` and every
 limit key it does not override (`output`) from the catalog model — verified on
-`opencode-go/deepseek-v4.1-flash` (1,000,000 context / 384,000 output). Nothing
-else has to be repeated.
+`opencode-go/deepseek-v4.1-flash` (1,000,000 context / 384,000 output) and
+`opencode-go/hy4-flash-free` (1,048,576 context / 65,536 output). Nothing else
+has to be repeated.
 
 A catalog model that also carries `limit.input` has a second cap: lower it in the
 same object when it exceeds the new context.
@@ -75,11 +61,13 @@ same object when it exceeds the new context.
   the catalog.
 - **Split:** main agents (`plan`, `build`) take the larger cap, subagents the
   smaller one; a subagent's task is narrow, its transcript should be too. A main
-  agent that also serves as a subagent keeps `mode: all`.
+  agent that also serves as a subagent keeps `mode: all`. At equal caps the same
+  split can use a different model per role — here DeepSeek for main agents and
+  free Hy4 Flash Free for `general` and `explore`.
 - **Downward only.** An alias above the provider's window is a number the client
   budgets against and the provider rejects.
-- Naming: `<model-id>-<cap>k`, `(…k)` in `name`. Two steps cover the realistic
-  cases; a ladder of every size is clutter.
+- Naming: `<model-id>-<cap>k`, `(…k)` in `name`. Two aliases cover the models in
+  use; a ladder of every size is clutter.
 
 ## Alternative, and verify
 
@@ -90,5 +78,5 @@ shape of model, the alias when the choice must hold per session or per agent.
 ```sh
 opencode reload
 opencode api get /api/model \
-  | jq -r '.data[] | select(.id|test("(deepseek-v4\\.1-flash|longcat-2\\.5-free)-(220|300|440)k$")) | "\(.id) \(.limit.context)/\(.limit.output)"'
+  | jq -r '.data[] | select(.id|test("(deepseek-v4\\.1-flash|hy4-flash-free)-300k$")) | "\(.id) \(.limit.context)/\(.limit.output)"'
 ```
