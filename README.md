@@ -32,6 +32,7 @@ agents-skills/
 │   ├── update-models/       ← live registry (opencode models, reload) + UPDATE/KEEP against the ocgo/cc price trackers
 │   ├── node-deps/           ← pnpm dependency policy: no pins, ranges + lockfile
 │   ├── permissions/         ← security policy: username isolation, secrets, macOS privacy, .env
+│   ├── playwright-demo-video/  ← hidden: promo clips from Playwright walkthroughs, isolated from QA suites
 │   ├── playwright-parallel/  ← Playwright E2E parallel instead of serial: named locks, workers, shards
 │   ├── project-gates/       ← rollout of the canonical agent-rule gates into a project (fragment, baseline, hook, CI)
 │   ├── react-i18n/          ← German React+Vite UI with Lingui; extract/compile gate
