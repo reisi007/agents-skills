@@ -1,146 +1,122 @@
 ---
 name: UI Review
-description: 'TRIGGER on UI review/improvement/screenshot requests or when the user wants to check the visual state of a web app: Playwright screenshots of manifest-configured routes and states, analyzed against a checklist.'
+description: 'TRIGGER on UI review/improvement/screenshot requests or checking the visual state of an app (web or native): capture views and states, analyze them against a checklist (the configured model is vision-capable — no vision subagent needed), then let findings drive fixes.'
 ---
 
 # UI Review — repeatable visual QA loop
 
-This skill turns a web app's visual state into a repeatable, reviewable artifact:
-Playwright captures the routes and states configured in the project's manifest
-(a route may include **filled**, **empty**, or both), you analyze them against a
-checklist (the configured model is vision-capable — no vision subagent needed),
-and the resulting findings drive targeted UI fixes.
+This skill turns an app's visual state into a repeatable, reviewable artifact.
+The core loop is technology-neutral:
 
-Each route/state/viewport combo produces readable, viewport-height section
-captures. To keep large galleries from overwhelming review, the harness samples
-the page top and current end by default, and claims the end as a settled footer
-only when the manifest's readiness hook is configured; see
-`references/harness.md` for the policy and short-page full-page overviews. Long
-full-page images are not evidence by themselves: they are downscaled and can make
-regions below the fold unreadable. The harness also supports apps that scroll in
-an inner overflow container (see `references/harness.md`).
+1. **Capture** representative views × states × viewports with the project's harness.
+2. **Vision analysis** — read the images yourself against a checklist.
+3. **Findings report** — consolidate severities, source locations and screenshots.
+4. **Fix & verify** — delegate targeted fixes, re-capture, diff old vs new.
+
+The screenshot set is **intentionally separate from functional tests**: it is not
+a test and never asserts behavior. It only *captures pixels* so a human or you can
+judge the design. Nothing here gates CI unless the project explicitly says so.
 
 > For a **full live-site audit** (SEO, image quality, performance, content) rather
 > than an in-app visual pass, load the hidden `web-audit` skill by exact ID.
 
-The screenshot set is **intentionally separate from the normal E2E suite**: it is
-not a functional test. It never asserts behavior — it only *captures pixels* so a
-human or you can judge the design. Nothing here gates CI.
+## Adapter selection
+
+Capture mechanics differ by UI stack, so the neutral core delegates them to an
+**adapter** under `references/adapters/`. Two adapters ship:
+
+- `references/adapters/playwright/harness.md` — web apps (dedicated screenshot
+  config, route/state manifest, manifest-driven spec, sampled section captures).
+- `references/adapters/rune/harness.md` — Rune / native Rust UIs (headless
+  fixtures, geometry assertions, mandatory live production screenshot).
+
+Pick one **from the consuming project's existing configuration** (its `AGENTS.md`,
+README, or an existing UI-stack setting) or by **auto-detection** from the project
+layout: a Playwright config or `package.json` → `playwright`; a Rust `Cargo.toml`
+with a Rune harness script → `rune`. If both or neither applies, ask the user.
+
+There is **no new mandatory manifest parameter**: reuse whatever the project
+already declares. The adapter is a choice of which harness document to read, not
+a field to add to a config. Once selected, follow its `harness.md` for the capture
+command, artifact layout, and what a failed capture means.
 
 ## Prereqs
 
-- The project must run locally (dev server + backend/API up).
-- The project must have the **screenshot harness**: a dedicated
-  `playwright.screenshots.config.ts`, a route/state **manifest**, and a generic
-  manifest-driven **spec**.
-- If the harness is missing, scaffold it first — see
-  `references/harness.md` and the copyable templates in `references/templates/`.
+- The app must run locally (dev server, binary, or deterministic fixtures).
+- The project must have a capture harness for its stack; if it is missing,
+  scaffold it as described in the selected adapter's `harness.md`.
 - No vision plugin needed: the configured model reads images (see the
   `update-models` skill's hard requirement).
 
 ## Step 1 — Capture
 
-Run the screenshot set with the consuming project's configured script, from the
-directory containing its package scripts:
+Run the selected adapter's capture command from the consuming project's root.
+The adapter defines the command, the artifact layout and the failure policy.
+A failed capture means the harness (or the app) is broken — fix it before moving on.
 
-```bash
-<package-manager> run test:screenshots
-```
-
-Alternatively, run `playwright test -c playwright.screenshots.config.ts` (or the
-project's equivalent command). The dedicated config means the
-standard suite (`playwright test`) stays untouched — the screenshot set never
-runs in CI's normal E2E pipeline.
-
-Screenshots and coverage files land under the config's `outputDir`, organized as:
-
-```
-<outputDir>/<state>/<viewport>/<name>.png        # full-page — only for short pages (see below)
-<outputDir>/<state>/<viewport>/<name>-secN.png   # viewport-height sections, sampled (N = 0,1,2,…)
-<outputDir>/<state>/<viewport>/<name>.json       # capture coverage metadata
-  filled/desktop/home-sec0.png
-  filled/desktop/home-sec1.png
-  filled/desktop/home-sec18.png   # end candidate; confirmed footer is recorded in JSON
-  empty/desktop/home-sec0.png
-  filled/mobile/admin-users-sec0.png
-  ...
-```
-
-Sections are **sampled, not exhaustive**: by default the page top and current end
-are written, while the middle may be skipped; the end is only reported as a footer
-when readiness is configured. `secN` indexes are therefore not always
-contiguous. Each capture also writes a `.json` coverage record, so the files show
-what was and was not looked at. Short pages additionally get a full-page overview
-where the page's scroll layout supports it; see `references/harness.md` for the
-exact thresholds and coverage fields.
-
-The consuming project's manifest defines which routes × states × viewports are
-captured, and may override the sampling windows per route. A failed screenshot
-test means the harness (or the page) is broken — fix it before moving on.
+Keep the capture set separate from the project's functional suite where the stack
+allows it: reviewers need stable, readable images, not behavioral assertions.
+Long pages or large UIs need a review **budget** — prefer readable, viewport-sized
+images and sampled regions over one downscaled full-view capture. The Playwright
+adapter documents its sampling policy; the Rune adapter uses fixed fixtures and
+adds a live screenshot.
 
 ## Step 2 — Vision analysis
 
-Read the generated PNGs from disk and analyze them yourself — you are
+Read the generated images from disk and analyze them yourself — you are
 vision-capable, so there is no vision subagent in the loop. Stay within **~10
 images per read** — always split into batches:
 
-1. **By configured state** first: analyze each state present in the manifest
-   (for example, `filled` and then `empty`).
-2. **By viewport** within each state: desktop batch, then mobile batch.
-3. **By route** when a batch is still too large: chunk routes alphabetically.
+1. **By state** first (for example `filled` then `empty`, or light then dark).
+2. **By viewport** within each state, then by view/route when a batch is large.
+3. Chunk alphabetically by name if a batch is still too large.
 
 For each batch:
 
 - Run the checklist in `references/ui-review-checklist.md` against every image.
 - Report findings per image, referencing the file name.
 
-**Hard calls.** A finding you are not sure about — a hairline
-border, faint contrast, an 8px gap that may or may not be inconsistent, a
-downscaled full-page PNG whose suspect region is unreadable — re-read the image
-yourself with one concrete question in mind ("is this gap consistent across
-these three cards?"). The configured model is vision-capable; do not guess, and
-do not pad the report with low-confidence findings.
+**Hard calls.** A finding you are not sure about — a hairline border, faint
+contrast, an inconsistent gap, an unreadable downscaled region — re-read the image
+with one concrete question in mind ("is this gap consistent across these three
+cards?"). Do not guess, and do not pad the report with low-confidence findings.
 
 ## Step 3 — Findings report
 
 Consolidate every batch into a single findings report using the template in
 `references/findings-report.md` (columns `Id | Severity | Status | Owner |
-Ticket | File:Line | Screenshot | Finding | Suggested fix`). Assign each
-finding a severity from the **canonical vocabulary** (`ratchet-gates`,
+Ticket | File:Line | Screenshot | Finding | Suggested fix`). Assign each finding
+a severity from the **canonical vocabulary** (`ratchet-gates`,
 `references/vocabulary.md`); the render criteria that put a defect into which
 level live in `references/findings-report.md` — cite them, do not restate them.
 
-`critical` and `high` findings **block** an APPROVED verdict for a page.
+`critical` and `high` findings **block** an `APPROVED` verdict for a view.
 
 ## Step 4 — Fix & verify
 
 Delegate fixes following the repo's `AGENTS.md` delegation rules (implementer +
 separate verifier). After a change:
 
-1. Re-run the screenshot set **only for the affected routes** — either via
-   Playwright's `--grep`/`-g` filter (each test is tagged `@screenshot` and
-   named after the route) or a manifest edit.
-2. Compare **old vs new** screenshots (diff) for the affected routes yourself and
-   confirm the finding is resolved (or a NEW issue appeared) — re-read the
-   images yourself if the difference is too fine-grained to call confidently.
+1. Re-capture **only the affected views/states** using the adapter's filter
+   (for example Playwright's `--grep`, or the Rune fixture scene selector).
+2. Compare **old vs new** images (diff) yourself and confirm the finding is
+   resolved (or a NEW issue appeared) — re-read the images if the difference is
+   too fine-grained to call confidently.
 3. Re-verify the whole affected batch before closing the loop.
 
-## Adding routes / states
+## Adding views / states
 
-Edit the consuming project's manifest: add one entry per route to the `routes`
-array. Each entry declares the route pattern, the states
-(`filled`/`empty`), and the required `expectedTitle`; entries may also include
-auth, viewports, nav steps, notes, per-state seeds, and per-state `tenant` keys
-for configured origins.
-For dynamic params, seeds resolve real ids/credentials from seeded data at
-runtime. The generic spec picks the new route up automatically; nothing else
-changes. Single-tenant apps can omit `tenant` and fixture setup. Where the
-backend enforces a login throttle, keep login-bearing seeds per-worker-cached
-(see `references/harness.md`) to stay within its limit.
+Add one entry per view to the project's existing capture configuration (the
+Playwright adapter calls this the route/state manifest): declare the view pattern,
+the states to review, and its identifying metadata. Seeds resolve real ids or
+credentials from the project's test data at runtime. The generic harness picks the
+new entry up; nothing else changes. Where the backend enforces a login throttle,
+keep login-bearing seeds cached per worker (see the Playwright adapter).
 
 ## Reference files
 
-- `references/ui-review-checklist.md` — the checklist you apply to each batch.
-- `references/findings-report.md` — the findings report template + severities.
-- `references/harness.md` — how to scaffold the harness in any web project.
-- `references/templates/` — copyable starting points for the harness.
+- `references/ui-review-checklist.md` — the checklist applied to each batch.
+- `references/findings-report.md` — findings template + severity criteria.
+- `references/adapters/playwright/harness.md` — Playwright capture harness.
+- `references/adapters/playwright/templates/` — copyable Playwright starting points.
+- `references/adapters/rune/harness.md` — Rune fixtures, geometry checks, live screenshot.
