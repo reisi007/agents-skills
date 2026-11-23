@@ -1,7 +1,8 @@
-# Scaffolding the UI-review screenshot harness in any web project
+# Playwright adapter — UI-review screenshot harness
 
-Generic instructions to bring up the harness in a web project (React/Vue/… with
-Playwright). Copyable starting points live in `references/templates/`.
+Instructions to bring up the harness in a web project (React/Vue/… with
+Playwright). Copyable starting points live in `adapters/playwright/templates/`.
+Paths in this file are relative to `references/` unless stated otherwise.
 
 ## 1. Dedicated Playwright config
 
@@ -16,7 +17,7 @@ never runs inside the normal E2E suite:
 - `baseURL` pointing at the local dev server.
 - **Do NOT** import or extend the standard config.
 
-Template: `templates/playwright.screenshots.config.ts.example`
+Template: `adapters/playwright/templates/playwright.screenshots.config.ts.example`
 
 ## 2. Route/state manifest
 
@@ -52,7 +53,7 @@ needs, and select them from a route's `tenant` map.
 The manifest is the single place to add/remove routes. The generic spec reads
 it — adding a route is a manifest edit only.
 
-Template: `templates/ui-review-manifest.ts.example`
+Template: `adapters/playwright/templates/ui-review-manifest.ts.example`
 
 ## 3. Generic manifest-driven spec
 
@@ -157,7 +158,7 @@ within that limit:
 - **Modest concurrency**: 2 workers is a safe default; raise only when the
   backend's login budget allows it.
 
-Template: `templates/ui-screenshots.spec.ts.example`
+Template: `adapters/playwright/templates/ui-screenshots.spec.ts.example`
 
 ## 4. npm script + gitignore
 
@@ -196,6 +197,6 @@ and must never alter data outside its intended test fixture.
 
 ## Reference templates
 
-- `templates/playwright.screenshots.config.ts.example`
-- `templates/ui-review-manifest.ts.example`
-- `templates/ui-screenshots.spec.ts.example`
+- `adapters/playwright/templates/playwright.screenshots.config.ts.example`
+- `adapters/playwright/templates/ui-review-manifest.ts.example`
+- `adapters/playwright/templates/ui-screenshots.spec.ts.example`
