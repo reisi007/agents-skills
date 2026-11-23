@@ -9,5 +9,7 @@ auto-detection — there is no mandatory manifest field for it.
 | `playwright/` | Web apps | `playwright/harness.md` + `playwright/templates/` |
 | `rune/` | Rune / native Rust UIs | `rune/harness.md` |
 
+Rune: real production view with synthetic data — its fixtures render the shipped view; the live screenshot is supplementary.
+
 Shared, stack-neutral references stay one level up: `../ui-review-checklist.md`
 and `../findings-report.md`.

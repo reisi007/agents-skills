@@ -1,41 +1,64 @@
 # Rune adapter — UI-review harness
 
 Rune renders a Rust UI from a view/`El` tree; there is no browser and no DOM.
-Capture therefore happens in **two layers, both required**:
+Capture therefore happens in **two layers with a clear priority**:
 
-1. **Headless fixtures** — deterministic PNGs plus inspectable element trees for
-   a fixed matrix of scenes × themes × viewports. These drive the visual review
-   and the geometry assertions.
-2. **A live screenshot of the installed production UI** — fixtures render fixture
-   cards, not the production card path. A fixture-only set is never enough for an
-   `APPROVED` verdict.
+1. **Headless fixtures of the real production view** — the **primary** review
+   artifact. A debug fixture renders the *actual* production view with synthetic
+   data, producing deterministic PNGs plus inspectable element trees for a fixed
+   matrix of scenes × themes × viewports. These drive the visual review and the
+   geometry assertions.
+2. **A live screenshot of the installed production UI** — **supplementary** only.
+   It is an additional sanity check on the real, installed app, not a substitute
+   for the fixture set and not a prerequisite for an `APPROVED` verdict.
 
 Everything below that names a path, script, key, scene or viewport is a **worked
-example from the `prime-photos` project** (its issue #72 is the case study). Treat
+example from the `prime-photos` project** (its issue #73 is the case study). Treat
 it as an example, not a universal Rune convention: substitute your own fixture
 binary, keys and dimensions. Paths are relative to `references/` unless stated.
 
-## 1. Headless fixtures
+## 1. Headless fixtures of the real production view
+
+The fixture must render the **real production view** — the same view code the
+shipped app uses — with synthetic data injected. It does **not** build a
+separate look-alike UI: reviewing a parallel UI would review the wrong pixels.
+Make the fake data unmistakable in the rendered UI itself. The example shows a
+banner reading "Synthetische Fixture-Daten – keine echten Ordner, Konten oder
+Uploads" and uses synthetic identifiers under `/synthetic/...`, so no capture can
+be mistaken for real user data.
 
 Example: `scripts/capture-rune-ui-review.sh` runs the fixture binary
-(`RUNE_UI_BIN`, default `target/debug/prime-photos`) and writes to
-`RUNE_UI_REVIEW_OUT` (default `target/rune-ui-review/`). It invokes the binary with
-fixture flags such as `--rune-backup-smoke`, `--rune-login-fixture`, plus
-`--scene`, `--theme`, `--size`, and `--snap` (PNG) / `--tree` (JSON element tree).
+(`RUNE_UI_BIN`, default `target/debug/prime-photos`) with
+`--rune-backup-live-fixture`, plus `--scene`, `--theme`, `--size`, and `--snap`
+(PNG) / `--tree` (JSON element tree). It writes to `RUNE_UI_REVIEW_OUT`
+(default `target/rune-ui-review/`). For example:
+
+```sh
+target/debug/prime-photos --rune-backup-live-fixture \
+  --scene mixed|empty|settings|about|licenses \
+  --theme light|dark --size 1400x900 \
+  --snap OUT.png        # or --tree OUT.json
+```
 
 The example matrix:
 
-- viewports **1400×900**, **1000×700**, **760×560**;
-- themes **light** and **dark**;
-- named scenes per view (backup: `mixed`, `uploading`, `paused`, `all-done`,
-  `failures`, `empty`, `many-folders`, `about`, `licenses`; plus login and settings
-  fixtures).
+- scenes, one per production view/state: `mixed`, `empty`, `settings`, `about`,
+  `licenses`. `mixed` renders synthetic target cards covering the states of
+  interest (an upload in progress with a spinner, a missing folder with disabled
+  controls, and an error); `empty` is the no-content state; `settings`, `about`
+  and `licenses` are the remaining production pages.
+- themes: **light** and **dark** for every scene.
+- viewports: **1400×900** for every scene; **1000×700** and **760×560**
+  additionally for `mixed` and `empty`.
 
-Naming: `<view>-<scene>-<theme>-<width>x<height>.png` with a matching `.json`
-tree. The tree is what makes a finding checkable: it lists keys, roles, states and
-the geometry of every presented element. Keep a stable filename per state, fix the
-locale in the script (the example exports `LC_ALL=de_DE.UTF-8`), and keep the
-fixture output directory out of version control.
+The example captures 18 PNGs and 18 matching JSON trees.
+
+Naming: `live-<scene>-<theme>-<width>x<height>.{png,json}`, e.g.
+`live-mixed-light-1400x900.png` with `live-mixed-light-1400x900.json`. The tree
+is what makes a finding checkable: it lists keys, roles, states and the geometry
+of every presented element. Keep a stable filename per state, fix the locale in
+the script (the example exports `LC_ALL=de_DE.UTF-8`), and keep the fixture
+output directory out of version control.
 
 ## 2. Geometry checks in unit tests
 
@@ -48,7 +71,7 @@ the view, using the runtime's element data:
   prove a disabled control paints no hover overlay.
 - `Runtime::accessibility_json()` → roles, states and checked values.
 
-Example assertions from `prime-photos` issue #72
+Example assertions from `prime-photos` issue #73
 (`src/rune_backup_live/targets/tests.rs`):
 
 - **Label ↔ toggle gap and right alignment.** For the label and its switch,
@@ -69,12 +92,14 @@ Example assertions from `prime-photos` issue #72
 Run these with the project's normal unit-test command. Unlike the screenshot set,
 they are real assertions and may gate CI.
 
-## 3. Mandatory live production screenshot (required)
+## 3. Supplementary live production screenshot
 
-Headless fixtures do not render production cards, so after building, signing and
-installing the app, take **at least one live screenshot of the production UI**
-with `screencapture` (macOS), store it with the review artifacts, and read it
-yourself in the vision step. Fixture-only verdicts are not `APPROVED` verdicts.
+The fixture images of the real production view are the primary review artifact.
+As an **additional** sanity check, take at least one live screenshot of the
+installed, real production UI after building/signing/installing, store it with
+the review artifacts, and read it yourself in the vision step. It is not a gate:
+a missing or blocked live screenshot does not by itself turn an otherwise clean
+fixture set into `CHANGES REQUIRED`, and it never replaces the fixture set.
 
 Example flow (`prime-photos`):
 
@@ -94,7 +119,7 @@ Notes:
   missing, an active upload with its spinner, light and dark). Verify the live
   result against the same checklist.
 - `screencapture` is macOS-specific; on other platforms use the equivalent
-  command, but keep the rule: one real, installed-app image.
+  command. This check stays a supplement, not a gate.
 
 ## 4. Publishing is a separate, approval-gated step
 
@@ -108,7 +133,8 @@ remove it on instruction.
 
 ## 5. Reporting
 
-Feed the PNGs, JSON trees and the live screenshot into the shared checklist and
-findings report (`ui-review-checklist.md`, `findings-report.md`).
-Keep the same severity vocabulary and the `critical`/`high` blocking rule. A
-finding from the live screenshot must name that screenshot, not a fixture.
+Feed the PNGs, JSON trees and the supplementary live screenshot into the shared
+checklist and findings report (`ui-review-checklist.md`, `findings-report.md`).
+Keep the same severity vocabulary and the `critical`/`high` blocking rule. Name
+the exact artifact a finding came from: a live-screenshot finding names that
+screenshot, a fixture finding names its `live-<scene>-<theme>-<...>.png` file.
