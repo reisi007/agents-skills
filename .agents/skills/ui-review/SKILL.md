@@ -28,7 +28,8 @@ Capture mechanics differ by UI stack, so the neutral core delegates them to an
 - `references/adapters/playwright/harness.md` — web apps (dedicated screenshot
   config, route/state manifest, manifest-driven spec, sampled section captures).
 - `references/adapters/rune/harness.md` — Rune / native Rust UIs (headless
-  fixtures, geometry assertions, mandatory live production screenshot).
+  fixtures of the real production view with synthetic data, geometry assertions,
+  supplementary live screenshot).
 
 Pick one **from the consuming project's existing configuration** (its `AGENTS.md`,
 README, or an existing UI-stack setting) or by **auto-detection** from the project
